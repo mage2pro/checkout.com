@@ -215,15 +215,6 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-04-11
-	 * @override
-	 * @see \Df\Payment\Method::configKeySecondPart()
-	 * @used-by \Df\Payment\Method::s()
-	 * @return string
-	 */
-	protected function configKeySecondPart() {return 'checkout.com';}
-
-	/**
 	 * 2016-03-17
 	 * @param InfoInterface|Info|OrderPayment $payment
 	 * @param float|null $amount [optional]
