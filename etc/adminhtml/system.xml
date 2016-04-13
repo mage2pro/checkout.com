@@ -79,7 +79,7 @@
 					showInStore='0'
 				>
 					<label>Test Secret Key</label>
-					<comment><![CDATA[<a href='https://mage2.pro/t/726'>how to get it?</a>]]></comment>
+					<comment><![CDATA[<a href='https://mage2.pro/t/1233'>how to get it?</a>]]></comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
 					<depends>
 						<field id='enable'>1</field>
@@ -96,7 +96,7 @@
 					showInStore='1'
 				>
 					<label>Test Publishable Key</label>
-					<comment><![CDATA[<a href='https://mage2.pro/t/726'>how to get it?</a>]]></comment>
+					<comment><![CDATA[<a href='https://mage2.pro/t/1233'>how to get it?</a>]]></comment>
 					<depends>
 						<field id='enable'>1</field>
 						<field id='test'>1</field>
@@ -113,7 +113,7 @@
 				>
 					<label>Prefill the Payment Form with Test Data?</label>
 					<source_model>Dfe\CheckoutCom\Source\Prefill</source_model>
-					<comment><![CDATA[If you do not want it, then please use the following <a href='https://stripe.com/docs/testing#cards'>test card numbers</a>.]]></comment>
+					<comment><![CDATA[If you do not want it, then please use the following <a href='http://developers.checkout.com/docs/server/api-reference/charges/simulator#test-cards'>test card numbers</a>.]]></comment>
 					<depends>
 						<field id='enable'>1</field>
 						<field id='test'>1</field>
@@ -129,7 +129,7 @@
 					showInStore='0'
 				>
 					<label>Live Secret Key</label>
-					<comment><![CDATA[<a href='https://mage2.pro/t/726'>how to get it?</a>]]></comment>
+					<comment><![CDATA[<a href='https://mage2.pro/t/1233'>how to get it?</a>]]></comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
 					<depends><field id='enable'>1</field></depends>
 				</field>
@@ -143,7 +143,7 @@
 					showInStore='1'
 				>
 					<label>Live Publishable Key</label>
-					<comment><![CDATA[<a href='https://mage2.pro/t/726'>how to get it?</a>]]></comment>
+					<comment><![CDATA[<a href='https://mage2.pro/t/1233'>how to get it?</a>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field 

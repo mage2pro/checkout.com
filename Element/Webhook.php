@@ -8,5 +8,5 @@ class Webhook extends AE {
 	 * @see \Magento\Framework\Data\Form\Element\AbstractElement::getElementHtml()
 	 * @return string
 	 */
-	public function getElementHtml() {return df_url_frontend('dfe-stripe');}
+	public function getElementHtml() {return df_url_frontend('dfe-checkout-com');}
 }
