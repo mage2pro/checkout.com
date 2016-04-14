@@ -11,7 +11,7 @@ define ([
 			active: false
 			,clientConfig: {id: 'dfe-checkout-com'}
 			,code: 'dfe_checkout_com'
-			,template: 'Dfe_Checkout_Com/item'
+			,template: 'Dfe_CheckoutCom/item'
 		},
 		imports: {onActiveChange: 'active'},
 		/**
@@ -47,7 +47,7 @@ define ([
 		 * @returns {String[]}
 	 	 */
 		getCardTypes: function() {
-			return ['VI', 'MC', 'AE'].concat(!this.config('isUS') ? [] : ['JCB', 'DI', 'DN']);
+			return ['VI', 'MC', 'AE'];
 		},
 		/** @returns {String} */
 		getCode: function() {return this.code;},
@@ -76,7 +76,7 @@ define ([
 		initialize: function() {
 			this._super();
 			/** @type {String} */
-			var library = 'Dfe_CheckoutCom/API/' + this.isTest() ? 'Sandbox' : 'Production';
+			var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
 			// 2016-04-11
 			// CheckoutKit не использует AMD и прикрепляет себя к window.
 			require([library], function() {

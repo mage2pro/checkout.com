@@ -66,7 +66,7 @@
 				>
 					<label>Test Mode?</label>
 					<backend_model>Df\Config\Backend\Checkbox</backend_model>
-					<comment><![CDATA[<a href='https://stripe.com/docs/testing#cards'>test card numbers</a>]]></comment>
+					<comment><![CDATA[<a href='http://developers.checkout.com/docs/server/api-reference/charges/simulator#test-cards'>test card numbers'>test card numbers</a>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field

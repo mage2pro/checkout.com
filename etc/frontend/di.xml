@@ -6,14 +6,14 @@
 	<type name='Magento\Checkout\Model\CompositeConfigProvider'>
 		<arguments>
 			<argument name='configProviders' xsi:type='array'>
-				<item name='dfe_stripe' xsi:type='object'>Dfe\CheckoutCom\ConfigProvider</item>
+				<item name='dfe_checkout_com' xsi:type='object'>Dfe\CheckoutCom\ConfigProvider</item>
 			</argument>
 		</arguments>
 	</type>
 	<type name='Magento\Payment\Model\CcGenericConfigProvider'>
 		<arguments>
 			<argument name='methodCodes' xsi:type='array'>
-				<item name='dfe_stripe' xsi:type='const'>Dfe\CheckoutCom\Method::CODE</item>
+				<item name='dfe_checkout_com' xsi:type='const'>Dfe\CheckoutCom\Method::CODE</item>
 			</argument>
 		</arguments>
 	</type>
