@@ -75,16 +75,37 @@ define ([
 		*/
 		initialize: function() {
 			this._super();
+			var _this = this;
 			/** @type {String} */
 			var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
+			// 2016-04-14
+			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
+			debugger;
+			window.CKOConfig = {
+				debugMode: this.isTest()
+				,publicKey: this.config('publishableKey')
+				// 2016-04-14
+				// «Charges Required-Field Matrix»
+				// http://developers.checkout.com/docs/server/integration-guide/charges#a1
+				,customerEmail: 'user@email.com'
+				,ready: function(event) {
+					console.log("CheckoutKit.js is ready");
+					// 2016-04-14
+					 // http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
+					CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
+				}
+				,apiError: function (event) {
+					// ...
+				}
+			};
 			// 2016-04-11
 			// CheckoutKit не использует AMD и прикрепляет себя к window.
 			require([library], function() {
-				CheckoutKit.setPublishableKey(this.config('publishableKey'));
+				//CheckoutKit.setPublishableKey(this.config('publishableKey'));
 				// 2016-03-09
 				// «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?»
 				/** {String|Boolean} */
-				var prefill = this.config('prefill');
+				var prefill = _this.config('prefill');
 				if (prefill) {
 					this.creditCardNumber(prefill);
 					this.creditCardExpMonth(7);
