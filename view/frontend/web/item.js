@@ -4,7 +4,35 @@ define ([
 	, 'df'
 	, 'mage/translate'
 	, 'underscore'
-], function(Component, $, df, $t, _) {
+	/**
+	 * 2016-04-17
+	 * How to get the customer's data on the frontend checkout page's client side (with JavaScript)
+	 * using the «Magento_Customer/js/model/customer» object?
+	 * https://mage2.pro/t/1245
+	 *
+	 * The «Magento_Customer/js/model/customer» JavaScript object interface
+	 * https://mage2.pro/t/1252
+	 */
+	, 'Magento_Customer/js/model/customer'
+	/**
+	 * 2016-04-17
+	 * How is the «Magento_Customer/js/customer-data» object implemented and used?
+	 * https://mage2.pro/t/1246
+	 */
+	, 'Magento_Customer/js/customer-data'
+	/**
+	 * 2016-04-17
+	 * How is the «Magento_Checkout/js/checkout-data» object implemented and used?
+	 * https://mage2.pro/t/1293
+	 *
+	 * How to get the checkout data on the frontend checkout page's client side (with JavaScript)?
+	 * https://mage2.pro/t/1292
+	 *
+	 * https://mage2.pro/t/1294
+	 * The «Magento_Checkout/js/checkout-data» JavaScript object interface and its implementation
+	 */
+	, 'Magento_Checkout/js/checkout-data'
+], function(Component, $, df, $t, _, customer, customerData, checkoutData) {
 	'use strict';
 	return Component.extend({
 		defaults: {
@@ -81,13 +109,23 @@ define ([
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
 			debugger;
+			console.log(customer);
+			console.log(customerData);
+			console.log(window.customerData);
+			console.log(checkoutData);
 			window.CKOConfig = {
 				debugMode: this.isTest()
 				,publicKey: this.config('publishableKey')
-				// 2016-04-14
-				// «Charges Required-Field Matrix»
-				// http://developers.checkout.com/docs/server/integration-guide/charges#a1
-				,customerEmail: 'user@email.com'
+				/**
+				 * 2016-04-14
+				 * «Charges Required-Field Matrix»
+				 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
+				 *
+				 * 2016-04-17
+				 * How to get the current customer's email on the frontend checkout screen?
+				 * https://mage2.pro/t/1295
+				 */
+				,customerEmail: checkoutData.getValidatedEmailValue()
 				,ready: function(event) {
 					console.log("CheckoutKit.js is ready");
 					// 2016-04-14
