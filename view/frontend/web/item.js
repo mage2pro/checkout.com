@@ -2,6 +2,7 @@ define ([
 	'Magento_Payment/js/view/payment/cc-form'
 	,'jquery'
 	, 'df'
+	, 'Df_Checkout/js/data'
 	, 'mage/translate'
 	, 'underscore'
 	/**
@@ -32,7 +33,7 @@ define ([
 	 * The «Magento_Checkout/js/checkout-data» JavaScript object interface and its implementation
 	 */
 	, 'Magento_Checkout/js/checkout-data'
-], function(Component, $, df, $t, _, customer, customerData, checkoutData) {
+], function(Component, $, df, dfCheckout, $t, _, customer, customerData, checkoutData) {
 	'use strict';
 	return Component.extend({
 		defaults: {
@@ -109,6 +110,7 @@ define ([
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
 			debugger;
+			console.log(dfCheckout.email());
 			console.log(customer);
 			console.log(customerData);
 			console.log(window.customerData);
@@ -137,7 +139,7 @@ define ([
 				 * How to get the current customer's email on the frontend checkout screen?
 				 * https://mage2.pro/t/1295
 				 */
-				,customerEmail: checkoutData.getValidatedEmailValue()
+				,customerEmail: dfCheckout.email()
 				,ready: function(event) {
 					debugger;
 					console.log("CheckoutKit.js is ready");
