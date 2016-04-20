@@ -114,6 +114,18 @@ define ([
 			console.log(window.customerData);
 			console.log(checkoutData);
 			window.CKOConfig = {
+				/**
+				 * 2016-04-20
+				 * Этот флаг только включает запись диагностических сообщений в консоль.
+				 *
+				 * «Setting debugMode to true is highly recommended during the integration process;
+				 * the browser’s console will display helpful information
+				 * such as key events including event data and/or any issues found.»
+				 * http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
+				 *
+				 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js
+				 * «The log action will only log messages on the console if debugMode is set to true.»
+				 */
 				debugMode: this.isTest()
 				,publicKey: this.config('publishableKey')
 				/**
@@ -127,13 +139,14 @@ define ([
 				 */
 				,customerEmail: checkoutData.getValidatedEmailValue()
 				,ready: function(event) {
+					debugger;
 					console.log("CheckoutKit.js is ready");
 					// 2016-04-14
 					 // http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
 					CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
 				}
 				,apiError: function (event) {
-					// ...
+					debugger;
 				}
 			};
 			// 2016-04-11
