@@ -322,6 +322,8 @@ class Method extends \Df\Payment\Method {
 			else {
 				/** @var \Magento\Sales\Model\Order $order */
 				$order = $payment->getOrder();
+				/** @var \Magento\Sales\Model\Order\Address|null $sa */
+				$sa = $order->getShippingAddress();
 				/** @var \Magento\Store\Model\Store $store */
 				$store = $order->getStore();
 				/** @var string $iso3 */
@@ -330,18 +332,28 @@ class Method extends \Df\Payment\Method {
 				$charge = $this->api()->chargeService();
 				/** @var CardTokenChargeCreate $request */
 				$request = new CardTokenChargeCreate;
-				/** @var CAddress $billingDetails */
-				$address = new CAddress;
+				/** @var CAddress $rsa */
+				$rsa = new CAddress;
 				/** @var CPhone $phone */
 				$phone = new CPhone;
-				$phone->setNumber("203 583 44 55");
-				$phone->setCountryCode("44");
-				$address->setAddressLine1('1 Glading Fields"');
-				$address->setPostcode('N16 2BR');
-				$address->setCountry('GB');
-				$address->setCity('London');
-				$address->setPhone($phone);
-				$request->setEmail('demo@checkout.com');
+				$phone->setNumber($sa->getTelephone());
+				//$phone->setCountryCode("44");
+				$rsa->setAddressLine1($sa->getStreetLine(1));
+				$rsa->setAddressLine2($sa->getStreetLine(2));
+				$rsa->setPostcode($sa->getPostcode());
+				// 2016-04-21
+				// Двухбуквенный код.
+				$rsa->setCountry($sa->getCountryId());
+				$rsa->setCity($sa->getCity());
+				$rsa->setPhone($phone);
+				$request->setShippingDetails($rsa);
+				/**
+				 * 2016-04-21
+				 * How are an order's getCustomerEmail() and setCustomerEmail() methods
+				 * implemented and used?
+				 * https://mage2.pro/t/1308
+				 */
+				$request->setEmail($order->getCustomerEmail());
 				$request->setAutoCapture('N');
 				$request->getAutoCapTime('0');
 				if (is_null($amount)) {
@@ -353,6 +365,7 @@ class Method extends \Df\Payment\Method {
 				$request->setCardToken($this->iia(self::$TOKEN));
 				/** @var Charge $response */
 			    $response = $charge->chargeWithCardToken($request);
+				xdebug_break();
 			}
 		});
 		return $this;
