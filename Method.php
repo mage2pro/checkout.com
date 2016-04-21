@@ -1,5 +1,11 @@
 <?php
 namespace Dfe\CheckoutCom;
+use com\checkout\ApiClient;
+use com\checkout\ApiServices\Charges\ChargeService;
+use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate;
+use com\checkout\ApiServices\Charges\ResponseModels\Charge;
+use com\checkout\ApiServices\SharedModels\Address as CAddress;
+use com\checkout\ApiServices\SharedModels\Phone as CPhone;
 use Dfe\CheckoutCom\Settings as S;
 use Dfe\CheckoutCom\Source\Action;
 use Dfe\CheckoutCom\Source\Metadata;
@@ -282,17 +288,18 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-03-17
-	 * Чтобы система показала наше сообщение вместо общей фразы типа
-	 * «We can't void the payment right now» надо вернуть объект именно класса
-	 * @uses \Magento\Framework\Exception\LocalizedException
-	 * https://mage2.pro/t/945
-	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L20-L30
-	 * @param callable $function
-	 * @throws LE
+	 * 2016-04-21
+	 * https://github.com/CKOTech/checkout-php-library#example
+	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+	 * @return ApiClient
 	 */
-	private function api($function) {
-		df_leh(function() use($function) {S::s()->init(); $function();});
+	private function api() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = new ApiClient(
+				S::s()->secretKey(), S::s()->test() ? 'sandbox' : 'live'
+			);
+		}
+		return $this->{__METHOD__};
 	}
 
 	/**
@@ -307,58 +314,45 @@ class Method extends \Df\Payment\Method {
 	 * @throws \Stripe\Error\Card
 	 */
 	private function charge(InfoInterface $payment, $amount = null, $capture = true) {
-		$this->api(function() use($payment, $amount, $capture) {
+		df_leh(function() use($payment, $amount, $capture) {
 			/** @var Transaction|false|null $auth */
 			$auth = !$capture ? null : $payment->getAuthorizationTransaction();
 			if ($auth) {
-				// 2016-03-17
-				// https://stripe.com/docs/api#retrieve_charge
-				/** @var \Stripe\Charge $charge */
-				$charge = \Stripe\Charge::retrieve($auth->getTxnId());
-				// 2016-03-17
-				// https://stripe.com/docs/api#capture_charge
-				$charge->capture();
 			}
 			else {
-				/** @var \Stripe\Charge $charge */
-				$charge = \Stripe\Charge::create($this->paramsCharge($payment, $amount, $capture));
-				/**
-				 * 2016-03-15
-				 * Информация о банковской карте.
-				 * https://stripe.com/docs/api#charge_object-source
-				 * https://stripe.com/docs/api#card_object
-				 */
-				/** @var \Stripe\Card $card */
-				$card = $charge->{'source'};
-				/**
-				 * 2016-03-15
-				 * https://mage2.pro/t/941
-				 * https://stripe.com/docs/api#card_object-last4
-				 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-				 */
-				$payment->setCcLast4($card->{'last4'});
-				/**
-				 * 2016-03-15
-				 * https://stripe.com/docs/api#card_object-brand
-				 */
-				$payment->setCcType($card->{'brand'});
-				/**
-				 * 2016-03-15
-				 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
-				 * «How is a payment authorization voiding implemented?»
-				 * https://mage2.pro/t/938
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-				 */
-				$payment->setTransactionId($charge->id);
-				/**
-				 * 2016-03-15
-				 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-				 * Транзакция ситается завершённой, если явно не указать «false».
-				 */
-				$payment->setIsTransactionClosed($capture);
+				/** @var \Magento\Sales\Model\Order $order */
+				$order = $payment->getOrder();
+				/** @var \Magento\Store\Model\Store $store */
+				$store = $order->getStore();
+				/** @var string $iso3 */
+				$iso3 = $order->getBaseCurrencyCode();
+				/** @var ChargeService $charge */
+				$charge = $this->api()->chargeService();
+				/** @var CardTokenChargeCreate $request */
+				$request = new CardTokenChargeCreate;
+				/** @var CAddress $billingDetails */
+				$address = new CAddress;
+				/** @var CPhone $phone */
+				$phone = new CPhone;
+				$phone->setNumber("203 583 44 55");
+				$phone->setCountryCode("44");
+				$address->setAddressLine1('1 Glading Fields"');
+				$address->setPostcode('N16 2BR');
+				$address->setCountry('GB');
+				$address->setCity('London');
+				$address->setPhone($phone);
+				$request->setEmail('demo@checkout.com');
+				$request->setAutoCapture('N');
+				$request->getAutoCapTime('0');
+				if (is_null($amount)) {
+					$amount = $payment->getBaseAmountOrdered();
+				}
+				$request->setValue(self::amount($payment, $amount));
+				$request->setCurrency($iso3);
+				$request->setTrackId('Demo-0001');
+				$request->setCardToken($this->iia(self::$TOKEN));
+				/** @var Charge $response */
+			    $response = $charge->chargeWithCardToken($request);
 			}
 		});
 		return $this;
@@ -636,44 +630,23 @@ class Method extends \Df\Payment\Method {
 	private static $TOKEN = 'token';
 
 	/**
-	 * 2016-03-07
-	 * https://stripe.com/docs/api/php#create_charge-amount
-	 * «A positive integer in the smallest currency unit
-	 * (e.g 100 cents to charge $1.00, or 1 to charge ¥1, a 0-decimal currency)
-	 * representing how much to charge the card.
-	 * The minimum amount is $0.50 (or equivalent in charge currency).»
-	 *
-	 * «Zero-decimal currencies»
-	 * https://support.stripe.com/questions/which-zero-decimal-currencies-does-stripe-support
-	 * Here is the full list of zero-decimal currencies supported by Stripe:
-	 * BIF: Burundian Franc
-	 * CLP: Chilean Peso
-	 * DJF: Djiboutian Franc
-	 * GNF: Guinean FrancJ
-	 * PY: Japanese Yen
-	 * KMF: Comorian Franc
-	 * KRW: South Korean Won
-	 * MGA: Malagasy Ariary
-	 * PYG: Paraguayan Guaraní
-	 * RWF: Rwandan Franc
-	 * VND: Vietnamese Đồng
-	 * VUV: Vanuatu Vatu
-	 * XAF: Central African Cfa Franc
-	 * XOF: West African Cfa Franc
-	 * XPF: Cfp Franc
-	 *
+	 * 2016-04-21
+	 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
+	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
+	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
+	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
+	 * Divide all other currencies into 100 units
+	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
 	 * @param $payment InfoInterface|Info|OrderPayment
 	 * @param float $amount
 	 * @return int
 	 */
 	private static function amount(InfoInterface $payment, $amount) {
-		/** @var string[] $zeroDecimal */
-		static $zeroDecimal = [
-			'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA'
-			,'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'
-		];
+		/** @var string[] $m1000 */
+		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
 		/** @var string $iso3 */
 		$iso3 = $payment->getOrder()->getBaseCurrencyCode();
-		return ceil($amount * (in_array($iso3, $zeroDecimal) ? 1 : 100));
+		return ceil($amount * (in_array($iso3, $m1000) ? 1000 : 100));
 	}
 }

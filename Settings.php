@@ -35,15 +35,6 @@ class Settings extends \Df\Core\Settings {
 	public function enable($s = null) {return $this->b(__FUNCTION__, $s);}
 
 	/**
-	 * 2016-03-08
-	 * @return void
-	 */
-	public function init() {\Stripe\Stripe::setApiKey($this->secretKey());}
-
-	/** @return bool */
-	public function isMerchantInUS() {return 'US' === $this->account()->{'country'};}
-
-	/**
 	 * 2016-03-14
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Metadata»
 	 * @param null|string|int|ScopeInterface $s [optional]
@@ -70,6 +61,15 @@ class Settings extends \Df\Core\Settings {
 	}
 
 	/**
+	 * 2016-03-02
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string
+	 */
+	public function secretKey($s = null) {
+		return $this->test($s) ? $this->testSecretKey($s) : $this->liveSecretKey($s);
+	}
+
+	/**
 	 * 2016-03-14
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Statement for Customer»
 	 * @param null|string|int|ScopeInterface $s [optional]
@@ -83,19 +83,6 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	protected function prefix() {return 'df_payment/checkout_com/';}
-
-	/**
-	 * 2016-03-08
-	 * https://stripe.com/docs/api/php#retrieve_account
-	 * @return \Stripe\Account
-	 */
-	private function account() {
-		if (!isset($this->{__METHOD__})) {
-			$this->init();
-			$this->{__METHOD__} = \Stripe\Account::retrieve();
-		}
-		return $this->{__METHOD__};
-	}
 
 	/**
 	 * 2016-03-02
@@ -112,15 +99,6 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	private function liveSecretKey($s = null) {return $this->p(__FUNCTION__, $s);}
-
-	/**
-	 * 2016-03-02
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string
-	 */
-	private function secretKey($s = null) {
-		return $this->test($s) ? $this->testSecretKey($s) : $this->liveSecretKey($s);
-	}
 
 	/**
 	 * 2016-03-02
