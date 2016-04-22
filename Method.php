@@ -464,7 +464,7 @@ class Method extends \Df\Payment\Method {
 					$product->setSku($item->getSku());
 					$product->setPrice(self::amount($payment, $item->getPrice()));
 					$product->setQuantity($item->getQtyOrdered());
-					$product->setImage($item->getProduct()->getImage());
+					$product->setImage(df_product_image_url($item->getProduct()));
 					$request->setProducts($product);
 				}
 				//
