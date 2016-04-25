@@ -106,7 +106,6 @@ define ([
 			this._super();
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
-			debugger;
 			this.initDf();
 			/*console.log(dfCheckout.email());
 			console.log(customer);
@@ -156,11 +155,10 @@ define ([
 					 */
 					,customerEmail: dfCheckout.email()
 					,ready: function(event) {
-						debugger;
 						console.log("CheckoutKit.js is ready");
 						// 2016-04-14
 						// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
-						CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
+						//CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
 						/**
 						 * 2016-04-20
 						 * http://developers.checkout.com/docs/browser/reference/handlers/checkoutkit-js
@@ -180,7 +178,6 @@ define ([
 						 * Example: {id: 'card_tok_111'}
 						 */
 						CheckoutKit.addEventHandler(ev.CARD_TOKENISED, function(event) {
-							debugger;
 						    console.log('card token', event.data.id);
 							_this.token = event.data.id;
 							_this.placeOrder();
@@ -190,7 +187,6 @@ define ([
 						 * http://developers.checkout.com/docs/browser/reference/handlers/checkoutkit-js
 						 */
 						CheckoutKit.addEventHandler(ev.CARD_TOKENISATION_FAILED, function(event) {
-							debugger;
 							_this.messageContainer.addErrorMessage({
 								'message': $t('The card tokenisation fails.')
 							});
@@ -204,7 +200,6 @@ define ([
 				// 2016-04-11
 				// CheckoutKit не использует AMD и прикрепляет себя к window.
 				require([library], function() {
-					debugger;
 				});
 				this._initDf = deferred.promise();
 			}
