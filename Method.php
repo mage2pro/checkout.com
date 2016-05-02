@@ -1,6 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom;
 use com\checkout\ApiClient;
+use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
@@ -460,8 +461,8 @@ class Method extends \Df\Payment\Method {
 					 * будет содержать как настраиваемый товар, так и его простой вариант.
 					 */
 					if (!$item->getChildrenItems()) {
-						/** @var CProduct $product */
-						$product = new CProduct;
+						/** @var CProduct $cProduct */
+						$cProduct = new CProduct;
 						/**
 						 * 2016-04-23
 						 * «Name of product. Max of 100 characters.»
@@ -470,18 +471,18 @@ class Method extends \Df\Payment\Method {
 						// Простые варианты имеют имена типа «New Very Prive-36-Almond»,
 						// нам удобнее видеть имена простыми,
 						// как у настраиваемого товара: «New Very Prive»).
-						$product->setName(
+						$cProduct->setName(
 							$item->getParentItem()
 							? $item->getParentItem()->getName()
 							: $item->getName()
 						);
-						$product->setProductId($item->getProductId());
+						$cProduct->setProductId($item->getProductId());
 						/**
 						 * 2016-04-23
 						 * «Description of the product.Max of 500 characters.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$product->setDescription($item->getDescription());
+						$cProduct->setDescription($item->getDescription());
 						/**
 						 * 2016-04-23
 						 * «Stock Unit Identifier.
@@ -489,31 +490,31 @@ class Method extends \Df\Payment\Method {
 						 * Max length of 100 characters.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$product->setSku($item->getSku());
+						$cProduct->setSku($item->getSku());
 						/**
 						 * 2016-04-23
 						 * «Product price per unit. Max. of 6 digits.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$product->setPrice(self::amount($payment, $item->getPrice()));
+						$cProduct->setPrice(self::amount($payment, $item->getPrice()));
 						/**
 						 * 2016-04-23
 						 * «Units of the product to be shipped. Max length of 3 digits.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$product->setQuantity($item->getQtyOrdered());
+						$cProduct->setQuantity($item->getQtyOrdered());
 						/**
 						 * 2016-04-23
 						 * «image link to product on merchant website.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$product->setImage(df_product_image_url($item->getProduct()));
+						$cProduct->setImage(df_product_image_url($item->getProduct()));
 						/**
 						 * 2016-04-23
 						 * «An array of Product details»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$request->setProducts($product);
+						$request->setProducts($cProduct);
 					}
 				}
 				/** @var CAddress $rsa */
@@ -604,8 +605,37 @@ class Method extends \Df\Payment\Method {
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
 				 */
 				/** @var Charge $response */
-				xdebug_break();
+				//xdebug_break();
 			    $response = $charge->chargeWithCardToken($request);
+				/** @var Card $card */
+				$card = $response->getCard();
+				if ('Authorised' === $response->getStatus()) {
+					/**
+					 * 2016-05-02
+					 * https://mage2.pro/t/941
+					 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+					 */
+					$payment->setCcLast4($card->getLast4());
+					// 2016-05-02
+					$payment->setCcType($card->getPaymentMethod());
+					/**
+					 * 2016-05-02
+					 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
+					 * «How is a payment authorization voiding implemented?»
+					 * https://mage2.pro/t/938
+					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+					 */
+					$payment->setTransactionId($response->getId());
+					/**
+					 * 2016-03-15
+					 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
+					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+					 * Транзакция ситается завершённой, если явно не указать «false».
+					 */
+					$payment->setIsTransactionClosed($capture);
+				}
 				xdebug_break();
 			}
 		});

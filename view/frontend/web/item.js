@@ -218,11 +218,12 @@ define ([
 				 * 2016-04-21
 				 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js#create-card-token
 				 */
+				debugger;
 				CheckoutKit.createCardToken({
 				    number: $('[data-checkout="card-number"]', $form).val()
 					,expiryMonth: $('[data-checkout="expiry-month"]', $form).val()
 					,'expiryYear': $('[data-checkout="expiry-year"]', $form).val()
-					,cvv: $('[data-checkout="cvv"]', $form)
+					,cvv: $('[data-checkout="cvv"]', $form).val()
 				}, function(response) {
 					debugger;
 					console.log(response.id);
