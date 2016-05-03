@@ -11,6 +11,10 @@
 		"homepage": "https://mage2.pro/users/dmitry_fedyuk",
 		"role": "Developer"
 	}]
-	,"require": {"mage2pro/core": "*", "checkout/checkout-php-api": "1.*"}
+	,"require": {
+		"mage2pro/core": "*"
+		, "checkout/checkout-php-api": "1.*"
+		, "giggsey/libphonenumber-for-php": "7.*"
+	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
 }
