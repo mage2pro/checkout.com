@@ -5,6 +5,9 @@ use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
+use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
+use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
+use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
 use com\checkout\ApiServices\SharedModels\Product as CProduct;
@@ -203,14 +206,37 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-03-15
+	 * 2016-05-03
+	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#void-a-charge
 	 * @override
 	 * @see \Df\Payment\Method::void()
 	 * @param InfoInterface|Info|OrderPayment $payment
 	 * @return $this
 	 */
 	public function void(InfoInterface $payment) {
-		$this->_refund($payment);
+		self::leh(function() use($payment) {
+			/** @var Transaction|false|null $auth */
+			$auth = $payment->getAuthorizationTransaction();
+			if ($auth) {
+				/** @var ChargeVoid $void */
+				$void = new ChargeVoid;
+				/**
+				 * 2016-05-03
+				 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
+				 * Хотя в документации сказано, что track_id не является обязательным параметром,
+				 * при пустом объекте ChargeVoid происходит сбой:
+				  {
+				 	"errorCode": "70000",
+				 	"message": "Validation error",
+				 	"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
+				 	"errorMessageCodes": ["70002"],
+				 	"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
+				 }
+				 */
+				$void->setTrackId($payment->getOrder()->getIncrementId());
+				$this->api()->voidCharge($auth->getTxnId(), $void);
+			}
+		});
 		return $this;
 	}
 
@@ -294,13 +320,13 @@ class Method extends \Df\Payment\Method {
 	 * 2016-04-21
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
-	 * @return ApiClient
+	 * @return ChargeService
 	 */
 	private function api() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = new ApiClient(
-				S::s()->secretKey(), S::s()->test() ? 'sandbox' : 'live'
-			);
+			/** @var ApiClient $client */
+			$client = new ApiClient(S::s()->secretKey(), S::s()->test() ? 'sandbox' : 'live');
+			$this->{__METHOD__} = $client->chargeService();
 		}
 		return $this->{__METHOD__};
 	}
@@ -321,6 +347,24 @@ class Method extends \Df\Payment\Method {
 			/** @var Transaction|false|null $auth */
 			$auth = !$capture ? null : $payment->getAuthorizationTransaction();
 			if ($auth) {
+				/**
+				 * 2016-05-03
+				 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
+				 */
+				/** @var ChargeCapture $capture */
+				$capture = new ChargeCapture;
+				$capture->setChargeId($auth->getTxnId());
+				/**
+				 * 2016-05-03
+				 * «Positive integer (without decimal separator) representing the capture amount.
+				 * Cannot exceed the authorised charge amount.
+				 * Partial captures (capture amount is less than the authorised amount) are allowed.
+				 * Only one partial capture is allowed per authorised charge.
+				 * If not specified, the default is authorisation charge amount.»
+				 * http://developers.checkout.com/docs/server/api-reference/charges/capture-card-charge#request-payload-fields
+				 */
+				$capture->setValue(self::amount($payment, $amount));
+				$this->api()->CaptureCardCharge($capture);
 			}
 			else {
 				/** @var \Magento\Sales\Model\Order $order */
@@ -334,10 +378,12 @@ class Method extends \Df\Payment\Method {
 				$store = $order->getStore();
 				/** @var string $iso3 */
 				$iso3 = $order->getBaseCurrencyCode();
-				/** @var ChargeService $charge */
-				$charge = $this->api()->chargeService();
 				/** @var CardTokenChargeCreate $request */
 				$request = new CardTokenChargeCreate;
+				// 2016-05-03
+				// Не является обязательным, но в целом приятно,
+				// когда в графе «Track ID» значится номер заказа вместо «Unknown».
+				$request->setTrackId($order->getIncrementId());
 				$request->setCustomerName($sa->getName());
 				/**
 				 * 2016-04-21
@@ -624,7 +670,7 @@ class Method extends \Df\Payment\Method {
 				 */
 				/** @var Charge $response */
 				//xdebug_break();
-			    $response = $charge->chargeWithCardToken($request);
+			    $response = $this->api()->chargeWithCardToken($request);
 				/** @var Card $card */
 				$card = $response->getCard();
 				if ('Authorised' === $response->getStatus()) {

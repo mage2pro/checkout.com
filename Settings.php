@@ -70,14 +70,6 @@ class Settings extends \Df\Core\Settings {
 	}
 
 	/**
-	 * 2016-03-14
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Statement for Customer»
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string[]
-	 */
-	public function statement($s = null) {return $this->v(__FUNCTION__, $s);}
-
-	/**
 	 * @override
 	 * @used-by \Df\Core\Settings::v()
 	 * @return string
