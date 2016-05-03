@@ -13,6 +13,8 @@ use Dfe\CheckoutCom\Settings as S;
 use Dfe\CheckoutCom\Source\Action;
 use Dfe\CheckoutCom\Source\Metadata;
 use Exception as E;
+use libphonenumber\PhoneNumberUtil as PhoneParser;
+use libphonenumber\PhoneNumber as ParsedPhone;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info;
@@ -562,33 +564,43 @@ class Method extends \Df\Payment\Method {
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 				 */
 				$rsa->setState($sa->getRegion());
-				/** @var CPhone $phone */
-				$phone = new CPhone;
 				/**
-				 * 2016-04-23
-				 * «Contact phone number for the card holder.
-				 * Its length should be between 6 and 25 characters.
-				 * Allowed characters are: numbers, +, (,) ,/ and ' '.»
-				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+				 * 2016-05-03
+				 * https://github.com/giggsey/libphonenumber-for-php#quick-examples
+				 * @var PhoneParser $phoneParser
 				 */
-				$phone->setNumber($sa->getTelephone());
-				/**
-				 * 2016-04-23
-				 * «Country code for the phone number of the card holder
-				 * e.g. 44 for United Kingdom.
-				 * Please refer to Country ISO and Code section
-				 * in the Other Codes menu option.»
-				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
-				 */
-				//$phone->setCountryCode("44");
-				/**
-				 * 2016-04-23
-				 * «Contact phone object for the card holder.
-				 * If provided, it will contain the countryCode and number properties
-				 * e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
-				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
-				 */
-				$rsa->setPhone($phone);
+				$phoneParser = PhoneParser::getInstance();
+				try {
+					/** @var ParsedPhone $parsedPhone */
+				    $parsedPhone = $phoneParser->parse($sa->getTelephone(), $sa->getCountryId());
+					/** @var CPhone $phone */
+					$phone = new CPhone;
+					/**
+					 * 2016-04-23
+					 * «Contact phone number for the card holder.
+					 * Its length should be between 6 and 25 characters.
+					 * Allowed characters are: numbers, +, (,) ,/ and ' '.»
+					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+					 */
+					$phone->setNumber($parsedPhone->getNationalNumber());
+					/**
+					 * 2016-04-23
+					 * «Country code for the phone number of the card holder
+					 * e.g. 44 for United Kingdom.
+					 * Please refer to Country ISO and Code section
+					 * in the Other Codes menu option.»
+					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+					 */
+					$phone->setCountryCode($parsedPhone->getCountryCode());
+					/**
+					 * 2016-04-23
+					 * «Contact phone object for the card holder.
+					 * If provided, it will contain the countryCode and number properties
+					 * e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
+					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+					 */
+					$rsa->setPhone($phone);
+				} catch (\libphonenumber\NumberParseException $e) {}
 				/**
 				 * 2016-04-23
 				 * «Shipping address details.»
