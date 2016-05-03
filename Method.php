@@ -367,6 +367,10 @@ class Method extends \Df\Payment\Method {
 				 * «A valid charge mode: 1 for No 3D, 2 for 3D, 3 Local Payment.
 				 * Default is 1 if not provided.»
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+				 *
+				 * 2016-05-03
+				 * С настройками Личного кабинета по умолчанию
+				 * 3D-Secure будет насилько испоьзоваться для платежей размером не меньше 150 долларов.
 				 */
 				$request->setChargeMode(1);
 				/**
@@ -491,8 +495,14 @@ class Method extends \Df\Payment\Method {
 						 * 2016-04-23
 						 * «Product price per unit. Max. of 6 digits.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+						 *
+						 * 2016-05-03
+						 * Не используем здесь @see \Dfe\CheckoutCom\Method::amount(),
+						 * потому что нам в данном случае нужно передавать цену в рублях,
+						 * а не в копейках (в документации об э\том не сказано,
+						 * проверял посредством личного кабинета checkout.com).
 						 */
-						$cProduct->setPrice(self::amount($payment, df_order_item_price($item)));
+						$cProduct->setPrice(df_order_item_price($item));
 						/**
 						 * 2016-04-23
 						 * «Units of the product to be shipped. Max length of 3 digits.»
