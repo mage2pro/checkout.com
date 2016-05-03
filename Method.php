@@ -492,7 +492,7 @@ class Method extends \Df\Payment\Method {
 						 * «Product price per unit. Max. of 6 digits.»
 						 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 						 */
-						$cProduct->setPrice(self::amount($payment, $item->getPrice()));
+						$cProduct->setPrice(self::amount($payment, df_order_item_price($item)));
 						/**
 						 * 2016-04-23
 						 * «Units of the product to be shipped. Max length of 3 digits.»
@@ -632,7 +632,7 @@ class Method extends \Df\Payment\Method {
 					 */
 					$payment->setIsTransactionClosed($capture);
 				}
-				xdebug_break();
+				//xdebug_break();
 			}
 		});
 		return $this;
