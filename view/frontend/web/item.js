@@ -84,10 +84,17 @@ define ([
 		 * 2016-03-06
    		 * @override
    		 */
-		getData: function () {
+		getData: function() {
 			return {
-				method: this.item.method,
+				/**
+				 * 2016-05-03
+				 * Если не засунуть «token» внутрь «additional_data»,
+				 * то получим сбой:
+				 * «Property "Token" does not have corresponding setter
+				 * in class "Magento\Quote\Api\Data\PaymentInterface»
+				 */
 				additional_data: {token: this.token}
+				,method: this.item.method
 			};
 		},
 		/**
@@ -218,7 +225,6 @@ define ([
 				 * 2016-04-21
 				 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js#create-card-token
 				 */
-				debugger;
 				CheckoutKit.createCardToken({
 				    number: $('[data-checkout="card-number"]', $form).val()
 					,expiryMonth: $('[data-checkout="expiry-month"]', $form).val()
