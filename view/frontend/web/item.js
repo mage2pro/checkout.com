@@ -33,7 +33,13 @@ define ([
 	 * The «Magento_Checkout/js/checkout-data» JavaScript object interface and its implementation
 	 */
 	, 'Magento_Checkout/js/checkout-data'
-], function(Component, $, df, dfCheckout, $t, _, customer, customerData, checkoutData) {
+	, 'Dfe_CheckoutCom/action/place-order'
+	, 'Magento_Checkout/js/model/payment/additional-validators'
+	, 'Magento_Checkout/js/action/redirect-on-success'
+], function(
+	Component, $, df, dfCheckout, $t, _, customer, customerData
+	, checkoutData, placeOrderAction, additionalValidators, redirectOnSuccessAction
+) {
 	'use strict';
 	return Component.extend({
 		defaults: {
@@ -96,6 +102,15 @@ define ([
 				additional_data: {token: this.token}
 				,method: this.item.method
 			};
+		},
+		/**
+		 * 2016-05-04
+		 * @override
+		 * https://github.com/magento/magento2/blob/981d1f/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L161-L165
+		 * @return {jQuery.Deferred}
+		*/
+		getPlaceOrderDeferredObject: function() {
+			return $.when(placeOrderAction(this.getData(), this.messageContainer));
 		},
 		/**
 		 * 2016-03-08
@@ -238,6 +253,36 @@ define ([
 				});
 
 			});
+		},
+		/**
+		 * 2016-05-04
+		 * @override
+		 * https://github.com/magento/magento2/blob/981d1f/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L127-L159
+		 * @return {Boolean}
+		*/
+		placeOrder: function(data, event) {
+			var self = this;
+			if (event) {
+				event.preventDefault();
+			}
+			/** @type {Boolean} */
+			var result = this.validate() || additionalValidators.validate();
+			if (result) {
+				this.isPlaceOrderActionAllowed(false);
+				this.getPlaceOrderDeferredObject()
+					.fail(function() {self.isPlaceOrderActionAllowed(true);})
+					.done(
+						function(response) {
+							debugger;
+							self.afterPlaceOrder();
+							if (self.redirectAfterPlaceOrder) {
+								redirectOnSuccessAction.execute();
+							}
+						}
+					)
+				;
+			}
+			return result;
 		}
 	});
 });

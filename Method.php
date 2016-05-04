@@ -671,9 +671,36 @@ class Method extends \Df\Payment\Method {
 				/** @var Charge $response */
 				//xdebug_break();
 			    $response = $this->api()->chargeWithCardToken($request);
-				/** @var Card $card */
-				$card = $response->getCard();
-				if ('Authorised' === $response->getStatus()) {
+				/**
+				 * 2016-05-02
+				 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
+				 * «How is a payment authorization voiding implemented?»
+				 * https://mage2.pro/t/938
+				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+				 */
+				$payment->setTransactionId($response->getId());
+				/**
+				 * 2016-05-03
+				 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
+				 * Пример ответа сервера в случае необъодимости проверки 3D-Secure:
+					{
+						"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
+						"liveMode": false,
+						"chargeMode": 2,
+						"responseCode": "10000",
+						"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
+					}
+				 * @var string|null $redirectUrl
+				 */
+				$redirectUrl = dfa(df_json_decode($response->json), 'redirectUrl');
+				if ($redirectUrl) {
+					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
+					$payment->setIsTransactionClosed(false);
+				}
+				else if ('Authorised' === $response->getStatus()) {
+					/** @var Card $card */
+					$card = $response->getCard();
 					/**
 					 * 2016-05-02
 					 * https://mage2.pro/t/941
@@ -682,15 +709,6 @@ class Method extends \Df\Payment\Method {
 					$payment->setCcLast4($card->getLast4());
 					// 2016-05-02
 					$payment->setCcType($card->getPaymentMethod());
-					/**
-					 * 2016-05-02
-					 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
-					 * «How is a payment authorization voiding implemented?»
-					 * https://mage2.pro/t/938
-					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-					 */
-					$payment->setTransactionId($response->getId());
 					/**
 					 * 2016-03-15
 					 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
@@ -763,6 +781,14 @@ class Method extends \Df\Payment\Method {
 	 * @used-by \Dfe\CheckoutCom\ConfigProvider::getConfig()
 	 */
 	const CODE = 'dfe_checkout_com';
+
+	/**
+	 * 2016-05-04
+	 * @used-by \Dfe\CheckoutCom\Method::charge()
+	 * @used-by
+	 */
+	const REDIRECT_URL = 'dfe_redirect_url';
+
 	/**
 	 * 2016-03-06
 	 * @var string
