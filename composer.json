@@ -12,8 +12,8 @@
 		"role": "Developer"
 	}]
 	,"require": {
-		"mage2pro/core": "*"
-		, "checkout/checkout-php-api": "1.*"
+		"mage2pro/core": "^1.1"
+		, "checkout/checkout-php-api": "^1.2.3"
 		, "giggsey/libphonenumber-for-php": "7.*"
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
