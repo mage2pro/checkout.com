@@ -527,11 +527,27 @@ class Method extends \Df\Payment\Method {
 	 * @return int
 	 */
 	public static function amount(InfoInterface $payment, $amount) {
+		return ceil($amount * self::amountFactor($payment));
+	}
+
+	/**
+	 * @param $payment InfoInterface|Info|OrderPayment
+	 * @param int $amount
+	 * @return float
+	 */
+	public static function amountReverse(InfoInterface $payment, $amount) {
+		return $amount / self::amountFactor($payment);
+	}
+
+	/**
+	 * 2016-05-06
+	 * @param $payment InfoInterface|Info|OrderPayment
+	 * @return int
+	 */
+	private static function amountFactor(InfoInterface $payment) {
 		/** @var string[] $m1000 */
 		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
-		/** @var string $iso3 */
-		$iso3 = $payment->getOrder()->getBaseCurrencyCode();
-		return ceil($amount * (in_array($iso3, $m1000) ? 1000 : 100));
+		return in_array($payment->getOrder()->getBaseCurrencyCode(), $m1000) ? 1000 : 100;
 	}
 
 	/**

@@ -6,6 +6,7 @@ use com\checkout\ApiServices\Charges\ResponseModels\Charge;
 use Df\Payment\Transaction;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler;
+use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Settings as S;
 use Dfe\CheckoutCom\Source\Action;
 use Magento\Sales\Model\Order;
@@ -56,6 +57,8 @@ class Index extends \Magento\Framework\App\Action\Action {
 			$payment->setCcLast4($card->getLast4());
 			// 2016-05-02
 			$payment->setCcType($card->getPaymentMethod());
+			/** @var bool $isCapture */
+			$isCapture = 'Y' === $charge->getAutoCapture();
 			/**
 			 * 2016-03-15
 			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
@@ -63,7 +66,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 * Транзакция ситается завершённой, если явно не указать «false».
 			 */
-			$payment->setIsTransactionClosed('Y' === $charge->getAutoCapture());
+			$payment->setIsTransactionClosed($isCapture);
 			/**
 			 * 2016-05-06
 			 * По аналогии с https://github.com/magento/magento2/blob/135f967/app/code/Magento/Braintree/Gateway/Response/CardDetailsHandler.php#L76-L76
@@ -72,16 +75,35 @@ class Index extends \Magento\Framework\App\Action\Action {
 			$payment->setAdditionalInformation('cc_type', $card->getPaymentMethod());
 			/** @var \Dfe\CheckoutCom\Method $method */
 			$method = $payment->getMethodInstance();
-			$order->setState(
+			/**
+			 * 2016-05-06
+			 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
+			 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
+			 */
+			/** @var string $state */
+			$state =
 				Action::REVIEW === $method->getConfigPaymentAction()
 				? Order::STATE_PAYMENT_REVIEW
 				: Order::STATE_PROCESSING
+			;
+			$order->setState($state);
+			$order->setStatus($order->getConfig()->getStateDefaultStatus($state));
+			/** @var string $formattedAmount */
+			$formattedAmount = $order->getBaseCurrency()->formatTxt(
+				Method::amountReverse($payment, $charge->getValue())
 			);
+			/** @var string $message */
+			$message = $payment->prependMessage(__(
+				$isCapture ? 'Captured amount of %1 online' : 'Authorized amount of %1'
+				, $formattedAmount
+			));
+			$order->addStatusHistoryComment($message);
+			$order->save();
 			/**
 			 * 2016-05-06
 			 * Надо ещё отправить письмо-оповещение о заказе.
 			 */
-			$order->save();
+			df_order_send_email($order);
 			$result = $this->_redirect('checkout/onepage/success');
 		}
 		/**
