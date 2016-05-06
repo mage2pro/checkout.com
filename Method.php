@@ -1,6 +1,5 @@
 <?php
 namespace Dfe\CheckoutCom;
-use com\checkout\ApiClient;
 use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate;
@@ -322,14 +321,7 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return ChargeService
 	 */
-	private function api() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var ApiClient $client */
-			$client = new ApiClient(S::s()->secretKey(), S::s()->test() ? 'sandbox' : 'live');
-			$this->{__METHOD__} = $client->chargeService();
-		}
-		return $this->{__METHOD__};
-	}
+	private function api() {return S::s()->apiCharge();}
 
 	/**
 	 * 2016-03-07
@@ -418,7 +410,7 @@ class Method extends \Df\Payment\Method {
 				 *
 				 * 2016-05-03
 				 * С настройками Личного кабинета по умолчанию
-				 * 3D-Secure будет насилько испоьзоваться для платежей размером не меньше 150 долларов.
+				 * 3D-Secure будет насильно использоваться для платежей размером не меньше 150 долларов.
 				 */
 				$request->setChargeMode(1);
 				/**

@@ -272,10 +272,19 @@ define ([
 				this.getPlaceOrderDeferredObject()
 					.fail(function() {self.isPlaceOrderActionAllowed(true);})
 					.done(
-						function(response) {
+						function(redirectUrl) {
 							debugger;
 							self.afterPlaceOrder();
-							if (self.redirectAfterPlaceOrder) {
+							/**
+							 * 2016-05-04
+							 * Перенаправление на проверку 3D-Secure.
+							 * Сделано по аналогии с redirectOnSuccessAction.execute()
+							 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
+							 */
+							if (redirectUrl) {
+								window.location.replace(redirectUrl);
+							}
+							else if (self.redirectAfterPlaceOrder) {
 								redirectOnSuccessAction.execute();
 							}
 						}

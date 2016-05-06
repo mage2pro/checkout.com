@@ -1,5 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom;
+use com\checkout\ApiClient as API;
+use com\checkout\ApiServices\Charges\ChargeService;
 use Magento\Framework\App\ScopeInterface;
 class Settings extends \Df\Core\Settings {
 	/**
@@ -17,6 +19,29 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	public function actionForReturned($s = null) {return $this->v(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-05-05
+	 * https://github.com/CKOTech/checkout-php-library#example
+	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return API
+	 */
+	public function api($s = null) {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = new API($this->secretKey($s), $this->test($s) ? 'sandbox' : 'live');
+		}
+		return $this->{__METHOD__};
+	}
+
+	/**
+	 * 2016-05-05
+	 * https://github.com/CKOTech/checkout-php-library#example
+	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return ChargeService
+	 */
+	public function apiCharge($s = null) {return $this->api($s)->chargeService();}
 
 	/**
 	 * 2016-03-09

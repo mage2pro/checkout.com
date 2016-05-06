@@ -2,6 +2,10 @@
 namespace Dfe\CheckoutCom;
 use Magento\Checkout\Api\GuestPaymentInformationManagementInterface as IGuest;
 use Magento\Checkout\Api\PaymentInformationManagementInterface as IRegistered;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\Data\OrderPaymentInterface as PaymentInterface;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 class PlaceOrder {
 	/**
 	 * 2016-05-04
@@ -10,7 +14,7 @@ class PlaceOrder {
 	 * @param \Magento\Quote\Api\Data\PaymentInterface $paymentMethod
 	 * @param \Magento\Quote\Api\Data\AddressInterface|null $billingAddress
 	 * @throws \Magento\Framework\Exception\CouldNotSaveException
-	 * @return array
+	 * @return string
 	 */
 	public function guest(
 		$cartId,
@@ -20,11 +24,9 @@ class PlaceOrder {
 	) {
 		/** @var IGuest $iGuest */
 		$iGuest = df_o(IGuest::class);
-		/** @var int $orderId */
-		$orderId = $iGuest->savePaymentInformationAndPlaceOrder(
+		return $this->response($iGuest->savePaymentInformationAndPlaceOrder(
 			$cartId, $email, $paymentMethod, $billingAddress
-		);
-		return [$orderId];
+		));
 	}
 
 	/**
@@ -33,7 +35,7 @@ class PlaceOrder {
 	 * @param \Magento\Quote\Api\Data\PaymentInterface $paymentMethod
 	 * @param \Magento\Quote\Api\Data\AddressInterface|null $billingAddress
 	 * @throws \Magento\Framework\Exception\CouldNotSaveException
-	 * @return array
+	 * @return string
 	 */
 	public function registered(
 		$cartId,
@@ -42,11 +44,18 @@ class PlaceOrder {
 	) {
 		/** @var IRegistered $iRegistered */
 		$iRegistered = df_o(IRegistered::class);
-		/** @var int $orderId */
-		$orderId = $iRegistered->savePaymentInformationAndPlaceOrder(
+		return $this->response($iRegistered->savePaymentInformationAndPlaceOrder(
 			$cartId, $paymentMethod, $billingAddress
-		);
-		return [$orderId];
+		));
+	}
+
+	/**
+	 * 2016-05-04
+	 * @param int $orderId
+	 * @return string|null
+	 */
+	private function response($orderId) {
+		return df_order($orderId)->getPayment()->getAdditionalInformation(Method::REDIRECT_URL);
 	}
 }
 
