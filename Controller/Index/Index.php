@@ -1,10 +1,14 @@
 <?php
 namespace Dfe\CheckoutCom\Controller\Index;
+use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
 use Df\Payment\Transaction;
+use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Settings as S;
+use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment;
 class Index extends \Magento\Framework\App\Action\Action {
 	/**
 	 * 2016-05-05
@@ -32,12 +36,36 @@ class Index extends \Magento\Framework\App\Action\Action {
 	private function customerReturn($token) {
 		/** @var Transaction $transaction */
 		$transaction = Transaction::s($token);
+		/** @var Order $order */
+		$order = $transaction->order();
+		/** @var Payment|DfPayment $payment */
+		$payment = $transaction->payment();
 		/** @var ChargeService $api */
-		$api = S::s()->apiCharge($transaction->order()->getStore());
+		$api = S::s()->apiCharge($order->getStore());
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
 		if ('Authorized' === $charge->getStatus()) {
-			$result = null;
+			/** @var Card $card */
+			$card = $charge->getCard();
+			/**
+			 * 2016-05-02
+			 * https://mage2.pro/t/941
+			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+			 */
+			$payment->setCcLast4($card->getLast4());
+			// 2016-05-02
+			$payment->setCcType($card->getPaymentMethod());
+			/**
+			 * 2016-03-15
+			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 * Транзакция ситается завершённой, если явно не указать «false».
+			 */
+			$payment->setIsTransactionClosed('Y' === $charge->getAutoCapture());
+			$order->setState(Order::STATE_PROCESSING);
+			$order->save();
+			$result = $this->_redirect('checkout/onepage/success');
 		}
 		/**
 		 * 2016-05-06
@@ -58,7 +86,6 @@ class Index extends \Magento\Framework\App\Action\Action {
 			 */
 			$result = $this->_redirect('checkout', ['_fragment' => 'payment']);
 		}
-		xdebug_break();
 		return $result;
 	}
 

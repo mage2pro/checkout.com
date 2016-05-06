@@ -352,8 +352,6 @@ class Method extends \Df\Payment\Method {
 				$this->api()->CaptureCardCharge($capture);
 			}
 			else {
-				/** @var \Magento\Sales\Model\Order $order */
-				$order = $payment->getOrder();
 				/**
 				 * 2016-04-23
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
@@ -372,6 +370,8 @@ class Method extends \Df\Payment\Method {
 				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 				 */
 				$payment->setTransactionId($response->getId());
+				/** @var \Magento\Sales\Model\Order $order */
+				$order = $payment->getOrder();
 				/**
 				 * 2016-05-03
 				 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
@@ -389,6 +389,7 @@ class Method extends \Df\Payment\Method {
 				if ($redirectUrl) {
 					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
 					$payment->setIsTransactionClosed(false);
+					$order->setState(Order::STATE_NEW);
 				}
 				else if ('Authorised' === $response->getStatus()) {
 					/** @var Card $card */
