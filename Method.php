@@ -81,12 +81,22 @@ class Method extends \Df\Payment\Method {
 	public function canRefundPartialPerInvoice() {return true;}
 
 	/**
-	 * 2016-03-15
+	 * 2016-05-06
+	 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
+	 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
+	 *
+	 * 2016-05-06
+	 * Наличие ключа @uses \Dfe\CheckoutCom\Method::REDIRECT_URL означает,
+	 * что покупатель не прошёл ещё проверку 3D-Secure.
+	 * В этом случае кнопки «Accept Payment» and «Deny Payment» в административной части
+	 * точно смысла не имеют.
+	 * https://mage2.pro/t/935
+	 *
 	 * @override
 	 * @see \Df\Payment\Method::canReviewPayment()
 	 * @return bool
 	 */
-	public function canReviewPayment() {return true;}
+	public function canReviewPayment() {return !$this->iia(self::REDIRECT_URL);}
 
 	/**
 	 * 2016-03-15

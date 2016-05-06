@@ -42,6 +42,14 @@ class Index extends \Magento\Framework\App\Action\Action {
 		$order = $transaction->order();
 		/** @var Payment|DfPayment $payment */
 		$payment = $transaction->payment();
+		/**
+		 * 2016-05-07
+		 * Удаляем @uses \Dfe\CheckoutCom\Method::REDIRECT_URL,
+		 * чтобы кнопки «Accept Payment» and «Deny Payment» в административной части
+		 * стали при необходимости доступными.
+		 * @see \Dfe\CheckoutCom\Method::canReviewPayment()
+		 */
+		$payment->unsAdditionalInformation(Method::REDIRECT_URL);
 		/** @var ChargeService $api */
 		$api = S::s()->apiCharge($order->getStore());
 		/** @var Charge $charge */
