@@ -7,6 +7,7 @@ use Df\Payment\Transaction;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Settings as S;
+use Dfe\CheckoutCom\Source\Action;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 class Index extends \Magento\Framework\App\Action\Action {
@@ -44,7 +45,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 		$api = S::s()->apiCharge($order->getStore());
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
-		if ('Authorized' === $charge->getStatus()) {
+		if ('Authorised' === $charge->getStatus()) {
 			/** @var Card $card */
 			$card = $charge->getCard();
 			/**
@@ -63,7 +64,23 @@ class Index extends \Magento\Framework\App\Action\Action {
 			 * Транзакция ситается завершённой, если явно не указать «false».
 			 */
 			$payment->setIsTransactionClosed('Y' === $charge->getAutoCapture());
-			$order->setState(Order::STATE_PROCESSING);
+			/**
+			 * 2016-05-06
+			 * По аналогии с https://github.com/magento/magento2/blob/135f967/app/code/Magento/Braintree/Gateway/Response/CardDetailsHandler.php#L76-L76
+			 */
+			$payment->setAdditionalInformation('cc_number', 'xxxx-' . $card->getLast4());
+			$payment->setAdditionalInformation('cc_type', $card->getPaymentMethod());
+			/** @var \Dfe\CheckoutCom\Method $method */
+			$method = $payment->getMethodInstance();
+			$order->setState(
+				Action::REVIEW === $method->getConfigPaymentAction()
+				? Order::STATE_PAYMENT_REVIEW
+				: Order::STATE_PROCESSING
+			);
+			/**
+			 * 2016-05-06
+			 * Надо ещё отправить письмо-оповещение о заказе.
+			 */
 			$order->save();
 			$result = $this->_redirect('checkout/onepage/success');
 		}
@@ -78,7 +95,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 			 * Идентично:
 			 * df_checkout_session()->getLastRealOrder()->cancel()->save();
 			 */
-			$transaction->order()->cancel()->save();
+			$order->cancel()->save();
 			df_checkout_session()->restoreQuote();
 			/**
 			 * 2016-05-06

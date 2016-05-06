@@ -13,6 +13,11 @@ class Action extends \Df\Config\SourceT {
 		return [
 			M::ACTION_AUTHORIZE => 'Authorize'
 			, M::ACTION_AUTHORIZE_CAPTURE => 'Capture'
+			/**
+			 * 2016-05-06
+			 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
+			 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
+			 */
 			, self::REVIEW => 'Review'
 		];
 	}

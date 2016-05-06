@@ -262,7 +262,9 @@ class Charge extends \Df\Core\O {
 			$result = new CPhone;
 			try {
 				/** @var ParsedPhone $parsedPhone */
-			    $parsedPhone = $phoneParser->parse($a->getTelephone(), $a->getCountryId());
+			    $parsedPhone = $phoneParser->parse(
+					$this->address()->getTelephone(), $this->address()->getCountryId()
+				);
 				/**
 				 * 2016-04-23
 				 * «Contact phone number for the card holder.

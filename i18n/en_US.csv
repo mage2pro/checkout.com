@@ -1,15 +1,15 @@
-"cc_type","Credit Card Type"
-"cc_number","Credit Card Number"
 "avsPostalCodeResponseCode","AVS Postal Code Response Code"
 "avsStreetAddressResponseCode","AVS Street Address Response Code"
+"cc_number","Credit Card Number"
+"cc_type","Credit Card Type"
 "cvvResponseCode","CVV Response Code"
+"liabilityShifted", "Liability Shifted"
+"liabilityShiftPossible", "Liability Shift Possible"
+"payerEmail", "Payer Email"
+"paymentId", "Payment Id"
 "processorAuthorizationCode","Processor Authorization Code"
 "processorResponseCode","Processor Response Code"
 "processorResponseText","Processor Response Text"
-"braintree", "Braintree"
-"liabilityShifted", "Liability Shifted"
-"liabilityShiftPossible", "Liability Shift Possible"
+"riskDataDecision", "Risk Decision"
 "riskDataId", "Risk ID"
-"riskDataDecision", "Risk Decision",
-"paymentId", "Payment Id",
-"payerEmail", "Payer Email",
+

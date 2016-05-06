@@ -146,6 +146,10 @@ class Method extends \Df\Payment\Method {
 	public function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
 
 	/**
+	 * 2016-05-06
+	 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
+	 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
+	 *
 	 * 2016-03-15
 	 * @override
 	 * @see \Df\Payment\Method::initialize()
@@ -389,7 +393,27 @@ class Method extends \Df\Payment\Method {
 				if ($redirectUrl) {
 					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
 					$payment->setIsTransactionClosed(false);
-					$order->setState(Order::STATE_NEW);
+					/**
+					 * 2016-05-06
+					 * Не получается здесь явно устанавливать состояние заказа вызовом
+					 * $order->setState(Order::STATE_NEW);
+					 * потому что это состояние перетрётся:
+					 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
+					 *
+					 * Поэтому поступаем иначе.
+					 * Флаг IsTransactionPending будет считан в том же методе
+					 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
+					 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+					 */
+					$payment->setIsTransactionPending(true);
+					/**
+					 * 2016-05-06
+					 * Письмо-оповещение о заказе здесь ещё не должно отправляться.
+					 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
+					 */
+					$order->setCanSendNewEmailFlag(false);
 				}
 				else if ('Authorised' === $response->getStatus()) {
 					/** @var Card $card */
