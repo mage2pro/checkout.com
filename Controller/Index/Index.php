@@ -48,6 +48,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 		 * чтобы кнопки «Accept Payment» and «Deny Payment» в административной части
 		 * стали при необходимости доступными.
 		 * @see \Dfe\CheckoutCom\Method::canReviewPayment()
+		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/2993e11/Method.php#L99
 		 */
 		$payment->unsAdditionalInformation(Method::REDIRECT_URL);
 		/** @var ChargeService $api */
