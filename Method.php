@@ -472,7 +472,7 @@ class Method extends \Df\Payment\Method {
 	 * 2016-02-29
 	 * @used-by Dfe/Stripe/etc/frontend/di.xml
 	 * @used-by \Dfe\CheckoutCom\ConfigProvider::getConfig()
-	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fc9f731/etc/di.xml#L9
+	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */
 	const CODE = 'dfe_checkout_com';
 
