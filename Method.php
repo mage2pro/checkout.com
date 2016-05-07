@@ -371,19 +371,9 @@ class Method extends \Df\Payment\Method {
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
 				 */
 				/** @var ChargeResponse $response */
-				//xdebug_break();
 			    $response = $this->api()->chargeWithCardToken(Charge::build(
 					$payment, $this->iia(self::$TOKEN), $amount, $capture
 				));
-				/**
-				 * 2016-05-02
-				 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
-				 * «How is a payment authorization voiding implemented?»
-				 * https://mage2.pro/t/938
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-				 */
-				$payment->setTransactionId($response->getId());
 				/** @var \Magento\Sales\Model\Order $order */
 				$order = $payment->getOrder();
 				/**
@@ -401,6 +391,17 @@ class Method extends \Df\Payment\Method {
 				 */
 				$redirectUrl = dfa(df_json_decode($response->json), 'redirectUrl');
 				if ($redirectUrl) {
+					/**
+					 * 2016-05-07
+					 * В случае необходимости проверки 3D-Secure
+					 * $response->getId() вернёт не идентификатор charge, а токен.
+					 * Транзакцию пока не создаём, т.е.
+					 * $payment->setTransactionId($response->getId());
+					 * не вызываем.
+					 *
+					 * Вместо создания транзации запоминаем идентификатор платежа в udf1:
+					 * @see
+					 */
 					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
 					$payment->setIsTransactionClosed(false);
 					/**
@@ -426,6 +427,15 @@ class Method extends \Df\Payment\Method {
 					$order->setCanSendNewEmailFlag(false);
 				}
 				else if ('Authorised' === $response->getStatus()) {
+					/**
+					 * 2016-05-02
+					 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
+					 * «How is a payment authorization voiding implemented?»
+					 * https://mage2.pro/t/938
+					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+					 */
+					$payment->setTransactionId($response->getId());
 					/** @var Card $card */
 					$card = $response->getCard();
 					/**
@@ -445,7 +455,6 @@ class Method extends \Df\Payment\Method {
 					 */
 					$payment->setIsTransactionClosed($capture);
 				}
-				//xdebug_break();
 			}
 		});
 		return $this;
