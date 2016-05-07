@@ -14,6 +14,7 @@ use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
+use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Creditmemo;
@@ -21,21 +22,6 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
-	/**
-	 * 2016-03-15
-	 * @override
-	 * @see \Df\Payment\Method::acceptPayment()
-	 * @param II|I|OP $payment
-	 * @return bool
-	 */
-	public function acceptPayment(II $payment) {
-		// 2016-03-15
-		// Напрашивающееся $this->charge($payment) не совсем верно:
-		// тогда не будет создан invoice.
-		$payment->capture();
-		return true;
-	}
-
 	/**
 	 * 2016-03-07
 	 * @override
@@ -81,22 +67,15 @@ class Method extends \Df\Payment\Method {
 	public function canRefundPartialPerInvoice() {return true;}
 
 	/**
-	 * 2016-05-06
-	 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
-	 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
-	 *
-	 * 2016-05-06
-	 * Наличие ключа @uses \Dfe\CheckoutCom\Method::REDIRECT_URL означает,
-	 * что покупатель не прошёл ещё проверку 3D-Secure.
-	 * В этом случае кнопки «Accept Payment» and «Deny Payment» в административной части
-	 * точно смысла не имеют.
-	 * https://mage2.pro/t/935
-	 *
+	 * 2016-05-08
+	 * Режим review убрал, потому что мы ни как не можем повлиять на решение платёжного шлюза
+	 * использовать проверку 3D-Secure,
+	 * а администратор, разумеется, не сможет пройти проверку 3D-Secure за клиента.
 	 * @override
 	 * @see \Df\Payment\Method::canReviewPayment()
 	 * @return bool
 	 */
-	public function canReviewPayment() {return !$this->iia(self::REDIRECT_URL);}
+	public function canReviewPayment() {return false;}
 
 	/**
 	 * 2016-03-15
@@ -129,31 +108,20 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-03-15
-	 * @override
-	 * @see \Df\Payment\Method::denyPayment()
-	 * @param II|I|OP $payment
-	 * @return bool
-	 */
-	public function denyPayment(II $payment) {return true;}
-
-	/**
-	 * 2016-05-07
-	 * Сюда мы попадаем только из метода @used-by \Magento\Sales\Model\Order\Payment::place()
-	 * причём там наш метод вызывается сразу из двух мест и по-разному.
 	 * @override
 	 * @see \Df\Payment\Method::getConfigPaymentAction()
 	 * @return string
+	 *
+	 * 2016-05-07
+	 * Сюда мы попадаем только из метода @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * причём там наш метод вызывается сразу из двух мест и по-разному.
+	 *
+	 * 2016-05-08
+	 * При необходимости проверки 3D-Secure возвращаем null.
+	 * @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
 	 */
-	public function getConfigPaymentAction() {
-		/** @var OP $payment */
-		$payment = $this->ii();
-		/** @var O $order */
-		$order = $this->o();
-		/** @var string $action */
-		$action = parent::getConfigPaymentAction();
-		return $this->isTheCustomerNew() ? S::s()->actionForNew() : S::s()->actionForReturned();
-	}
+	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->action();}
 
 	/**
 	 * 2016-03-15
@@ -162,35 +130,6 @@ class Method extends \Df\Payment\Method {
 	 * @return string
 	 */
 	public function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
-
-	/**
-	 * 2016-05-06
-	 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
-	 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
-	 *
-	 * 2016-03-15
-	 * @override
-	 * @see \Df\Payment\Method::initialize()
-	 * @param string $paymentAction
-	 * @param object $stateObject
-	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L2336-L346
-	 * @see \Magento\Sales\Model\Order::isPaymentReview()
-	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order.php#L821-L832
-	 * @return $this
-	 */
-	public function initialize($paymentAction, $stateObject) {
-		$stateObject['state'] = O::STATE_PAYMENT_REVIEW;
-		return $this;
-	}
-
-	/**
-	 * 2016-03-15
-	 * @override
-	 * @see \Df\Payment\Method::isInitializeNeeded()
-	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L2336-L346
-	 * @return bool
-	 */
-	public function isInitializeNeeded() {return Action::REVIEW === $this->getConfigPaymentAction();}
 
 	/**
 	 * 2016-03-15
@@ -206,6 +145,12 @@ class Method extends \Df\Payment\Method {
 		}
 		return $this;
 	}
+
+	/**
+	 * 2016-05-08
+	 * @param ChargeResponse $response
+	 */
+	public function responseSet(ChargeResponse $response) {$this->_response = $response;}
 
 	/**
 	 * 2016-03-08
@@ -262,6 +207,21 @@ class Method extends \Df\Payment\Method {
 	 * @return string[]
 	 */
 	protected function iiaKeys() {return [self::$TOKEN];}
+
+	/**
+	 * 2016-05-08
+	 * По аналогии с @see \Magento\Sales\Model\Order\Payment::processAction()
+	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L414
+	 * и @see \Magento\Sales\Model\Order\Payment\Operations\AuthorizeOperation::authorize()
+	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/AuthorizeOperation.php#L36-L36
+	 * @return float
+	 */
+	private function _amount() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = $this->ii()->formatAmount($this->o()->getBaseTotalDue(), true);
+		}
+		return $this->{__METHOD__};
+	}
 
 	/**
 	 * 2016-03-17
@@ -331,6 +291,19 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
+	 * 2016-05-08
+	 * @return string
+	 */
+	private function action() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} =
+				$this->isTheCustomerNew() ? S::s()->actionForNew() : S::s()->actionForReturned()
+			;
+		}
+		return $this->{__METHOD__};
+	}
+
+	/**
 	 * 2016-04-21
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
@@ -350,10 +323,10 @@ class Method extends \Df\Payment\Method {
 	 * @throws \Stripe\Error\Card
 	 */
 	private function charge(II $payment, $amount = null, $capture = true) {
-		self::leh(function() use($payment, $amount, $capture) {
-			/** @var Transaction|false|null $auth */
-			$auth = !$capture ? null : $payment->getAuthorizationTransaction();
-			if ($auth) {
+		/** @var Transaction|false|null $auth */
+		$auth = !$capture ? null : $payment->getAuthorizationTransaction();
+		if ($auth) {
+			self::leh(function() use($auth, $payment, $amount, $capture) {
 				/**
 				 * 2016-05-03
 				 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
@@ -372,117 +345,52 @@ class Method extends \Df\Payment\Method {
 				 */
 				$capture->setValue(self::amount($payment, $amount));
 				$this->api()->CaptureCardCharge($capture);
-			}
-			else {
-				/**
-				 * 2016-04-23
-				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
-				 */
-				/** @var ChargeResponse $response */
-			    $response = $this->api()->chargeWithCardToken(Charge::build(
-					$payment, $this->iia(self::$TOKEN), $amount, $capture
-				));
-				/** @var \Magento\Sales\Model\Order $order */
-				$order = $payment->getOrder();
-				/**
-				 * 2016-05-03
-				 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
-				 * Пример ответа сервера в случае необъодимости проверки 3D-Secure:
-					{
-						"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
-						"liveMode": false,
-						"chargeMode": 2,
-						"responseCode": "10000",
-						"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
-					}
-				 * @var string|null $redirectUrl
-				 */
-				$redirectUrl = dfa(df_json_decode($response->json), 'redirectUrl');
-				if ($redirectUrl) {
-					/**
-					 * 2016-05-07
-					 * В случае необходимости проверки 3D-Secure
-					 * $response->getId() вернёт не идентификатор charge, а токен.
-					 * Транзакцию пока не создаём, т.е.
-					 * $payment->setTransactionId($response->getId());
-					 * не вызываем.
-					 *
-					 * Вместо создания транзации запоминаем идентификатор платежа в udf1:
-					 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
-					 * @see \Dfe\CheckoutCom\Charge::_build()
-					 *
-					 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
-					 */
-					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
-					$payment->setIsTransactionClosed(false);
-					/**
-					 * 2016-05-06
-					 * Не получается здесь явно устанавливать состояние заказа вызовом
-					 * $order->setState(Order::STATE_NEW);
-					 * потому что это состояние перетрётся:
-					 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
-					 *
-					 * Поэтому поступаем иначе.
-					 * Флаг IsTransactionPending будет считан в том же методе
-					 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-					 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-					 */
-					$payment->setIsTransactionPending(true);
-					/**
-					 * 2016-05-06
-					 * Письмо-оповещение о заказе здесь ещё не должно отправляться.
-					 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
-					 */
-					$order->setCanSendNewEmailFlag(false);
-				}
-				else if ('Authorised' === $response->getStatus()) {
-					/**
-					 * 2016-05-02
-					 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
-					 * «How is a payment authorization voiding implemented?»
-					 * https://mage2.pro/t/938
-					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-					 */
-					$payment->setTransactionId($response->getId());
-					/** @var Card $card */
-					$card = $response->getCard();
-					/**
-					 * 2016-05-02
-					 * https://mage2.pro/t/941
-					 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-					 */
-					$payment->setCcLast4($card->getLast4());
-					// 2016-05-02
-					$payment->setCcType($card->getPaymentMethod());
-					/**
-					 * 2016-03-15
-					 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
-					 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-					 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-					 * Транзакция ситается завершённой, если явно не указать «false».
-					 */
-					$payment->setIsTransactionClosed($capture);
-				}
-			}
-		});
+			});
+		}
+		else {
+			/**
+			 * 2016-04-23
+			 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
+			 */
+			/** @var ChargeResponse $response */
+		    $response = $this->response();
+			df_assert(self::isChargeValid($response));
+			/**
+			 * 2016-05-02
+			 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
+			 * «How is a payment authorization voiding implemented?»
+			 * https://mage2.pro/t/938
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 */
+			$payment->setTransactionId($response->getId());
+			/** @var Card $card */
+			$card = $response->getCard();
+			/**
+			 * 2016-05-02
+			 * https://mage2.pro/t/941
+			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+			 */
+			$payment->setCcLast4($card->getLast4());
+			// 2016-05-02
+			$payment->setCcType($card->getPaymentMethod());
+			/**
+			 * 2016-03-15
+			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 * Транзакция ситается завершённой, если явно не указать «false».
+			 */
+			$payment->setIsTransactionClosed($capture);
+		}
 		return $this;
 	}
 
 	/**
-	 * 2016-05-07
-	 * @return ChargeResponse
+	 * 2016-05-08
+	 * @return bool
 	 */
-	private function chargeResponse() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var ChargeResponse $result */
-			$result = null;
-			$this->{__METHOD__} = $result;
-		}
-		return $this->{__METHOD__};
-	}
+	private function isCapture() {return M::ACTION_AUTHORIZE_CAPTURE === $this->action();}
 
 	/**
 	 * 2016-03-18
@@ -526,6 +434,72 @@ class Method extends \Df\Payment\Method {
 			]
 		);
 	}
+
+	/**
+	 * 2016-05-08
+	 * Пример ответа сервера в случае необъодимости проверки 3D-Secure:
+		{
+			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
+			"liveMode": false,
+			"chargeMode": 2,
+			"responseCode": "10000",
+			"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
+		}
+	 * @return string|null
+	 */
+	private function redirectUrl() {
+		if (!isset($this->{__METHOD__})) {
+			/** @var string|null $result */
+			$result = dfa(df_json_decode($this->response()->json), 'redirectUrl');
+			if ($result) {
+				/**
+				 * 2016-05-07
+				 * В случае необходимости проверки 3D-Secure
+				 * $response->getId() вернёт не идентификатор charge, а токен.
+				 * Транзакцию пока не создаём, т.е.
+				 * $payment->setTransactionId($response->getId());
+				 * не вызываем.
+				 *
+				 * Вместо создания транзации запоминаем идентификатор платежа в udf1:
+				 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
+				 * @see \Dfe\CheckoutCom\Charge::_build()
+				 *
+				 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
+				 */
+				$this->iiaSet(self::REDIRECT_URL, $result);
+				/**
+				 * 2016-05-06
+				 * Письмо-оповещение о заказе здесь ещё не должно отправляться.
+				 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
+				 */
+				$this->o()->setCanSendNewEmailFlag(false);
+			}
+			$this->{__METHOD__} = df_n_set($result);
+		}
+		return df_n_get($this->{__METHOD__});
+	}
+
+	/**
+	 * 2016-05-07
+	 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
+	 * @return ChargeResponse
+	 */
+	private function response() {
+		if (!isset($this->_response)) {$this->_response = self::leh(function() {
+			$this->api()->chargeWithCardToken(Charge::build(
+				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCapture()
+			));
+		});}
+		return $this->_response;
+	}
+
+	/**
+	 * 2016-05-08
+	 * @used-by \Dfe\CheckoutCom\Method::response()
+	 * @used-by \Dfe\CheckoutCom\Method::responseSet()
+	 * @var ChargeResponse
+	 */
+	private $_response;
 
 	/**
 	 * 2016-03-26
@@ -580,6 +554,15 @@ class Method extends \Df\Payment\Method {
 	 */
 	public static function amountReverse(II $payment, $amount) {
 		return $amount / self::amountFactor($payment);
+	}
+
+	/**
+	 * 2016-05-08
+	 * @param ChargeResponse $charge
+	 * @return bool
+	 */
+	public static function isChargeValid(ChargeResponse $charge) {
+		return 'Authorised' === $charge->getStatus();
 	}
 
 	/**

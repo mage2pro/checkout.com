@@ -9,6 +9,7 @@ use Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Settings as S;
 use Dfe\CheckoutCom\Source\Action;
+use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 class Index extends \Magento\Framework\App\Action\Action {
@@ -51,85 +52,12 @@ class Index extends \Magento\Framework\App\Action\Action {
 		$payment = df_order_payment_get($charge->getUdf1());
 		/** @var Order $order */
 		$order = df_order_by_payment($payment);
-		/**
-		 * 2016-05-07
-		 * Удаляем @uses \Dfe\CheckoutCom\Method::REDIRECT_URL,
-		 * чтобы кнопки «Accept Payment» and «Deny Payment» в административной части
-		 * стали при необходимости доступными.
-		 * @see \Dfe\CheckoutCom\Method::canReviewPayment()
-		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/2993e11/Method.php#L99
-		 */
-		$payment->unsAdditionalInformation(Method::REDIRECT_URL);
-		if ('Authorised' === $charge->getStatus()) {
-			$payment->setTransactionId($charge->getId());
-			/** @var Card $card */
-			$card = $charge->getCard();
-			/**
-			 * 2016-05-02
-			 * https://mage2.pro/t/941
-			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-			 */
-			$payment->setCcLast4($card->getLast4());
-			// 2016-05-02
-			$payment->setCcType($card->getPaymentMethod());
-			/** @var bool $isCapture */
-			$isCapture = 'Y' === $charge->getAutoCapture();
-			/**
-			 * 2016-03-15
-			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 * Транзакция ситается завершённой, если явно не указать «false».
-			 */
-			$payment->setIsTransactionClosed($isCapture);
+		if (!Method::isChargeValid($charge)) {
 			/**
 			 * 2016-05-06
-			 * По аналогии с https://github.com/magento/magento2/blob/135f967/app/code/Magento/Braintree/Gateway/Response/CardDetailsHandler.php#L76-L76
+			 * «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
+			 * https://mage2.pro/t/1525
 			 */
-			$payment->setAdditionalInformation('cc_number', 'xxxx-' . $card->getLast4());
-			$payment->setAdditionalInformation('cc_type', $card->getPaymentMethod());
-			/** @var \Dfe\CheckoutCom\Method $method */
-			$method = $payment->getMethodInstance();
-			/**
-			 * 2016-05-06
-			 * Если мы 3D-Secure отключить не сможем, то и от режима review толку нет,
-			 * потому что в административной части мы будем не в состоянии пройти проверку 3D-Secure
-			 */
-			/** @var string $state */
-			$state =
-				Action::REVIEW === $method->getConfigPaymentAction()
-				? Order::STATE_PAYMENT_REVIEW
-				: Order::STATE_PROCESSING
-			;
-			$order->setState($state);
-			$order->setStatus($order->getConfig()->getStateDefaultStatus($state));
-			if (!$isCapture) {
-
-			}
-			/** @var string $formattedAmount */
-			$formattedAmount = $order->getBaseCurrency()->formatTxt(
-				Method::amountReverse($payment, $charge->getValue())
-			);
-			/** @var string $message */
-			$message = $payment->prependMessage(__(
-				$isCapture ? 'Captured amount of %1 online' : 'Authorized amount of %1'
-				, $formattedAmount
-			));
-			$order->addStatusHistoryComment($message);
-			$order->save();
-			/**
-			 * 2016-05-06
-			 * Надо ещё отправить письмо-оповещение о заказе.
-			 */
-			df_order_send_email($order);
-			$result = $this->_redirect('checkout/onepage/success');
-		}
-		/**
-		 * 2016-05-06
-		 * «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
-		 * https://mage2.pro/t/1525
-		 */
-		else {
 			/**
 			 * 2016-05-06
 			 * Идентично:
@@ -142,6 +70,33 @@ class Index extends \Magento\Framework\App\Action\Action {
 			 * «How to redirect a customer to the checkout payment step?» https://mage2.pro/t/1523
 			 */
 			$result = $this->_redirect('checkout', ['_fragment' => 'payment']);
+		}
+		else {
+			/** @var Method $method */
+			$method = $payment->getMethodInstance();
+			/**
+			 * 2016-05-08
+			 * По аналогии с @see \Magento\Sales\Model\Order\Payment::place()
+			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L326
+			 */
+			$method->setStore($order->getStoreId());
+			$method->responseSet($charge);
+			DfPayment::processActionS(
+				$payment
+				, 'Y' === $charge->getAutoCapture()
+					? M::ACTION_AUTHORIZE_CAPTURE
+					: M::ACTION_AUTHORIZE
+				, $order
+			);
+			DfPayment::updateOrderS(
+				$payment
+				, $order
+				, Order::STATE_PROCESSING
+				, $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
+				, $isCustomerNotified = true
+			);
+			$order->save();
+			$result = $this->_redirect('checkout/onepage/success');
 		}
 		return $result;
 	}
