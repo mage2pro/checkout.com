@@ -32,6 +32,7 @@ class Charge extends \Df\Core\O {
 		 * Поэтому когда покупатель возвращается после проверки 3D-Secure,
 		 * то находим его платёж по идентификатору из udf1
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+		 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
 		 */
 		df_assert($this->payment()->getId());
 		$result->setUdf1($this->payment()->getId());

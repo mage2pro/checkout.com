@@ -12,23 +12,23 @@ use Dfe\CheckoutCom\Source\Action;
 use Exception as E;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
-use Magento\Payment\Model\Info;
-use Magento\Payment\Model\InfoInterface;
-use Magento\Sales\Model\Order;
+use Magento\Payment\Model\Info as I;
+use Magento\Payment\Model\InfoInterface as II;
+use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
+use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-15
 	 * @override
 	 * @see \Df\Payment\Method::acceptPayment()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @return bool
 	 */
-	public function acceptPayment(InfoInterface $payment) {
+	public function acceptPayment(II $payment) {
 		// 2016-03-15
 		// Напрашивающееся $this->charge($payment) не совсем верно:
 		// тогда не будет создан invoice.
@@ -40,11 +40,11 @@ class Method extends \Df\Payment\Method {
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::::authorize()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @param float $amount
 	 * @return $this
 	 */
-	public function authorize(InfoInterface $payment, $amount) {
+	public function authorize(II $payment, $amount) {
 		return $this->charge($payment, $amount, $capture = false);
 	}
 
@@ -116,12 +116,12 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L37-L37
 	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L76-L82
 	 *
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @param float $amount
 	 * @return $this
 	 * @throws \Stripe\Error\Card
 	 */
-	public function capture(InfoInterface $payment, $amount) {
+	public function capture(II $payment, $amount) {
 		if (!$payment[self::ALREADY_DONE]) {
 			$this->charge($payment, $amount);
 		}
@@ -132,18 +132,26 @@ class Method extends \Df\Payment\Method {
 	 * 2016-03-15
 	 * @override
 	 * @see \Df\Payment\Method::denyPayment()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @return bool
 	 */
-	public function denyPayment(InfoInterface $payment) {return true;}
+	public function denyPayment(II $payment) {return true;}
 
 	/**
-	 * 2016-03-15
+	 * 2016-05-07
+	 * Сюда мы попадаем только из метода @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * причём там наш метод вызывается сразу из двух мест и по-разному.
 	 * @override
 	 * @see \Df\Payment\Method::getConfigPaymentAction()
 	 * @return string
 	 */
 	public function getConfigPaymentAction() {
+		/** @var OP $payment */
+		$payment = $this->ii();
+		/** @var O $order */
+		$order = $this->o();
+		/** @var string $action */
+		$action = parent::getConfigPaymentAction();
 		return $this->isTheCustomerNew() ? S::s()->actionForNew() : S::s()->actionForReturned();
 	}
 
@@ -171,7 +179,7 @@ class Method extends \Df\Payment\Method {
 	 * @return $this
 	 */
 	public function initialize($paymentAction, $stateObject) {
-		$stateObject['state'] = Order::STATE_PAYMENT_REVIEW;
+		$stateObject['state'] = O::STATE_PAYMENT_REVIEW;
 		return $this;
 	}
 
@@ -188,11 +196,11 @@ class Method extends \Df\Payment\Method {
 	 * 2016-03-15
 	 * @override
 	 * @see \Df\Payment\Method::refund()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @param float $amount
 	 * @return $this
 	 */
-	public function refund(InfoInterface $payment, $amount) {
+	public function refund(II $payment, $amount) {
 		if (!$payment[self::ALREADY_DONE]) {
 			$this->_refund($payment, $amount);
 		}
@@ -216,10 +224,10 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#void-a-charge
 	 * @override
 	 * @see \Df\Payment\Method::void()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @return $this
 	 */
-	public function void(InfoInterface $payment) {
+	public function void(II $payment) {
 		self::leh(function() use($payment) {
 			/** @var Transaction|false|null $auth */
 			$auth = $payment->getAuthorizationTransaction();
@@ -257,11 +265,11 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-03-17
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @param float|null $amount [optional]
 	 * @return void
 	 */
-	private function _refund(InfoInterface $payment, $amount = null) {
+	private function _refund(II $payment, $amount = null) {
 		$this->api(function() use($payment, $amount) {
 			/**
 			 * 2016-03-17
@@ -335,13 +343,13 @@ class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see https://stripe.com/docs/charges
 	 * @see \Df\Payment\Method::capture()
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param II|I|OP $payment
 	 * @param float|null $amount [optional]
 	 * @param bool|null $capture [optional]
 	 * @return $this
 	 * @throws \Stripe\Error\Card
 	 */
-	private function charge(InfoInterface $payment, $amount = null, $capture = true) {
+	private function charge(II $payment, $amount = null, $capture = true) {
 		self::leh(function() use($payment, $amount, $capture) {
 			/** @var Transaction|false|null $auth */
 			$auth = !$capture ? null : $payment->getAuthorizationTransaction();
@@ -402,6 +410,8 @@ class Method extends \Df\Payment\Method {
 					 * Вместо создания транзации запоминаем идентификатор платежа в udf1:
 					 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
 					 * @see \Dfe\CheckoutCom\Charge::_build()
+					 *
+					 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
 					 */
 					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
 					$payment->setIsTransactionClosed(false);
@@ -459,6 +469,19 @@ class Method extends \Df\Payment\Method {
 			}
 		});
 		return $this;
+	}
+
+	/**
+	 * 2016-05-07
+	 * @return ChargeResponse
+	 */
+	private function chargeResponse() {
+		if (!isset($this->{__METHOD__})) {
+			/** @var ChargeResponse $result */
+			$result = null;
+			$this->{__METHOD__} = $result;
+		}
+		return $this->{__METHOD__};
 	}
 
 	/**
@@ -542,29 +565,29 @@ class Method extends \Df\Payment\Method {
 	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
 	 * Divide all other currencies into 100 units
 	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
-	 * @param $payment InfoInterface|Info|OrderPayment
+	 * @param $payment II|I|OP
 	 * @param float $amount
 	 * @return int
 	 */
-	public static function amount(InfoInterface $payment, $amount) {
+	public static function amount(II $payment, $amount) {
 		return ceil($amount * self::amountFactor($payment));
 	}
 
 	/**
-	 * @param $payment InfoInterface|Info|OrderPayment
+	 * @param $payment II|I|OP
 	 * @param int $amount
 	 * @return float
 	 */
-	public static function amountReverse(InfoInterface $payment, $amount) {
+	public static function amountReverse(II $payment, $amount) {
 		return $amount / self::amountFactor($payment);
 	}
 
 	/**
 	 * 2016-05-06
-	 * @param $payment InfoInterface|Info|OrderPayment
+	 * @param $payment II|I|OP
 	 * @return int
 	 */
-	private static function amountFactor(InfoInterface $payment) {
+	private static function amountFactor(II $payment) {
 		/** @var string[] $m1000 */
 		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
 		return in_array($payment->getOrder()->getBaseCurrencyCode(), $m1000) ? 1000 : 100;

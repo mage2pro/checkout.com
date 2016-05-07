@@ -36,23 +36,8 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return \Magento\Framework\Controller\Result\Redirect
 	 */
 	private function customerReturn($token) {
-		/** @var Transaction $transaction */
-		$transaction = Transaction::s($token);
-		/** @var Order $order */
-		$order = $transaction->order();
-		/** @var Payment|DfPayment $payment */
-		$payment = $transaction->payment();
-		/**
-		 * 2016-05-07
-		 * Удаляем @uses \Dfe\CheckoutCom\Method::REDIRECT_URL,
-		 * чтобы кнопки «Accept Payment» and «Deny Payment» в административной части
-		 * стали при необходимости доступными.
-		 * @see \Dfe\CheckoutCom\Method::canReviewPayment()
-		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/2993e11/Method.php#L99
-		 */
-		$payment->unsAdditionalInformation(Method::REDIRECT_URL);
 		/** @var ChargeService $api */
-		$api = S::s()->apiCharge($order->getStore());
+		$api = S::s()->apiCharge();
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
 		/**
@@ -62,8 +47,21 @@ class Index extends \Magento\Framework\App\Action\Action {
 		 * @see \Dfe\CheckoutCom\Charge::_build()
 		 * @var int $paymentId
 		 */
-		$paymentId = $charge->getUdf1();
+		/** @var Payment|DfPayment $payment */
+		$payment = df_order_payment_get($charge->getUdf1());
+		/** @var Order $order */
+		$order = df_order_by_payment($payment);
+		/**
+		 * 2016-05-07
+		 * Удаляем @uses \Dfe\CheckoutCom\Method::REDIRECT_URL,
+		 * чтобы кнопки «Accept Payment» and «Deny Payment» в административной части
+		 * стали при необходимости доступными.
+		 * @see \Dfe\CheckoutCom\Method::canReviewPayment()
+		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/2993e11/Method.php#L99
+		 */
+		$payment->unsAdditionalInformation(Method::REDIRECT_URL);
 		if ('Authorised' === $charge->getStatus()) {
+			$payment->setTransactionId($charge->getId());
 			/** @var Card $card */
 			$card = $charge->getCard();
 			/**
@@ -105,6 +103,9 @@ class Index extends \Magento\Framework\App\Action\Action {
 			;
 			$order->setState($state);
 			$order->setStatus($order->getConfig()->getStateDefaultStatus($state));
+			if (!$isCapture) {
+
+			}
 			/** @var string $formattedAmount */
 			$formattedAmount = $order->getBaseCurrency()->formatTxt(
 				Method::amountReverse($payment, $charge->getValue())
