@@ -55,6 +55,14 @@ class Index extends \Magento\Framework\App\Action\Action {
 		$api = S::s()->apiCharge($order->getStore());
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
+		/**
+		 * 2016-05-07
+		 * В udf1 мы записывали идентификатор платежа:
+		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
+		 * @see \Dfe\CheckoutCom\Charge::_build()
+		 * @var int $paymentId
+		 */
+		$paymentId = $charge->getUdf1();
 		if ('Authorised' === $charge->getStatus()) {
 			/** @var Card $card */
 			$card = $charge->getCard();

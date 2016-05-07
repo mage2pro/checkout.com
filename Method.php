@@ -400,7 +400,8 @@ class Method extends \Df\Payment\Method {
 					 * не вызываем.
 					 *
 					 * Вместо создания транзации запоминаем идентификатор платежа в udf1:
-					 * @see
+					 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
+					 * @see \Dfe\CheckoutCom\Charge::_build()
 					 */
 					$payment->setAdditionalInformation(self::REDIRECT_URL, $redirectUrl);
 					$payment->setIsTransactionClosed(false);
