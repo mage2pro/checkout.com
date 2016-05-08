@@ -193,7 +193,8 @@ class Method extends \Df\Payment\Method {
 				 }
 				 */
 				$void->setTrackId($payment->getOrder()->getIncrementId());
-				$this->api()->voidCharge($auth->getTxnId(), $void);
+				/** @var ChargeResponse $response */
+				$response = $this->api()->voidCharge($auth->getTxnId(), $void);
 			}
 		});
 		return $this;
@@ -344,7 +345,29 @@ class Method extends \Df\Payment\Method {
 				 * http://developers.checkout.com/docs/server/api-reference/charges/capture-card-charge#request-payload-fields
 				 */
 				$capture->setValue(self::amount($payment, $amount));
-				$this->api()->CaptureCardCharge($capture);
+				/** @var ChargeResponse $response */
+				$response = $this->api()->CaptureCardCharge($capture);
+				/**
+				 * 2016-06-08
+				 * В случае успеха ответ сервера выглядит так:
+					{
+						"id": "charge_test_910FE7244E5J7A98EFFA",
+						"originalId": "charge_test_352BA7344E5Z7A98EFE5",
+						"liveMode": false,
+						"created": "2016-05-08T11:01:06Z",
+						"value": 31813,
+						"currency": "USD",
+						"trackId": "ORD-2016/05-00123",
+						"chargeMode": 2,
+						"responseMessage": "Approved",
+						"responseAdvancedInfo": "Approved",
+						"responseCode": "10000",
+						"status": "Captured",
+						"hasChargeback": "N"
+				 		...
+					}
+				 */
+				df_assert_eq('Captured', $response->getStatus());
 			});
 		}
 		else {
@@ -354,7 +377,6 @@ class Method extends \Df\Payment\Method {
 			 */
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
-			df_assert(self::isChargeValid($response));
 			/**
 			 * 2016-05-02
 			 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
@@ -364,24 +386,46 @@ class Method extends \Df\Payment\Method {
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 */
 			$payment->setTransactionId($response->getId());
-			/** @var Card $card */
-			$card = $response->getCard();
-			/**
-			 * 2016-05-02
-			 * https://mage2.pro/t/941
-			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-			 */
-			$payment->setCcLast4($card->getLast4());
-			// 2016-05-02
-			$payment->setCcType($card->getPaymentMethod());
-			/**
-			 * 2016-03-15
-			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 * Транзакция ситается завершённой, если явно не указать «false».
-			 */
-			$payment->setIsTransactionClosed($capture);
+			if (!self::isChargeValid($response)) {
+				/**
+				 * 2016-05-08
+				 * Если платёжный шлюз отклонил транзакцию,
+				 * то мы получаем ответ типа
+					{
+						"id": "charge_test_153AF6744E5J7A98E1D9",
+						"responseMessage": "40144 - Threshold Risk - Decline",
+						"responseAdvancedInfo": null,
+						"responseCode": "40144",
+						"status": "Declined",
+						"authCode": "00000"
+						...
+					}
+				 * Вот что с этим добром делать? Надо подумать...
+				 */
+				df_error(df_dump($this->responseA([
+					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
+				])));
+			}
+			else {
+				/** @var Card $card */
+				$card = $response->getCard();
+				/**
+				 * 2016-05-02
+				 * https://mage2.pro/t/941
+				 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+				 */
+				$payment->setCcLast4($card->getLast4());
+				// 2016-05-02
+				$payment->setCcType($card->getPaymentMethod());
+				/**
+				 * 2016-03-15
+				 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
+				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+				 * Транзакция ситается завершённой, если явно не указать «false».
+				 */
+				$payment->setIsTransactionClosed($capture);
+			}
 		}
 		return $this;
 	}
@@ -450,7 +494,7 @@ class Method extends \Df\Payment\Method {
 	private function redirectUrl() {
 		if (!isset($this->{__METHOD__})) {
 			/** @var string|null $result */
-			$result = dfa(df_json_decode($this->response()->json), 'redirectUrl');
+			$result = $this->responseA('redirectUrl');
 			if ($result) {
 				/**
 				 * 2016-05-07
@@ -486,11 +530,27 @@ class Method extends \Df\Payment\Method {
 	 */
 	private function response() {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {
-			$this->api()->chargeWithCardToken(Charge::build(
+			return $this->api()->chargeWithCardToken(Charge::build(
 				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCapture()
 			));
 		});}
 		return $this->_response;
+	}
+
+	/**
+	 * 2016-05-08
+	 * @param string|string[]|null $key [optional]
+	 * @return array(string => string)
+	 */
+	private function responseA($key = null) {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = df_json_decode($this->response()->json);
+		}
+		return is_null($key) ? $this->{__METHOD__} : (
+			is_array($key)
+			? df_clean(dfa_select_ordered($this->{__METHOD__}, $key))
+			: dfa($this->{__METHOD__}, $key)
+		);
 	}
 
 	/**
