@@ -23,18 +23,7 @@ class Charge extends \Df\Core\O {
 	private function _build() {
 		/** @var CardTokenChargeCreate $result */
 		$result = new CardTokenChargeCreate;
-		/**
-		 * 2016-05-07
-		 * Идентификатор платежа сохраняем на случай проверки 3D-Secure,
-		 * потому что в этом случае мы транзацию не создаём.
-		 * Мы бы рады создавать транзакцию,
-		 * но типы транзакций зашиты в системе, и новый тип создавать проблематично.
-		 * Поэтому когда покупатель возвращается после проверки 3D-Secure,
-		 * то находим его платёж по идентификатору из udf1
-		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
-		 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
-		 */
-		df_assert($this->payment()->getId());
+		df_assert($this->order()->getIncrementId());
 		$result->setUdf1($this->payment()->getId());
 		/**
 		 * 2016-04-21
@@ -44,6 +33,30 @@ class Charge extends \Df\Core\O {
 		 * 2016-05-03
 		 * Не является обязательным, но в целом приятно,
 		 * когда в графе «Track ID» значится номер заказа вместо «Unknown».
+		 *
+		 * 2016-05-08
+		 * Вот теперь «Track ID» стал нам жизненно необходим,
+		 * потому что именно по нему мы определяем, какой заказ оплачивал покупатель
+		 * после возвращения покупателя с проверки 3D-Secure.
+		 *
+		 * Предыдущей попыткой решения было
+		 * $result->setUdf1($this->payment()->getId());
+		 * однако это неправильно, потому что в момент размещения заказа
+		 * ни заказ, ни платёж ещё не сохранены в БД,
+		 * в то же время increment_id для заказа создаётся заранее,
+		 * именно для того, чтобы к нему можно было привязываться.
+		 *
+		 * Ещё более ранней попыткой решения проблемы было создание транзакции.
+		 * однако типы транзакций зашиты в системе, и новый тип создавать проблематично.
+		 *
+		 * 2016-05-08 (дополнение)
+		 * Ещё глубже проникнув в проблему, я понял, что привязка charge к заказу
+		 * всё-таки не является обязательной:
+		 * ведь и размещение заказа, и провека 3D-Secure
+		 * происходят в контексте сессии покупателя,
+		 * и мы можем получить последний размещённый покупателем заказ
+		 * простым вызовом @see \Magento\Checkout\Model\Session::getLastRealOrder()
+		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
 		$result->setTrackId($this->order()->getIncrementId());
 		$result->setCustomerName($this->address()->getName());

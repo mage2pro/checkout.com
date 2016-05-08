@@ -37,21 +37,39 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return \Magento\Framework\Controller\Result\Redirect
 	 */
 	private function customerReturn($token) {
-		/** @var ChargeService $api */
-		$api = S::s()->apiCharge();
-		/** @var Charge $charge */
-		$charge = $api->verifyCharge($token);
 		/**
-		 * 2016-05-07
-		 * В udf1 мы записывали идентификатор платежа:
-		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
-		 * @see \Dfe\CheckoutCom\Charge::_build()
-		 * @var int $paymentId
+		 * 2016-05-08 (дополнение)
+		 * И размещение заказа, и провека 3D-Secure
+		 * происходят в контексте сессии покупателя,
+		 * и мы можем получить последний размещённый покупателем заказ
+		 * простым вызовом @see \Magento\Checkout\Model\Session::getLastRealOrder()
+		 * How to get the last order programmatically? https://mage2.pro/t/1528
+		 *
+		 * Мы также могли получить increment_id последнего заказа вызовом $charge->getTrackId(),
+		 * а затем загрузить заказ по increment_id:
+		 * How to get an order by its increment id programmatically?
+		 * https://mage2.pro/t/topic/1561
+		 */
+		/** @var Order $order */
+		$order = df_checkout_session()->getLastRealOrder();
+		/**
+		 * 2016-05-08
+		 * Вообще говоря, у заказа может быть много платежей,
+		 * и @uses \Magento\Sales\Model\Order::getPayment()
+		 * возвращает платёж от балды: https://mage2.pro/t/1559
+		 * Однако в нашем случае непосредственно после размещения заказа и проверки 3D-Secure
+		 * платёж гарантированно только один, поэтому получаем его самым простым способом.
 		 */
 		/** @var Payment|DfPayment $payment */
-		$payment = df_order_payment_get($charge->getUdf1());
-		/** @var Order $order */
-		$order = df_order_by_payment($payment);
+		$payment = $order->getPayment();
+		/**
+		 * How to get the last order programmatically? https://mage2.pro/t/1528
+		 * How to get an order programmatically? https://mage2.pro/t/1562
+		 */
+		/** @var ChargeService $api */
+		$api = S::s()->apiCharge($order->getStore());
+		/** @var Charge $charge */
+		$charge = $api->verifyCharge($token);
 		if (!Method::isChargeValid($charge)) {
 			/**
 			 * 2016-05-06
