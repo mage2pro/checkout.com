@@ -11,6 +11,7 @@ class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMapper {
 	public function requestPayloadConverter($requestModel = null) {
 		/** @var array(string => mixed) $result */
 		$result = parent::requestPayloadConverter($requestModel);
+		$requestModel = $requestModel ?: $this->getRequestModel();
 		if ($requestModel instanceof CardTokenChargeCreate) {
 			/** @var string|null $descriptor */
 			$descriptor = $requestModel->getDescriptorDf();
