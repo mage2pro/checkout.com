@@ -24,6 +24,23 @@ use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
 	/**
+	 * 2016-05-09
+	 * Состояние «Flagged» равноценно состоянию «Authorised»:
+	 * можно выполнить либо capture, либо void.
+	 * @override
+	 * @see \Df\Payment\Method::acceptPayment()
+	 * @param II|I|OP $payment
+	 * @return bool
+	 */
+	public function acceptPayment(II $payment) {
+		// 2016-03-15
+		// Напрашивающееся $this->charge($payment) не совсем верно:
+		// тогда не будет создан invoice.
+		$payment->capture();
+		return true;
+	}
+
+	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::::authorize()
@@ -72,11 +89,19 @@ class Method extends \Df\Payment\Method {
 	 * Режим review убрал, потому что мы ни как не можем повлиять на решение платёжного шлюза
 	 * использовать проверку 3D-Secure,
 	 * а администратор, разумеется, не сможет пройти проверку 3D-Secure за клиента.
+	 *
+	 * 2016-05-09
+	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
+	 * то параметр autoCapture шлюзом игнорируется,
+	 * и нужно отдельно проводить транзакцию capture.
+	 * https://mage2.pro/t/1565
+	 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
+	 *
 	 * @override
 	 * @see \Df\Payment\Method::canReviewPayment()
 	 * @return bool
 	 */
-	public function canReviewPayment() {return false;}
+	public function canReviewPayment() {return true;}
 
 	/**
 	 * 2016-03-15
@@ -107,6 +132,17 @@ class Method extends \Df\Payment\Method {
 		}
 		return $this;
 	}
+
+	/**
+	 * 2016-05-09
+	 * Состояние «Flagged» равноценно состоянию «Authorised»:
+	 * можно выполнить либо capture, либо void.
+	 * @override
+	 * @see \Df\Payment\Method::denyPayment()
+	 * @param II|I|OP  $payment
+	 * @return bool
+	 */
+	public function denyPayment(II $payment) {return $this->void($payment);}
 
 	/**
 	 * @override
@@ -281,13 +317,19 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
+	 * 2016-05-09
+	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
+	 * то параметр autoCapture шлюзом игнорируется,
+	 * и нужно отдельно проводить транзакцию capture.
+	 * https://mage2.pro/t/1565
+	 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
 	 * @return string
 	 */
 	private function action() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
+			$this->{__METHOD__} = $this->isChargeFlagged() ? M::ACTION_AUTHORIZE : (
 				$this->isTheCustomerNew() ? S::s()->actionForNew() : S::s()->actionForReturned()
-			;
+			);
 		}
 		return $this->{__METHOD__};
 	}
@@ -427,6 +469,21 @@ class Method extends \Df\Payment\Method {
 				 * Транзакция ситается завершённой, если явно не указать «false».
 				 */
 				$payment->setIsTransactionClosed($capture);
+				/**
+				 * 2016-05-06
+				 * Не получается здесь явно устанавливать состояние заказа вызовом
+				 * $order->setState(O::STATE_PAYMENT_REVIEW);
+				 * потому что это состояние перетрётся:
+				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
+				 *
+				 * Поэтому поступаем иначе.
+				 * Флаг IsTransactionPending будет считан в том же методе
+				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
+				 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+				 */
+				$payment->setIsTransactionPending($this->isChargeFlagged());
 			}
 		}
 		return $this;
@@ -437,6 +494,23 @@ class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	private function isCapture() {return M::ACTION_AUTHORIZE_CAPTURE === $this->action();}
+
+	/**
+	 * 2016-05-09
+	 * «[Checkout.com] - What is a «Flagged» transaction?» https://mage2.pro/t/1565
+		{
+			"id": "charge_test_253DB7144E5Z7A98EED4",
+			"responseMessage": "40142 - Threshold Risk",
+			"responseAdvancedInfo": "",
+			"responseCode": "10100",
+			"status": "Flagged",
+			"authCode": "188986"
+		}
+	 * @return bool
+	 */
+	private function isChargeFlagged() {
+		return self::$S__FLAGGED === $this->response()->getStatus();
+	}
 
 	/**
 	 * 2016-05-08
@@ -544,6 +618,21 @@ class Method extends \Df\Payment\Method {
 	const REDIRECT_URL = 'dfe_redirect_url';
 
 	/**
+	 * 2016-05-09
+	 * «[Checkout.com] - What is a «Flagged» transaction?» https://mage2.pro/t/1565
+		{
+			"id": "charge_test_253DB7144E5Z7A98EED4",
+			"responseMessage": "40142 - Threshold Risk",
+			"responseAdvancedInfo": "",
+			"responseCode": "10100",
+			"status": "Flagged",
+			"authCode": "188986"
+		}
+	 * @var string
+	 */
+	private static $S__FLAGGED = 'Flagged';
+
+	/**
 	 * 2016-03-06
 	 * @var string
 	 */
@@ -591,7 +680,7 @@ class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	public static function isChargeValid(ChargeResponse $charge) {
-		return in_array($charge->getStatus(), ['Authorised', 'Flagged']);
+		return in_array($charge->getStatus(), ['Authorised', self::$S__FLAGGED]);
 	}
 
 	/**

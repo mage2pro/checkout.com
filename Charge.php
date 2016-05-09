@@ -86,8 +86,7 @@ class Charge extends \Df\Core\O {
 		 * то параметр autoCapture шлюзом игнорируется,
 		 * и нужно отдельно проводить транзакцию capture.
 		 * https://mage2.pro/t/1565
-		 *
-		 * Есть мысль проводить для транзакций Flagged процедуру Review
+		 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
 		 */
 		$result->setAutoCapture($this->needCapture() ? 'Y' : 'N');
 		/**
