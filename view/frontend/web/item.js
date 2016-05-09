@@ -273,7 +273,6 @@ define ([
 					.fail(function() {self.isPlaceOrderActionAllowed(true);})
 					.done(
 						function(redirectUrl) {
-							debugger;
 							self.afterPlaceOrder();
 							/**
 							 * 2016-05-04
@@ -281,7 +280,16 @@ define ([
 							 * Сделано по аналогии с redirectOnSuccessAction.execute()
 							 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
 							 */
-							if (redirectUrl) {
+							debugger;
+							/**
+							 * 2016-05-09
+							 * При отсутствии необходимости проверки 3D-Secure
+							 * сюда из веб-сервиса приходит пустой массив,
+							 * поэтому добавил проверку redirectUrl.length
+							 * «A Web API request returns an empty array for a null response»
+							 * https://mage2.pro/t/1569
+							 */
+							if (redirectUrl && redirectUrl.length) {
 								window.location.replace(redirectUrl);
 							}
 							else if (self.redirectAfterPlaceOrder) {

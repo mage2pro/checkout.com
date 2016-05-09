@@ -16,7 +16,7 @@ class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMapper {
 			/** @var string|null $descriptor */
 			$descriptor = $requestModel->getDescriptorDf();
 			if ($descriptor) {
-				$requestPayload['descriptor'] = $descriptor;
+				$result['descriptor'] = $descriptor;
 			}
 		}
 		return $result;
