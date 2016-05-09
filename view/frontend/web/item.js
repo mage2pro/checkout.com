@@ -279,16 +279,24 @@ define ([
 							 * Перенаправление на проверку 3D-Secure.
 							 * Сделано по аналогии с redirectOnSuccessAction.execute()
 							 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
-							 */
-							debugger;
-							/**
+							 *
 							 * 2016-05-09
 							 * При отсутствии необходимости проверки 3D-Secure
-							 * сюда из веб-сервиса приходит пустой массив,
-							 * поэтому добавил проверку redirectUrl.length
+							 * метод @see \Dfe\CheckoutCom\PlaceOrder::response() возвращает null:
+							 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
+							 * который затем конвертируется методом
+							 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
+							 * в пустой массив:
 							 * «A Web API request returns an empty array for a null response»
 							 * https://mage2.pro/t/1569
+							 *
+							 * Т.е. при отсутствии необходимости проверки 3D-Secure
+							 * значением переменной redirectUrl будет пустой массив.
+							 * Поэтому правильной проверкой является не if (redirectUrl) а if (redirectUrl.length)
+							 * На всякий случай if (redirectUrl) тоже оставил: не хочется погибать,
+							 * если ядро Magento вдруг передумает и вернёт null.
 							 */
+							debugger;
 							if (redirectUrl && redirectUrl.length) {
 								window.location.replace(redirectUrl);
 							}

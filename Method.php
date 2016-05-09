@@ -7,6 +7,7 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
+use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Settings as S;
 use Dfe\CheckoutCom\Source\Action;
 use Exception as E;
@@ -226,68 +227,33 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-03-17
-	 * @param II|I|OP $payment
+	 * @param II|I|OP|DfPayment $payment
 	 * @param float|null $amount [optional]
 	 * @return void
 	 */
 	private function _refund(II $payment, $amount = null) {
-		$this->api(function() use($payment, $amount) {
+		self::leh(function() use($payment, $amount) {
+			/** @var ChargeRefund $refund */
+			$refund = new ChargeRefund;
 			/**
-			 * 2016-03-17
-			 * Метод @uses \Magento\Sales\Model\Order\Payment::getAuthorizationTransaction()
-			 * необязательно возвращает транзакцию типа «авторизация»:
-			 * в первую очередь он стремится вернуть родительскую транзакцию:
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment/Transaction/Manager.php#L31-L47
-			 * Это как раз то, что нам нужно, ведь наш модуль может быть настроен сразу на capture,
-			 * без предварительной транзакции типа «авторизация».
+			 * 2016-05-09
+			 * Идентификатор транзакции capture
+			 * отличается от идентификатора предыдущей транзации.
+			 * Для транзации refund
+			 * нужно будет указывать именно идентификатор транзакции capture,
+			 *
+			 * Здесь вызовы $payment->getRefundTransactionId()
+			 * и $payment->getParentTransactionId()
+			 * равнозначны: они возвращают одно и то же значение.
+			 *
+			 * refund_transaction_id устанавливается здесь:
+			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 			 */
-			/** @var Transaction|false $parent */
-			$parent = $payment->getAuthorizationTransaction();
-			if ($parent) {
-				/** @var Creditmemo $cm */
-				$cm = $payment->getCreditmemo();
-				/**
-				 * 2016-03-24
-				 * Credit Memo и Invoice отсутствуют в сценарии Authorize / Capture
-				 * и присутствуют в сценарии Capture / Refund.
-				 */
-				if (!$cm) {
-					$metadata = [];
-				}
-				else {
-					/** @var Invoice $invoice */
-					$invoice = $cm->getInvoice();
-					$metadata = df_clean([
-						'Comment' => $payment->getCreditmemo()->getCustomerNote()
-						,'Credit Memo' => $cm->getIncrementId()
-						,'Invoice' => $invoice->getIncrementId()
-					])
-						+ $this->metaAdjustments($cm, 'positive')
-						+ $this->metaAdjustments($cm, 'negative')
-					;
-				}
-				// 2016-03-16
-				// https://stripe.com/docs/api#create_refund
-				\Stripe\Refund::create(df_clean([
-					// 2016-03-17
-					// https://stripe.com/docs/api#create_refund-amount
-					'amount' => !$amount ? null : self::amount($payment, $amount)
-					/**
-					 * 2016-03-18
-					 * Хитрый трюк,
-					 * который позволяет нам не ханиматься хранением идентификаторов платежей.
-					 * Система уже хранит их в виде «ch_17q00rFzKb8aMux1YsSlBIlW-capture»,
-					 * а нам нужно лишь отсечь суффиксы (Stripe не использует символ «-»).
-					 */
-					,'charge' => df_first(explode('-', $parent->getTxnId()))
-					// 2016-03-17
-					// https://stripe.com/docs/api#create_refund-metadata
-					,'metadata' => $metadata
-					// 2016-03-18
-					// https://stripe.com/docs/api#create_refund-reason
-					,'reason' => 'requested_by_customer'
-				]));
-			}
+			$refund->setChargeId($payment->getRefundTransactionId());
+			$refund->setValue(self::amount($payment, $amount));
+			/** @var ChargeResponse $response */
+			$response = $this->api()->refundCardChargeRequest($refund);
+			$payment->setTransactionId($response->getId());
 		});
 	}
 
@@ -368,6 +334,20 @@ class Method extends \Df\Payment\Method {
 					}
 				 */
 				df_assert_eq('Captured', $response->getStatus());
+				/**
+				 * 2016-05-09
+				 * Как видно из приведённого выше ответа сервера,
+				 * идентификатор транзакции capture
+				 * отличается от идентификатора предыдущей транзации.
+				 * Я так понял, что для транзации refund
+				 * нужно будет указывать именно идентификатор транзакции capture,
+				 * поэтому сохраняем его.
+				 *
+				 * При этом payment уже содержит transaction_id
+				 * вида <предыдущая транзакция>-capture,
+				 * и мы его перетираем, устанавливая свой.
+				 */
+				$payment->setTransactionId($response->getId());
 			});
 		}
 		else {
@@ -435,49 +415,6 @@ class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	private function isCapture() {return M::ACTION_AUTHORIZE_CAPTURE === $this->action();}
-
-	/**
-	 * 2016-03-18
-	 * @param Creditmemo $cm
-	 * @param string $type
-	 * @return array(string => float)
-	 */
-	private function metaAdjustments(Creditmemo $cm, $type) {
-		/** @var string $iso3Base */
-		$iso3Base = $cm->getBaseCurrencyCode();
-		/** @var string $iso3 */
-		$iso3 = $cm->getOrderCurrencyCode();
-		/** @var bool $multiCurrency */
-		$multiCurrency = $iso3Base !== $iso3;
-		/**
-		 * 2016-03-18
-		 * @uses \Magento\Sales\Api\Data\CreditmemoInterface::ADJUSTMENT_POSITIVE
-		 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Api/Data/CreditmemoInterface.php#L32-L35
-		 * @uses \Magento\Sales\Api\Data\CreditmemoInterface::ADJUSTMENT_NEGATIVE
-		 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Api/Data/CreditmemoInterface.php#L72-L75
-		 */
-		/** @var string $key */
-		$key = 'adjustment_' . $type;
-		/** @var float $a */
-		$a = $cm[$key];
-		/** @var string $label */
-		$label = ucfirst($type) . ' Adjustment';
-		return !$a ? [] : (
-			!$multiCurrency
-			? [$label => $a]
-			: [
-				"{$label} ({$iso3})" => $a
-				/**
-				 * 2016-03-18
-				 * @uses \Magento\Sales\Api\Data\CreditmemoInterface::BASE_ADJUSTMENT_POSITIVE
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Api/Data/CreditmemoInterface.php#L112-L115
-				 * @uses \Magento\Sales\Api\Data\CreditmemoInterface::BASE_ADJUSTMENT_NEGATIVE
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Api/Data/CreditmemoInterface.php#L56-L59
-				 */
-				,"{$label} ({$iso3Base})" => $cm['base_' . $key]
-			]
-		);
-	}
 
 	/**
 	 * 2016-05-08
