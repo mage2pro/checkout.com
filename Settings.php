@@ -1,6 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
-use com\checkout\ApiClient as API;
+use Dfe\CheckoutCom\Patch\ApiClient as API;
 use com\checkout\ApiServices\Charges\ChargeService;
 use Magento\Framework\App\ScopeInterface;
 class Settings extends \Df\Core\Settings {
@@ -93,6 +93,14 @@ class Settings extends \Df\Core\Settings {
 	public function secretKey($s = null) {
 		return $this->test($s) ? $this->testSecretKey($s) : $this->liveSecretKey($s);
 	}
+
+	/**
+	 * 2016-03-14
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string[]
+	 */
+	public function statement($s = null) {return $this->v(__FUNCTION__, $s);}
 
 	/**
 	 * @override

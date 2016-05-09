@@ -236,6 +236,24 @@
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
+					id='statement'
+					translate='label'
+					type='text'
+					sortOrder='13'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='1'
+				>
+					<label>Billing Descriptor</label>
+					<comment><![CDATA[An arbitrary string to be displayed on your customer's bank card statement.
+<br/>This may be up to <b>22</b> characters, may not include <b><>"'</b> characters, and will appear on your customer's statement in capital letters.
+<br/>Non-ASCII characters are automatically stripped.
+<br/><a href='https://www.checkout.com/blog/billing-descriptors/'>How To Use Billing Descriptors to Decrease Chargebacks</a>.
+]]></comment>
+					<depends><field id='enable'>1</field></depends>
+					<validate>validate-length maximum-length-22</validate>
+				</field>
+				<field
 					id='metadata'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'

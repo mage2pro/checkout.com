@@ -618,11 +618,21 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
+	 * 2016-05-09
+	 * Учёл ещё состояние Flagged: https://mage2.pro/t/1565
+		{
+			"id": "charge_test_253DB7144E5Z7A98EED4",
+			"responseMessage": "40142 - Threshold Risk",
+			"responseAdvancedInfo": "",
+			"responseCode": "10100",
+			"status": "Flagged",
+			"authCode": "188986"
+		}
 	 * @param ChargeResponse $charge
 	 * @return bool
 	 */
 	public static function isChargeValid(ChargeResponse $charge) {
-		return 'Authorised' === $charge->getStatus();
+		return in_array($charge->getStatus(), ['Authorised', 'Flagged']);
 	}
 
 	/**
