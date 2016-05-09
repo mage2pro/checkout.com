@@ -121,6 +121,14 @@ class Method extends \Df\Payment\Method {
 	 * При необходимости проверки 3D-Secure возвращаем null.
 	 * @used-by \Magento\Sales\Model\Order\Payment::place()
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
+	 *
+	 * 2016-05-09
+	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
+	 * то параметр autoCapture шлюзом игнорируется,
+	 * и нужно отдельно проводить транзакцию capture.
+	 * https://mage2.pro/t/1565
+	 *
+	 * Есть мысль проводить для транзакций Flagged процедуру Review.
 	 */
 	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->action();}
 
@@ -253,6 +261,20 @@ class Method extends \Df\Payment\Method {
 			$refund->setValue(self::amount($payment, $amount));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->refundCardChargeRequest($refund);
+			/**
+			 * 2016-05-09
+			 * В случае успеха ответ сервера выглядит так:
+				{
+					"id": "charge_test_033B66645E5K7A9812E5",
+					"originalId": "charge_test_427BB6745E5K7A9813C9",
+					"responseMessage": "Approved",
+					"responseAdvancedInfo": "Approved",
+					"responseCode": "10000",
+					"status": "Refunded",
+			 		<...>
+				}
+			 */
+			df_assert_eq('Refunded', $response->getStatus());
 			$payment->setTransactionId($response->getId());
 		});
 	}

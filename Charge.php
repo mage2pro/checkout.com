@@ -80,6 +80,14 @@ class Charge extends \Df\Core\O {
 		 * Несмотря на то, что в документации буквы 'y' и 'n' — прописные,
 		 * в примерах везде используются заглавные.
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#request-example
+		 *
+		 * 2016-05-09
+		 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
+		 * то параметр autoCapture шлюзом игнорируется,
+		 * и нужно отдельно проводить транзакцию capture.
+		 * https://mage2.pro/t/1565
+		 *
+		 * Есть мысль проводить для транзакций Flagged процедуру Review
 		 */
 		$result->setAutoCapture($this->needCapture() ? 'Y' : 'N');
 		/**
