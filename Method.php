@@ -142,7 +142,14 @@ class Method extends \Df\Payment\Method {
 	 * @param II|I|OP  $payment
 	 * @return bool
 	 */
-	public function denyPayment(II $payment) {return $this->void($payment);}
+	public function denyPayment(II $payment) {
+		/**
+		 * 2016-05-09
+		 * По аналогии с https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
+		 */
+		$payment->void(new \Magento\Framework\DataObject());
+		return true;
+	}
 
 	/**
 	 * @override
@@ -327,9 +334,32 @@ class Method extends \Df\Payment\Method {
 	 */
 	private function action() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = $this->isChargeFlagged() ? M::ACTION_AUTHORIZE : (
-				$this->isTheCustomerNew() ? S::s()->actionForNew() : S::s()->actionForReturned()
-			);
+			$this->{__METHOD__} =
+				$this->isChargeFlagged()
+				? M::ACTION_AUTHORIZE
+				: $this->actionDesired()
+			;
+		}
+		return $this->{__METHOD__};
+	}
+
+	/**
+	 * 2016-05-09
+	 * Чтобы не попасть в рекурсию, выделил этот метод из метода
+	 * @used-by \Dfe\CheckoutCom\Method::action()
+	 * Этот метод возвращает то действие, которое настроил администратор.
+	 * Однако для транзакции необязательно будет использовано именно это действие:
+	 * если платёжный шлюз пометил транзакцаю как «Flagged»,
+	 * то для транзакции будет насильно использовано действие authorize.
+	 * @return string
+	 */
+	private function actionDesired() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} =
+				$this->isTheCustomerNew()
+				? S::s()->actionForNew()
+				: S::s()->actionForReturned()
+			;
 		}
 		return $this->{__METHOD__};
 	}
@@ -469,21 +499,31 @@ class Method extends \Df\Payment\Method {
 				 * Транзакция ситается завершённой, если явно не указать «false».
 				 */
 				$payment->setIsTransactionClosed($capture);
-				/**
-				 * 2016-05-06
-				 * Не получается здесь явно устанавливать состояние заказа вызовом
-				 * $order->setState(O::STATE_PAYMENT_REVIEW);
-				 * потому что это состояние перетрётся:
-				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
-				 *
-				 * Поэтому поступаем иначе.
-				 * Флаг IsTransactionPending будет считан в том же методе
-				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-				 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-				 */
-				$payment->setIsTransactionPending($this->isChargeFlagged());
+				if ($this->isChargeFlagged()) {
+					/**
+					 * 2016-05-06
+					 * Не получается здесь явно устанавливать состояние заказа
+					 * @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+					 * вызовом $order->setState(O::STATE_PAYMENT_REVIEW);
+					 * потому что это состояние перетрётся:
+					 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
+					 *
+					 * Поэтому поступаем иначе.
+					 * Флаг IsTransactionPending будет считан в том же методе
+					 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
+					 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+					 */
+					$payment->setIsTransactionPending(true);
+					/**
+					 * 2016-05-09
+					 * How is @used-by \Magento\Sales\Model\Order\Payment.::getIsFraudDetected()
+					 * implemented and used?
+					 * https://mage2.pro/t/1574
+					 */
+					$payment->setIsFraudDetected(true);
+				}
 			}
 		}
 		return $this;
@@ -491,9 +531,15 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
+	 * Чтобы не попасть в рекурсию, использую здесь @uses \Dfe\CheckoutCom\Method::actionDesired()
+	 * вместо @see \Dfe\CheckoutCom\Method::actionDesired()
+	 * Этот метод говорит, хочет ли администратор capture.
+	 * Однако для транзакции необязательно будет использовано именно это действие:
+	 * если платёжный шлюз пометил транзакцаю как «Flagged»,
+	 * то для транзакции будет насильно использовано действие authorize.
 	 * @return bool
 	 */
-	private function isCapture() {return M::ACTION_AUTHORIZE_CAPTURE === $this->action();}
+	private function isCaptureDesired() {return M::ACTION_AUTHORIZE_CAPTURE === $this->actionDesired();}
 
 	/**
 	 * 2016-05-09
@@ -564,7 +610,7 @@ class Method extends \Df\Payment\Method {
 	private function response() {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardToken(Charge::build(
-				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCapture()
+				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
 			));
 		});}
 		return $this->_response;
