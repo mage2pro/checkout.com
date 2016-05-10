@@ -135,10 +135,16 @@ define ([
 			console.log(window.customerData);
 			console.log(checkoutData); */
 			//CheckoutKit.setPublishableKey(this.config('publishableKey'));
-			this.creditCardNumber('5436031030606378');
-			this.creditCardExpMonth(6);
-			this.creditCardExpYear(2017);
-			this.creditCardVerificationNumber(257);
+			// 2016-03-09
+			// «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?
+			/** {String|Boolean} */
+			var prefill = this.config('prefill');
+			if ($.isPlainObject(prefill)) {
+				this.creditCardNumber(prefill['number']);
+				this.creditCardExpMonth(prefill['expiration-month']);
+				this.creditCardExpYear(prefill['expiration-year']);
+				this.creditCardVerificationNumber(prefill['cvv']);
+			}
 			return this;
 		},
 		/**
@@ -246,8 +252,6 @@ define ([
 					,'expiryYear': $('[data-checkout="expiry-year"]', $form).val()
 					,cvv: $('[data-checkout="cvv"]', $form).val()
 				}, function(response) {
-					debugger;
-					console.log(response.id);
 					_this.token = response.id;
 					_this.placeOrder();
 				});
@@ -296,7 +300,6 @@ define ([
 							 * На всякий случай if (redirectUrl) тоже оставил: не хочется погибать,
 							 * если ядро Magento вдруг передумает и вернёт null.
 							 */
-							debugger;
 							if (redirectUrl && redirectUrl.length) {
 								window.location.replace(redirectUrl);
 							}

@@ -624,6 +624,7 @@ class Method extends \Df\Payment\Method {
 	private function responseA($key = null) {
 		if (!isset($this->{__METHOD__})) {
 			$this->{__METHOD__} = df_json_decode($this->response()->json);
+			df_log($this->response()->json);
 		}
 		return is_null($key) ? $this->{__METHOD__} : (
 			is_array($key)

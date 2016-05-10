@@ -16,7 +16,6 @@ class ConfigProvider implements ConfigProviderInterface {
 			,'prefill' => S::s()->prefill()
 			,'publishableKey' => S::s()->publishableKey()
 			,'isTest' => S::s()->test()
-			//,'isUS' => S::s()->isMerchantInUS()
 		]]];
 	}
 }

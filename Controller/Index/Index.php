@@ -14,6 +14,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return \Magento\Framework\Controller\Result\Redirect
 	 */
 	public function execute() {return df_leh(function(){
+		df_log(__METHOD__);
 		/** @var string|null $token */
 		$token = df_request('cko-payment-token');
 		return
@@ -43,7 +44,10 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return \Df\Framework\Controller\Result\Json
 	 */
 	private function webhook() {
-		$request = df_json_decode(@file_get_contents($this->file()));
-		return df_controller_json(Handler::p($request));
+		df_report('{date}-{time-full}.log', df_dump($_REQUEST));
+		df_log(df_dump($_REQUEST));
+		return df_controller_json('OK');
+		//$request = df_json_decode(@file_get_contents($this->file()));
+		//return df_controller_json(Handler::p($request));
 	}
 }

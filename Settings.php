@@ -1,6 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Dfe\CheckoutCom\Patch\ApiClient as API;
+use Dfe\CheckoutCom\Source\Prefill;
 use com\checkout\ApiServices\Charges\ChargeService;
 use Magento\Framework\App\ScopeInterface;
 class Settings extends \Df\Core\Settings {
@@ -72,9 +73,9 @@ class Settings extends \Df\Core\Settings {
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?»
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()
 	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string|false
+	 * @return array(string => string)|null
 	 */
-	public function prefill($s = null) {return $this->bv(__FUNCTION__, $s);}
+	public function prefill($s = null) {return Prefill::s()->config($this->v(__FUNCTION__, $s));}
 
 	/**
 	 * 2016-03-02
