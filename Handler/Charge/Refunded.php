@@ -1,15 +1,15 @@
 <?php
 namespace Dfe\CheckoutCom\Handler\Charge;
 use Dfe\CheckoutCom\Handler\Charge;
-use Dfe\CheckoutCom\Method;
 use Magento\Sales\Api\CreditmemoManagementInterface as CMI;
 use Magento\Sales\Controller\Adminhtml\Order\CreditmemoLoader;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
-// 2016-03-27
-// https://stripe.com/docs/api#event_types-charge.refunded
+// 2016-05-10
+// charge.captured
+// http://developers.checkout.com/docs/server/api-reference/webhooks
 class Refunded extends Charge {
 	/**
 	 * 2016-03-27
@@ -72,7 +72,7 @@ class Refunded extends Charge {
 	 */
 	private function invoice() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_invoice_by_transaction($this->order(), $this->id() . '-capture');
+			$this->{__METHOD__} = df_invoice_by_transaction($this->order(), $this->id());
 			df_assert($this->{__METHOD__});
 		}
 		return $this->{__METHOD__};

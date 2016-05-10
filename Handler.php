@@ -18,8 +18,8 @@ abstract class Handler extends \Df\Core\O {
 	protected function eligible() {return false;}
 
 	/**
-	 * 2016-03-25
-	 * @param string $path [optional]
+	 * 2016-05-10
+	 * @param string|null $path
 	 * @return string|array(string => mixed)
 	 */
 	protected function o($path = null) {
@@ -27,7 +27,7 @@ abstract class Handler extends \Df\Core\O {
 		// null может быть ключом массива: https://3v4l.org/hWmWC
 		if (!isset($this->{__METHOD__}[$path])) {
 			/** @var string|mixed $result */
-			$result = dfa_deep($this->_data, 'data/object');
+			$result = dfa_deep($this->_data, 'message');
 			$this->{__METHOD__}[$path] = df_n_set(is_null($path) ? $result : dfa_deep($result, $path));
 		}
 		return df_n_get($this->{__METHOD__}[$path]);
@@ -42,11 +42,14 @@ abstract class Handler extends \Df\Core\O {
 	public static function p(array $request) {
 		/** @var mixed $result */
 		try {
-			// 2016-03-18
-			// https://stripe.com/docs/api#event_object-type
-			// Пример события с обоими разделителями: «charge.dispute.funds_reinstated»
+			/**
+			 * 2016-05-10
+			 * Событий с обоими разделителями (типа «charge.dispute.funds_reinstated», как в Stripe),
+			 * у нас пока нет: http://developers.checkout.com/docs/server/api-reference/webhooks
+			 * Но код оставил таким же, как для Stripe
+			 */
 			/** @var string $suffix */
-			$suffix = df_implode_class('handler', df_explode_multiple(['.', '_'], $request['type']));
+			$suffix = df_implode_class('handler', df_explode_multiple(['.', '_'], $request['eventType']));
 			$class = df_convention(__CLASS__, $suffix, DefaultT::class);
 			/** @var Handler $i */
 			$i = df_create($class, $request);
@@ -56,12 +59,6 @@ abstract class Handler extends \Df\Core\O {
 			/**
 			 * 2016-03-27
 			 * https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
-			 * https://stripe.com/docs/webhooks#responding_to_a_webhook
-			 * «To acknowledge receipt of a webhook, your endpoint should return a 2xx HTTP status code.
-			 * Any response code outside the 2xx range
-			 * will indicate to Stripe that you did not receive the webhook.
-			 * When a webhook is not successfully received for any reason,
-			 * Stripe will continue trying to send the webhook once an hour for up to 3 days.»
 			 */
 			df_response()->setStatusCode(500);
 			if (df_is_it_my_local_pc()) {
