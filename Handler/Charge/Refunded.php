@@ -67,6 +67,10 @@ class Refunded extends Charge {
 	 * @return mixed
 	 */
 	protected function process() {
+		/**
+		 * 2016-05-11
+		 * @todo Надо ещё устанавливать присланное в запросе примечание к заказу.
+		 */
 		/** @var CreditmemoService|ICreditmemoService $cmi */
 		$cmi = df_om()->create(ICreditmemoService::class);
 		$cmi->refund($this->cm(), false);
@@ -91,7 +95,7 @@ class Refunded extends Charge {
 			/**
 			 * 2016-03-28
 			 * Важно! Иначе order загрузат payment автоматически вместо нашего,
-			 * и флаг @see \Dfe\CheckoutCom\Method::ALREADY_DONE будет утерян
+			 * и флаг @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE будет утерян
 			 */
 			$result->getOrder()->setData(Order::PAYMENT, $this->payment());
 			$this->{__METHOD__} = $result;

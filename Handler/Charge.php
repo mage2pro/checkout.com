@@ -87,7 +87,24 @@ abstract class Charge extends Handler {
 				$paymentId = df_fetch_one('sales_payment_transaction', 'payment_id', ['txn_id' => $id]);
 				if ($paymentId) {
 					$result = df_load(Payment::class, $paymentId);
-					$result->setData(Method::ALREADY_DONE, true);
+					$result[Method::WEBHOOK_CASE] = true;
+					/**
+					 * 2016-05-11
+					 * Этот идентификатор надо будет устанавливать в сценариях Webhook.
+					 * Идентификатор приходит от платёжного шлюза.
+					 * Нам надо его установить,
+					 * чтобы Magento не создавала автоматические идентификаторы типа
+					 * <идентификатор родителя>-capture
+					 *
+					 * Система норовит установить автоматический идентификатор для транзакции capture здесь:
+					 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
+					 * А потом будет использовать его здесь:
+					 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
+					 * Чтобы перехитрить систему, запоминаем нужный нам идентификатор транзакции,
+					 * а потому будем использовать его в методе @see \Dfe\CheckoutCom\Method::capture()
+					 * @used-by \Dfe\CheckoutCom\Method::capture()
+					 */
+					$result[Method::CUSTOM_TRANS_ID] =  $this->id();
 				}
 			}
 			$this->{__METHOD__}[$id] = df_n_set($result);

@@ -16,7 +16,17 @@ class Voided extends Charge {
 	 * @return void
 	 */
 	protected function process() {
-		$this->payment()->void(new \Magento\Framework\DataObject());
+		/**
+		 * 2016-05-11
+		 * Транзакция находится в состоянии «Flagged».
+		 * Нам нужно выполнить операцию Accept Payment.
+		 */
+		if ($this->order()->isPaymentReview()) {
+			$this->payment()->deny();
+		}
+		else {
+			$this->payment()->void(new \Magento\Framework\DataObject());
+		}
 		$this->order()->save();
 	}
 }

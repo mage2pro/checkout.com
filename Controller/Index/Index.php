@@ -34,7 +34,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 */
 	private function file() {
 		return df_is_it_my_local_pc()
-			? BP . '/_my/test/checkout.com/charge.captured.json'
+			? BP . '/_my/test/checkout.com/charge.voided.json'
 			: 'php://input'
 		;
 	}

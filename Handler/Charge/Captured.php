@@ -3,6 +3,7 @@ namespace Dfe\CheckoutCom\Handler\Charge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Dfe\CheckoutCom\Handler\Charge;
+use Dfe\CheckoutCom\Method;
 use Magento\Framework\DB\Transaction;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order\Invoice;
@@ -21,24 +22,54 @@ class Captured extends Charge {
 	 * How does the backend invoicing work? https://mage2.pro/t/933
 	 * @see \Dfe\CheckoutCom\Handler::_process()
 	 * @used-by \Dfe\CheckoutCom\Handler::process()
-	 * @return mixed
+	 * @return void
 	 * @throws LE
 	 */
 	protected function process() {
-		if (!$this->order()->canInvoice()) {
-			throw new LE(__('The order does not allow an invoice to be created.'));
+		/**
+		 * 2016-05-11
+		 * Транзакция находится в состоянии «Flagged».
+		 * Нам нужно выполнить операцию Accept Payment.
+		 */
+		if ($this->order()->isPaymentReview()) {
+			/**
+			 * 2016-05-11
+			 * Система норовит установить автоматический идентификатор для транзакции capture здесь:
+			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
+			 * А потом будет использовать его здесь:
+			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
+			 * Чтобы перехитрить систему, запоминаем нужный нам идентификатор транзакции,
+			 * а потому будем использовать его в методе @see \Dfe\CheckoutCom\Method::capture()
+			 */
+			$this->payment()->accept();
+			$this->order()->save();
 		}
-		$this->order()->setIsInProcess(true);
-		$this->order()->setCustomerNoteNotify(true);
-		/** @var Transaction $t */
-		$t = df_db_transaction();
-		$t->addObject($this->invoice());
-		$t->addObject($this->order());
-		$t->save();
-		/** @var InvoiceSender $sender */
-		$sender = df_o(InvoiceSender::class);
-		$sender->send($this->invoice());
-		return $this->payment()->getId();
+		/**
+		 * 2016-05-11
+		 * Транзакция находится в состоянии «Authorized».
+		 */
+		else {
+			if (!$this->order()->canInvoice()) {
+				throw new LE(__('The order does not allow an invoice to be created.'));
+			}
+			/**
+			 * 2016-05-11
+			 * @todo Надо присваивать транзации capture правильный идентификатор вместо
+			 * <идентификатор транзации authorize>-capture,
+			 * потому что иначе при пришествии оповещения о refund
+			 * мы просто не найдём нашу транзакцию capture.
+			 */
+			$this->order()->setIsInProcess(true);
+			$this->order()->setCustomerNoteNotify(true);
+			/** @var Transaction $t */
+			$t = df_db_transaction();
+			$t->addObject($this->invoice());
+			$t->addObject($this->order());
+			$t->save();
+			/** @var InvoiceSender $sender */
+			$sender = df_o(InvoiceSender::class);
+			$sender->send($this->invoice());
+		}
 	}
 
 	/**

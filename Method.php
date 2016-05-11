@@ -129,8 +129,21 @@ class Method extends \Df\Payment\Method {
 	 * @throws \Stripe\Error\Card
 	 */
 	public function capture(II $payment, $amount) {
-		if (!$payment[self::ALREADY_DONE]) {
+		if (!$payment[self::WEBHOOK_CASE]) {
 			$this->charge($payment, $amount);
+		}
+		else {
+			/**
+			 * 2016-05-11
+			 * Сценарий Webhook
+			 * Устанавливаем транзакции capture идентификатор,
+			 * пришедший от платёжного шлюза.
+			 * Нам надо его установить, чтобы Magento не создавала автоматические идентификаторы типа
+			 * <идентификатор родителя>-capture
+			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 */
+			$payment->setTransactionId($payment[self::CUSTOM_TRANS_ID]);
+			$payment->unsetData(self::CUSTOM_TRANS_ID);
 		}
 		return $this;
 	}
@@ -199,7 +212,20 @@ class Method extends \Df\Payment\Method {
 	 * @return $this
 	 */
 	public function refund(II $payment, $amount) {
-		if (!$payment[self::ALREADY_DONE]) {
+		if ($payment[self::WEBHOOK_CASE]) {
+			/**
+			 * 2016-05-11
+			 * Сценарий Webhook
+			 * Устанавливаем транзакции capture идентификатор,
+			 * пришедший от платёжного шлюза.
+			 * Нам надо его установить, чтобы Magento не создавала автоматические идентификаторы типа
+			 * <идентификатор родителя>-capture
+			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 */
+			$payment->setTransactionId($payment[self::CUSTOM_TRANS_ID]);
+			$payment->unsetData(self::CUSTOM_TRANS_ID);
+		}
+		else {
 			self::leh(function() use($payment, $amount) {
 				/** @var ChargeRefund $refund */
 				$refund = new ChargeRefund;
@@ -269,31 +295,46 @@ class Method extends \Df\Payment\Method {
 	 * @return $this
 	 */
 	public function void(II $payment) {
-		self::leh(function() use($payment) {
-			/** @var Transaction|false|null $auth */
-			$auth = $payment->getAuthorizationTransaction();
-			if ($auth) {
-				/** @var ChargeVoid $void */
-				$void = new ChargeVoid;
-				/**
-				 * 2016-05-03
-				 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
-				 * Хотя в документации сказано, что track_id не является обязательным параметром,
-				 * при пустом объекте ChargeVoid происходит сбой:
-				  {
-				 	"errorCode": "70000",
-				 	"message": "Validation error",
-				 	"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
-				 	"errorMessageCodes": ["70002"],
-				 	"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
-				 }
-				 */
-				$void->setTrackId($payment->getOrder()->getIncrementId());
-				$this->disableEvent($auth->getTxnId(), 'charge.voided');
-				/** @var ChargeResponse $response */
-				$response = $this->api()->voidCharge($auth->getTxnId(), $void);
-			}
-		});
+		if ($payment[self::WEBHOOK_CASE]) {
+			/**
+			 * 2016-05-11
+			 * Сценарий Webhook
+			 * Устанавливаем транзакции capture идентификатор,
+			 * пришедший от платёжного шлюза.
+			 * Нам надо его установить, чтобы Magento не создавала автоматические идентификаторы типа
+			 * <идентификатор родителя>-capture
+			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 */
+			$payment->setTransactionId($payment[self::CUSTOM_TRANS_ID]);
+			$payment->unsetData(self::CUSTOM_TRANS_ID);
+		}
+		else {
+			self::leh(function() use($payment) {
+				/** @var Transaction|false|null $auth */
+				$auth = $payment->getAuthorizationTransaction();
+				if ($auth) {
+					/** @var ChargeVoid $void */
+					$void = new ChargeVoid;
+					/**
+					 * 2016-05-03
+					 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
+					 * Хотя в документации сказано, что track_id не является обязательным параметром,
+					 * при пустом объекте ChargeVoid происходит сбой:
+					  {
+					 	"errorCode": "70000",
+					 	"message": "Validation error",
+					 	"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
+					 	"errorMessageCodes": ["70002"],
+					 	"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
+					 }
+					 */
+					$void->setTrackId($payment->getOrder()->getIncrementId());
+					$this->disableEvent($auth->getTxnId(), 'charge.voided');
+					/** @var ChargeResponse $response */
+					$response = $this->api()->voidCharge($auth->getTxnId(), $void);
+				}
+			});
+		}
 		return $this;
 	}
 
@@ -635,7 +676,7 @@ class Method extends \Df\Payment\Method {
 			 * хотя в ответе параметр autoCapture будет иметь значение 'Y'.
 			 */
 			/** @var string $result */
-			if ('Y' !== $response->getAutoCapture() && !$this->isChargeFlagged()) {
+			if ('Y' !== $response->getAutoCapture() || $this->isChargeFlagged()) {
 				$result = $response->getId();
 			}
 			else {
@@ -748,7 +789,7 @@ class Method extends \Df\Payment\Method {
 	 * @used-by \Dfe\CheckoutCom\Method::refund()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::payment()
 	 */
-	const ALREADY_DONE = 'dfe_already_done';
+	const WEBHOOK_CASE = 'dfe_already_done';
 
 	/**
 	 * 2016-02-29
@@ -757,6 +798,18 @@ class Method extends \Df\Payment\Method {
 	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */
 	const CODE = 'dfe_checkout_com';
+
+	/**
+	 * 2016-05-11
+	 * Этот идентификатор надо будет устанавливать в сценариях Webhook.
+	 * Идентификатор приходит от платёжного шлюза.
+	 * Нам надо его установить, чтобы Magento не создавала автоматические идентификаторы типа
+	 * <идентификатор родителя>-capture
+	 * @used-by \Dfe\CheckoutCom\Method::capture()
+	 * @used-by \Dfe\CheckoutCom\Method::refund()
+	 * @used-by Dfe\CheckoutCom\Handler\Charge::paymentByTxnId()
+	 */
+	const CUSTOM_TRANS_ID = 'dfe_transaction_id';
 
 	/**
 	 * 2016-05-11
