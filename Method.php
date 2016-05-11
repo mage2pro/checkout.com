@@ -2,10 +2,11 @@
 namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
-use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
+use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
+use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Settings as S;
@@ -185,15 +186,56 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-03-15
+	 * 2016-05-11
+	 * Оказывается, в запросе refund мы можем указывать комментарий,
+	 * а также возвращаемые товары, их цены и количества:
+	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
+	 * @todo Надо добавить поддержку этого в модуль.
 	 * @override
 	 * @see \Df\Payment\Method::refund()
-	 * @param II|I|OP $payment
+	 * @param II|I|OP|DfPayment $payment
 	 * @param float $amount
 	 * @return $this
 	 */
 	public function refund(II $payment, $amount) {
 		if (!$payment[self::ALREADY_DONE]) {
-			$this->_refund($payment, $amount);
+			self::leh(function() use($payment, $amount) {
+				/** @var ChargeRefund $refund */
+				$refund = new ChargeRefund;
+				/**
+				 * 2016-05-09
+				 * Идентификатор транзакции capture
+				 * отличается от идентификатора предыдущей транзации.
+				 * Для транзации refund
+				 * нужно будет указывать именно идентификатор транзакции capture,
+				 *
+				 * Здесь вызовы $payment->getRefundTransactionId()
+				 * и $payment->getParentTransactionId()
+				 * равнозначны: они возвращают одно и то же значение.
+				 *
+				 * refund_transaction_id устанавливается здесь:
+				 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
+				 */
+				$refund->setChargeId($payment->getRefundTransactionId());
+				$refund->setValue(self::amount($payment, $amount));
+				/** @var ChargeResponse $response */
+				$response = $this->api()->refundCardChargeRequest($refund);
+				/**
+				 * 2016-05-09
+				 * В случае успеха ответ сервера выглядит так:
+					{
+						"id": "charge_test_033B66645E5K7A9812E5",
+						"originalId": "charge_test_427BB6745E5K7A9813C9",
+						"responseMessage": "Approved",
+						"responseAdvancedInfo": "Approved",
+						"responseCode": "10000",
+						"status": "Refunded",
+				 		<...>
+					}
+				 */
+				df_assert_eq('Refunded', $response->getStatus());
+				$payment->setTransactionId($response->getId());
+			});
 		}
 		return $this;
 	}
@@ -277,52 +319,6 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-03-17
-	 * @param II|I|OP|DfPayment $payment
-	 * @param float|null $amount [optional]
-	 * @return void
-	 */
-	private function _refund(II $payment, $amount = null) {
-		self::leh(function() use($payment, $amount) {
-			/** @var ChargeRefund $refund */
-			$refund = new ChargeRefund;
-			/**
-			 * 2016-05-09
-			 * Идентификатор транзакции capture
-			 * отличается от идентификатора предыдущей транзации.
-			 * Для транзации refund
-			 * нужно будет указывать именно идентификатор транзакции capture,
-			 *
-			 * Здесь вызовы $payment->getRefundTransactionId()
-			 * и $payment->getParentTransactionId()
-			 * равнозначны: они возвращают одно и то же значение.
-			 *
-			 * refund_transaction_id устанавливается здесь:
-			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
-			 */
-			$refund->setChargeId($payment->getRefundTransactionId());
-			$refund->setValue(self::amount($payment, $amount));
-			/** @var ChargeResponse $response */
-			$response = $this->api()->refundCardChargeRequest($refund);
-			/**
-			 * 2016-05-09
-			 * В случае успеха ответ сервера выглядит так:
-				{
-					"id": "charge_test_033B66645E5K7A9812E5",
-					"originalId": "charge_test_427BB6745E5K7A9813C9",
-					"responseMessage": "Approved",
-					"responseAdvancedInfo": "Approved",
-					"responseCode": "10000",
-					"status": "Refunded",
-			 		<...>
-				}
-			 */
-			df_assert_eq('Refunded', $response->getStatus());
-			$payment->setTransactionId($response->getId());
-		});
-	}
-
-	/**
 	 * 2016-05-08
 	 * 2016-05-09
 	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
@@ -373,6 +369,73 @@ class Method extends \Df\Payment\Method {
 	private function api() {return S::s()->apiCharge();}
 
 	/**
+	 * 2016-05-11
+	 * @used-by \Dfe\CheckoutCom\Method::charge()
+	 * @param Transaction $auth
+	 * @param II|I|OP $payment
+	 * @param float|null $amount [optional]
+	 * @return void
+	 */
+	private function capturePreauthorized(Transaction $auth, II $payment, $amount = null) {
+		self::leh(function() use($auth, $payment, $amount) {
+			/**
+			 * 2016-05-03
+			 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
+			 */
+			/** @var ChargeCapture $capture */
+			$capture = new ChargeCapture;
+			$capture->setChargeId($auth->getTxnId());
+			/**
+			 * 2016-05-03
+			 * «Positive integer (without decimal separator) representing the capture amount.
+			 * Cannot exceed the authorised charge amount.
+			 * Partial captures (capture amount is less than the authorised amount) are allowed.
+			 * Only one partial capture is allowed per authorised charge.
+			 * If not specified, the default is authorisation charge amount.»
+			 * http://developers.checkout.com/docs/server/api-reference/charges/capture-card-charge#request-payload-fields
+			 */
+			$capture->setValue(self::amount($payment, $amount));
+			/** @var ChargeResponse $response */
+			$response = $this->api()->CaptureCardCharge($capture);
+			/**
+			 * 2016-06-08
+			 * В случае успеха ответ сервера выглядит так:
+				{
+					"id": "charge_test_910FE7244E5J7A98EFFA",
+					"originalId": "charge_test_352BA7344E5Z7A98EFE5",
+					"liveMode": false,
+					"created": "2016-05-08T11:01:06Z",
+					"value": 31813,
+					"currency": "USD",
+					"trackId": "ORD-2016/05-00123",
+					"chargeMode": 2,
+					"responseMessage": "Approved",
+					"responseAdvancedInfo": "Approved",
+					"responseCode": "10000",
+					"status": "Captured",
+					"hasChargeback": "N"
+			 		...
+				}
+			 */
+			df_assert_eq('Captured', $response->getStatus());
+			/**
+			 * 2016-05-09
+			 * Как видно из приведённого выше ответа сервера,
+			 * идентификатор транзакции capture
+			 * отличается от идентификатора предыдущей транзации.
+			 * Я так понял, что для транзации refund
+			 * нужно будет указывать именно идентификатор транзакции capture,
+			 * поэтому сохраняем его.
+			 *
+			 * При этом payment уже содержит transaction_id
+			 * вида <предыдущая транзакция>-capture,
+			 * и мы его перетираем, устанавливая свой.
+			 */
+			$payment->setTransactionId($response->getId());
+		});
+	}
+
+	/**
 	 * 2016-03-07
 	 * @override
 	 * @see https://stripe.com/docs/charges
@@ -387,62 +450,7 @@ class Method extends \Df\Payment\Method {
 		/** @var Transaction|false|null $auth */
 		$auth = !$capture ? null : $payment->getAuthorizationTransaction();
 		if ($auth) {
-			self::leh(function() use($auth, $payment, $amount, $capture) {
-				/**
-				 * 2016-05-03
-				 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
-				 */
-				/** @var ChargeCapture $capture */
-				$capture = new ChargeCapture;
-				$capture->setChargeId($auth->getTxnId());
-				/**
-				 * 2016-05-03
-				 * «Positive integer (without decimal separator) representing the capture amount.
-				 * Cannot exceed the authorised charge amount.
-				 * Partial captures (capture amount is less than the authorised amount) are allowed.
-				 * Only one partial capture is allowed per authorised charge.
-				 * If not specified, the default is authorisation charge amount.»
-				 * http://developers.checkout.com/docs/server/api-reference/charges/capture-card-charge#request-payload-fields
-				 */
-				$capture->setValue(self::amount($payment, $amount));
-				/** @var ChargeResponse $response */
-				$response = $this->api()->CaptureCardCharge($capture);
-				/**
-				 * 2016-06-08
-				 * В случае успеха ответ сервера выглядит так:
-					{
-						"id": "charge_test_910FE7244E5J7A98EFFA",
-						"originalId": "charge_test_352BA7344E5Z7A98EFE5",
-						"liveMode": false,
-						"created": "2016-05-08T11:01:06Z",
-						"value": 31813,
-						"currency": "USD",
-						"trackId": "ORD-2016/05-00123",
-						"chargeMode": 2,
-						"responseMessage": "Approved",
-						"responseAdvancedInfo": "Approved",
-						"responseCode": "10000",
-						"status": "Captured",
-						"hasChargeback": "N"
-				 		...
-					}
-				 */
-				df_assert_eq('Captured', $response->getStatus());
-				/**
-				 * 2016-05-09
-				 * Как видно из приведённого выше ответа сервера,
-				 * идентификатор транзакции capture
-				 * отличается от идентификатора предыдущей транзации.
-				 * Я так понял, что для транзации refund
-				 * нужно будет указывать именно идентификатор транзакции capture,
-				 * поэтому сохраняем его.
-				 *
-				 * При этом payment уже содержит transaction_id
-				 * вида <предыдущая транзакция>-capture,
-				 * и мы его перетираем, устанавливая свой.
-				 */
-				$payment->setTransactionId($response->getId());
-			});
+			$this->capturePreauthorized($auth, $payment, $amount);
 		}
 		else {
 			/**
@@ -451,15 +459,6 @@ class Method extends \Df\Payment\Method {
 			 */
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
-			/**
-			 * 2016-05-02
-			 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
-			 * «How is a payment authorization voiding implemented?»
-			 * https://mage2.pro/t/938
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 */
-			$payment->setTransactionId($response->getId());
 			if (!self::isChargeValid($response)) {
 				/**
 				 * 2016-05-08
@@ -480,50 +479,57 @@ class Method extends \Df\Payment\Method {
 					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
 				])));
 			}
-			else {
-				/** @var Card $card */
-				$card = $response->getCard();
+			/**
+			 * 2016-05-02
+			 * Иначе операция «void» (отмена авторизации платежа) будет недоступна:
+			 * «How is a payment authorization voiding implemented?»
+			 * https://mage2.pro/t/938
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 */
+			$payment->setTransactionId($this->magentoTransactionId());
+			/** @var Card $card */
+			$card = $response->getCard();
+			/**
+			 * 2016-05-02
+			 * https://mage2.pro/t/941
+			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+			 */
+			$payment->setCcLast4($card->getLast4());
+			// 2016-05-02
+			$payment->setCcType($card->getPaymentMethod());
+			/**
+			 * 2016-03-15
+			 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 * Транзакция ситается завершённой, если явно не указать «false».
+			 */
+			$payment->setIsTransactionClosed($capture);
+			if ($this->isChargeFlagged()) {
 				/**
-				 * 2016-05-02
-				 * https://mage2.pro/t/941
-				 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+				 * 2016-05-06
+				 * Не получается здесь явно устанавливать состояние заказа
+				 * @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+				 * вызовом $order->setState(O::STATE_PAYMENT_REVIEW);
+				 * потому что это состояние перетрётся:
+				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
+				 *
+				 * Поэтому поступаем иначе.
+				 * Флаг IsTransactionPending будет считан в том же методе
+				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
+				 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
 				 */
-				$payment->setCcLast4($card->getLast4());
-				// 2016-05-02
-				$payment->setCcType($card->getPaymentMethod());
+				$payment->setIsTransactionPending(true);
 				/**
-				 * 2016-03-15
-				 * Аналогично, иначе операция «void» (отмена авторизации платежа) будет недоступна:
-				 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-				 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-				 * Транзакция ситается завершённой, если явно не указать «false».
+				 * 2016-05-09
+				 * How is @used-by \Magento\Sales\Model\Order\Payment.::getIsFraudDetected()
+				 * implemented and used?
+				 * https://mage2.pro/t/1574
 				 */
-				$payment->setIsTransactionClosed($capture);
-				if ($this->isChargeFlagged()) {
-					/**
-					 * 2016-05-06
-					 * Не получается здесь явно устанавливать состояние заказа
-					 * @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-					 * вызовом $order->setState(O::STATE_PAYMENT_REVIEW);
-					 * потому что это состояние перетрётся:
-					 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
-					 *
-					 * Поэтому поступаем иначе.
-					 * Флаг IsTransactionPending будет считан в том же методе
-					 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-					 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-					 * И будет установлено состояние @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-					 */
-					$payment->setIsTransactionPending(true);
-					/**
-					 * 2016-05-09
-					 * How is @used-by \Magento\Sales\Model\Order\Payment.::getIsFraudDetected()
-					 * implemented and used?
-					 * https://mage2.pro/t/1574
-					 */
-					$payment->setIsFraudDetected(true);
-				}
+				$payment->setIsFraudDetected(true);
 			}
 		}
 		return $this;
@@ -556,6 +562,61 @@ class Method extends \Df\Payment\Method {
 	 */
 	private function isChargeFlagged() {
 		return self::$S__FLAGGED === $this->response()->getStatus();
+	}
+
+	/**
+	 * 2016-05-11
+	 * Этот метод решает описанную ниже проблему.
+	 *
+	 * 2016-05-10
+	 * Если мы проводили платёж с параметром autoCapture,
+	 * то Checkout.com на самом деле сразу проводит 2 транзации: authorize и capture.
+	 * При этом в ответе Checkout.com присылает только идентификатор транзации authorize.
+	 * А получается, что мы присваиваем этот идентификатор транзакции capture внутри Magento.
+	 *
+	 * 2016-05-11
+	 * Кстати, в документации так и сказано:
+	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
+	 * «To process a refund the merchant must send the Charge ID of the Captured transaction»
+	 * «For an Automatic Capture, the Charge Response will contain
+	 * the Charge ID of the Auth Charge. This ID cannot be used.»
+	 *
+	 * 2016-05-11
+	 * Вчера я думал, что в описанной выше ситуации (autoCapture)
+	 * мы не можем узнать идентификатор транзации capture по идентификатору транзации authorize.
+	 * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
+	 * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
+	 * «This is a quick way to view a charge status, rather than searching through webhooks»
+	 *
+	 * @return string
+	 */
+	private function magentoTransactionId() {
+		if (!isset($this->{__METHOD__})) {
+			/** @var ChargeResponse $response */
+		    $response = $this->response();
+			/** @var string $result */
+			if ('Y' !== $response->getAutoCapture()) {
+				$result = $response->getId();
+			}
+			else {
+				/** @var ChargeHistory $history */
+				$history = $this->api()->getChargeHistory($response->getId());
+				/**
+				 * 2016-05-11
+				 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
+				 * «[Checkout.com]
+				 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
+				 * sample response»
+				 * https://mage2.pro/t/1601
+				 */
+				/** @var ChargeResponse $chargeCapture */
+				$chargeCapture = df_first($history->getCharges());
+				df_assert_eq('Captured', $chargeCapture->getStatus());
+				$result = $chargeCapture->getId();
+			}
+			$this->{__METHOD__} = $result;
+		}
+		return $this->{__METHOD__};
 	}
 
 	/**

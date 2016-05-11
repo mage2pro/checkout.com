@@ -1,15 +1,48 @@
 <?php
 namespace Dfe\CheckoutCom\Handler\Charge;
+use com\checkout\ApiServices\Charges\ChargeService;
+use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler\Charge;
-use Magento\Sales\Api\CreditmemoManagementInterface as CMI;
+use Dfe\CheckoutCom\Settings as S;
+use Magento\Sales\Api\CreditmemoManagementInterface as ICreditmemoService;
 use Magento\Sales\Controller\Adminhtml\Order\CreditmemoLoader;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
-// 2016-05-10
-// charge.captured
-// http://developers.checkout.com/docs/server/api-reference/webhooks
+use Magento\Sales\Model\Service\CreditmemoService;
+/**
+ * 2016-05-10
+ * charge.refunded
+ * http://developers.checkout.com/docs/server/api-reference/webhooks
+ *
+ * Если мы проводили платёж с параметром autoCapture,
+ * то Checkout.com на самом деле сразу проводит 2 транзации: authorize и capture.
+ * При этом в ответе Checkout.com присылает только идентификатор транзации authorize.
+ * По идентификатору транзации authorize мы не можем узнать идентификатор транзакции capture.
+ * Сюда же, в событие charge.refunded, Checkout.com присылает 2 идентификатора:
+ * id: идентификатор транзакции refund
+ * originalId: идентификатор транзакции capture.
+ *
+ * 2016-05-11
+ * Кстати, в документации так и сказано:
+ * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
+ * «To process a refund the merchant must send the Charge ID of the Captured transaction»
+ * «For an Automatic Capture, the Charge Response will contain
+ * the Charge ID of the Auth Charge. This ID cannot be used.»
+ *
+ * 2016-05-11
+ * Вчера я думал, что в описанной выше ситуации (autoCapture)
+ * мы не можем узнать идентификатор транзации capture по идентификатору транзации authorize.
+ * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
+ * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
+ *
+ * 2016-05-11
+ * Всё, решил проблему самым правильным способом :-)
+ * Теперь в режиме autoCapture в Magento сохраняется идентификатор транзации capture,
+ * как и должно быть.
+ *
+ */
 class Refunded extends Charge {
 	/**
 	 * 2016-03-27
@@ -34,8 +67,8 @@ class Refunded extends Charge {
 	 * @return mixed
 	 */
 	protected function process() {
-		/** @var CMI $cmi */
-		$cmi = df_om()->create(CMI::class);
+		/** @var CreditmemoService|ICreditmemoService $cmi */
+		$cmi = df_om()->create(ICreditmemoService::class);
 		$cmi->refund($this->cm(), false);
 		// 2016-03-28
 		// @todo Надо отослать покупателю письмо-оповещение о возврате оплаты.
@@ -72,7 +105,7 @@ class Refunded extends Charge {
 	 */
 	private function invoice() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_invoice_by_transaction($this->order(), $this->id());
+			$this->{__METHOD__} = df_invoice_by_transaction($this->order(), $this->parentId());
 			df_assert($this->{__METHOD__});
 		}
 		return $this->{__METHOD__};
