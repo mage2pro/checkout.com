@@ -33,8 +33,18 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return string
 	 */
 	private function file() {
-		return df_is_it_my_local_pc() ? BP . '/_my/test/charge.refunded.json' : 'php://input';
+		return df_is_it_my_local_pc()
+			? BP . '/_my/test/checkout.com/charge.captured.json'
+			: 'php://input'
+		;
 	}
+
+	/**
+	 * 2016-05-11
+	 * @param mixed $message
+	 * @return void
+	 */
+	private function log($message) {if (!df_is_it_my_local_pc()) {df_log($message);}}
 
 	/**
 	 * 2016-05-05
@@ -43,10 +53,13 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return \Df\Framework\Controller\Result\Json
 	 */
 	private function webhook() {
-		df_log(__METHOD__);
+		$this->log(__METHOD__);
 		/** @var string $request */
 		$request = @file_get_contents($this->file());
-		df_log($request);
-		return df_controller_json(Handler::p(df_json_decode($request)));
+		$this->log($request);
+		/** @var string $response */
+		$response = Handler::p(df_json_decode($request));
+		$this->log($response);
+		return df_controller_json($response);
 	}
 }

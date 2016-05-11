@@ -41,7 +41,7 @@ use Magento\Sales\Model\Service\CreditmemoService;
  * Всё, решил проблему самым правильным способом :-)
  * Теперь в режиме autoCapture в Magento сохраняется идентификатор транзации capture,
  * как и должно быть.
- *
+ * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/3a1d36/Method.php#L593
  */
 class Refunded extends Charge {
 	/**

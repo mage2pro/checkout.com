@@ -3,8 +3,9 @@ namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
-use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
+use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
+use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
@@ -206,8 +207,8 @@ class Method extends \Df\Payment\Method {
 				 * 2016-05-09
 				 * Идентификатор транзакции capture
 				 * отличается от идентификатора предыдущей транзации.
-				 * Для транзации refund
-				 * нужно будет указывать именно идентификатор транзакции capture,
+				 * Для транзации refund нужно будет указывать
+				 * именно идентификатор транзакции capture,
 				 *
 				 * Здесь вызовы $payment->getRefundTransactionId()
 				 * и $payment->getParentTransactionId()
@@ -218,6 +219,7 @@ class Method extends \Df\Payment\Method {
 				 */
 				$refund->setChargeId($payment->getRefundTransactionId());
 				$refund->setValue(self::amount($payment, $amount));
+				$this->disableEvent($payment->getRefundTransactionId(), 'charge.refunded');
 				/** @var ChargeResponse $response */
 				$response = $this->api()->refundCardChargeRequest($refund);
 				/**
@@ -287,6 +289,7 @@ class Method extends \Df\Payment\Method {
 				 }
 				 */
 				$void->setTrackId($payment->getOrder()->getIncrementId());
+				$this->disableEvent($auth->getTxnId(), 'charge.voided');
 				/** @var ChargeResponse $response */
 				$response = $this->api()->voidCharge($auth->getTxnId(), $void);
 			}
@@ -326,6 +329,7 @@ class Method extends \Df\Payment\Method {
 	 * и нужно отдельно проводить транзакцию capture.
 	 * https://mage2.pro/t/1565
 	 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
+	 * @used-by \Dfe\CheckoutCom\Method::getConfigPaymentAction()
 	 * @return string
 	 */
 	private function action() {
@@ -384,6 +388,7 @@ class Method extends \Df\Payment\Method {
 			 */
 			/** @var ChargeCapture $capture */
 			$capture = new ChargeCapture;
+			$this->disableEvent($auth->getTxnId(), 'charge.captured');
 			$capture->setChargeId($auth->getTxnId());
 			/**
 			 * 2016-05-03
@@ -433,6 +438,34 @@ class Method extends \Df\Payment\Method {
 			 */
 			$payment->setTransactionId($response->getId());
 		});
+	}
+
+	/**
+	 * 2016-05-11
+	 * Отключаем оповещение о действии
+	 * (по причине того, что это действие делали мы сами).
+	 * @param string $transactionId
+	 * @param string $eventId
+	 * @return void
+	 */
+	private function disableEvent($transactionId, $eventId) {
+		/** @var ChargeResponse $charge */
+		$charge = $this->api()->getCharge($transactionId);
+		/** @var array(string => string) $metadata */
+		$metadata = df_nta($charge->getMetadata());
+		/** @var string[] $events */
+		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, ''));
+		if (!in_array($eventId, $events)) {
+			$events[]= $eventId;
+		}
+		$metadata[self::DISABLED_EVENTS] = df_csv($events);
+		// 2016-05-11
+		// «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
+		/** @var ChargeUpdate $update */
+		$update = new ChargeUpdate;
+		$update->setChargeId($transactionId);
+		$update->setMetadata($metadata);
+		$this->api()->UpdateCardCharge($update);
 	}
 
 	/**
@@ -594,8 +627,15 @@ class Method extends \Df\Payment\Method {
 		if (!isset($this->{__METHOD__})) {
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
+			/**
+			 * 2016-05-11
+			 * Раньше тут стояло просто ('Y' !== $response->getAutoCapture())
+			 * Это неправильно, потому что транзакция могла быть помечена как Flagged,
+			 * и тогда такая транзакция эквивалентна authorize, а не capture,
+			 * хотя в ответе параметр autoCapture будет иметь значение 'Y'.
+			 */
 			/** @var string $result */
-			if ('Y' !== $response->getAutoCapture()) {
+			if ('Y' !== $response->getAutoCapture() && !$this->isChargeFlagged()) {
 				$result = $response->getId();
 			}
 			else {
@@ -717,6 +757,16 @@ class Method extends \Df\Payment\Method {
 	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */
 	const CODE = 'dfe_checkout_com';
+
+	/**
+	 * 2016-05-11
+	 * Этот ключ внутри метаданных транзации будет хранить перечень тех событий,
+	 * оповещения о которых мы будем игнорировать по причине того,
+	 * что эти события были вызваны нашими же собственными действиями.
+	 * @used-by \Dfe\CheckoutCom\Method::disableEvent()
+	 * @used-by \Dfe\CheckoutCom\Handler::isInitiatedByMyself()
+	 */
+	const DISABLED_EVENTS = 'disabled_events';
 
 	/**
 	 * 2016-05-04

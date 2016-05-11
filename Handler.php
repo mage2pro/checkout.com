@@ -34,6 +34,24 @@ abstract class Handler extends \Df\Core\O {
 	}
 
 	/**
+	 * 2016-05-11
+	 * @return string
+	 */
+	protected function type() {return $this['eventType'];}
+
+	/**
+	 * 2016-05-11
+	 * Этот метод определяет, было ли действите инициировано в нашем же магазине.
+	 * Если да, то и обрабатывать его не надо
+	 * (более того, такая обработка может привести к сложнодиагностируемым сбоям).
+	 * @used-by \Dfe\CheckoutCom\Handler::p()
+	 * @return bool
+	 */
+	private function isInitiatedByMyself() {
+		return in_array($this->type(), df_csv_parse($this->o('metadata/' . Method::DISABLED_EVENTS)));
+	}
+
+	/**
 	 * 2016-03-25
 	 * @param array(string => mixed) $request
 	 * @return mixed
@@ -43,17 +61,25 @@ abstract class Handler extends \Df\Core\O {
 		/** @var mixed $result */
 		try {
 			/**
-			 * 2016-05-10
-			 * Событий с обоими разделителями (типа «charge.dispute.funds_reinstated», как в Stripe),
-			 * у нас пока нет: http://developers.checkout.com/docs/server/api-reference/webhooks
-			 * Но код оставил таким же, как для Stripe
+			 * 2016-05-13
+			 * В отличие от Stripe, у Checkout.com разделителем частей идентификатора события
+			 * является только точка, символ подчёркивания не используется.
+			 * http://developers.checkout.com/docs/server/api-reference/webhooks
 			 */
 			/** @var string $suffix */
-			$suffix = df_implode_class('handler', df_explode_multiple(['.', '_'], $request['eventType']));
+			$suffix = df_implode_class('handler', explode('.', $request['eventType']));
 			$class = df_convention(__CLASS__, $suffix, DefaultT::class);
 			/** @var Handler $i */
 			$i = df_create($class, $request);
-			$result = $i->eligible() ? $i->process() : 'The event is not for our store.';
+			/** @var string $result */
+			$result =
+				!$i->eligible() ? 'The event is not for our store.' : (
+					$i->isInitiatedByMyself()
+					? 'The action is initiated inside the store,'
+						. ' so we do not need to process the notification.'
+					: $i->process()
+				)
+			;
 		}
 		catch (E $e) {
 			/**
