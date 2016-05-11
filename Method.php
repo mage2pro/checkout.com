@@ -15,6 +15,7 @@ use Dfe\CheckoutCom\Source\Action;
 use Exception as E;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
+use Magento\Framework\Webapi\Exception;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
 use Magento\Payment\Model\Method\AbstractMethod as M;
@@ -661,8 +662,8 @@ class Method extends \Df\Payment\Method {
 	 * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
 	 * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
 	 * «This is a quick way to view a charge status, rather than searching through webhooks»
-	 *
 	 * @return string
+	 * @throws \Exception
 	 */
 	private function magentoTransactionId() {
 		if (!isset($this->{__METHOD__})) {
@@ -680,20 +681,46 @@ class Method extends \Df\Payment\Method {
 				$result = $response->getId();
 			}
 			else {
-				/** @var ChargeHistory $history */
-				$history = $this->api()->getChargeHistory($response->getId());
-				/**
-				 * 2016-05-11
-				 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
-				 * «[Checkout.com]
-				 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
-				 * sample response»
-				 * https://mage2.pro/t/1601
-				 */
-				/** @var ChargeResponse $chargeCapture */
-				$chargeCapture = df_first($history->getCharges());
-				df_assert_eq('Captured', $chargeCapture->getStatus());
-				$result = $chargeCapture->getId();
+				try {
+					/**
+					 * 2016-05-11
+					 * Когда выполняешь этот код без отладчика,
+					 * то в результате приходит не 2 транзации authorized и captured,
+					 * а одна транзакция pending.
+					 * В этом случае надо просто подождать...
+					 * Потом в ответе приходит одна транзакция Authorized.
+					 * Надо снова подождать...
+					 */
+					/** @var int $numRetries */
+					$numRetries = 10;
+					$result = null;
+					while ($numRetries && !$result) {
+						/** @var ChargeHistory $history */
+						$history = $this->api()->getChargeHistory($response->getId());
+						df_log(print_r($history->getCharges(), true));
+						/**
+						 * 2016-05-11
+						 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
+						 * «[Checkout.com]
+						 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
+						 * sample response»
+						 * https://mage2.pro/t/1601
+						 */
+						/** @var ChargeResponse $chargeCapture */
+						$chargeCapture = df_first($history->getCharges());
+						if ('Captured' === $chargeCapture->getStatus()) {
+							$result = $chargeCapture->getId();
+						}
+						else {
+							sleep(1);
+							$numRetries--;
+						}
+					}
+				}
+				catch (\Exception $e) {
+					df_log($e);
+					throw $e;
+				}
 			}
 			$this->{__METHOD__} = $result;
 		}
