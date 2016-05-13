@@ -333,6 +333,13 @@ class Method extends \Df\Payment\Method {
 					$this->disableEvent($auth->getTxnId(), 'charge.voided');
 					/** @var ChargeResponse $response */
 					$response = $this->api()->voidCharge($auth->getTxnId(), $void);
+					/**
+					 * 2016-05-13
+					 * Чтобы идентификатор транзакции void в Magento был таким же,
+					 * как в личном кабинете Checkout.com,
+					 * иначе же он будет иметь вид <ID транзакции authorize>-void
+					 */
+					$payment->setTransactionId($response->getId());
 				}
 			});
 		}
