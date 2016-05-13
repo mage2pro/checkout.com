@@ -1,5 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
+use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Source\Prefill;
 use com\checkout\ApiServices\Charges\ChargeService;
@@ -72,20 +73,13 @@ class Settings extends \Df\Core\Settings {
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
 	 * «Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?»
+	 * @param string $countryIso2
 	 * @param null|string|int|ScopeInterface $s [optional]
 	 * @return string
 	 */
-	public function force3DS_forIPs($s = null) {return $this->v(__FUNCTION__, $s);}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?» →
-	 * «Countries»
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string[]
-	 */
-	public function force3DS_forIPs_countries($s = null) {return $this->csv(__FUNCTION__, $s);}
+	public function force3DS_forIPs($countryIso2, $s = null) {
+		return $this->nwb(__FUNCTION__, 'countries', $countryIso2, $s);
+	}
 
 	/**
 	 * 2016-05-13
@@ -99,22 +93,12 @@ class Settings extends \Df\Core\Settings {
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
 	 * «Force 3D-Secure validation for the Particular Shipping Destinations?»
+	 * @param string $countryIso2
 	 * @param null|string|int|ScopeInterface $s [optional]
 	 * @return string
 	 */
-	public function force3DS_forShippingDestinations($s = null) {
-		return $this->v(__FUNCTION__, $s);
-	}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Force 3D-Secure validation for the Particular Shipping Destinations?» → «Countries»
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string[]
-	 */
-	public function force3DS_forShippingDestinations_countries($s = null) {
-		return $this->csv(__FUNCTION__, $s);
+	public function force3DS_forShippingDestinations($countryIso2, $s = null) {
+		return $this->nwb(__FUNCTION__, 'countries', $countryIso2, $s);
 	}
 
 	/**

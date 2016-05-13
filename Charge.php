@@ -1,5 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
+use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\Patch\CardTokenChargeCreate;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
@@ -457,12 +458,12 @@ class Charge extends \Df\Core\O {
 	 */
 	private function use3DS() {
 		if (!isset($this->{__METHOD__})) {
-			/** @var bool $result */
-			$result = S::s()->force3DS_forAll();
-			if (!$result) {
-
-			}
-			$this->{__METHOD__} = $result;
+			$this->{__METHOD__} =
+				S::s()->force3DS_forAll()
+				|| S::s()->force3DS_forNew() && df_customer_is_new($this->order()->getCustomerId())
+				|| S::s()->force3DS_forShippingDestinations($this->address()->getCountryId())
+				|| S::s()->force3DS_forIPs(df_visitor()->iso2())
+			;
 		}
 		return $this->{__METHOD__};
 	}
