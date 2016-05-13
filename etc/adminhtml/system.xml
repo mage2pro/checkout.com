@@ -170,6 +170,7 @@
 				>
 					<label>Payment Action for a New Customer</label>
 					<source_model>Dfe\CheckoutCom\Source\Action</source_model>
+					<comment><![CDATA[A customer is regarded as <b>new</b>, if he does not have any order in the «Completed» or «Processing» state.]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
@@ -305,7 +306,7 @@
 					showInStore='1'
 				>
 					<label>Country Restriction</label>
-					<source_model>Df\Payment\Source\CountryRestriction</source_model>
+					<source_model>Df\Config\Source\NoWhiteBlack</source_model>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
@@ -343,7 +344,7 @@
 					<label>Force 3D-Secure validation for All Customers?</label>
 					<backend_model>Df\Config\Backend\Checkbox</backend_model>
 					<comment><![CDATA[<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D-Secure validation will be used based on the <a href="https://mage2.pro/t/1611">risk rules</a> from your Checkout.com account.</li>
-<li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the payments.</li>]]></comment>
+<li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the payments.</li></ul>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
@@ -355,15 +356,87 @@
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for New Customers?</label>
+					<label>Force 3D-Secure validation for the New Customers?</label>
 					<backend_model>Df\Config\Backend\Checkbox</backend_model>
 					<comment><![CDATA[A customer is regarded as <b>new</b>, if he does not have any order in the «Completed» or «Processing» state.
-<br/>If the option is <b>disabled</b>, then the 3D-Secure validation will be used based on the <a href="https://mage2.pro/t/1611">risk rules</a> from your Checkout.com account.
-<br/>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the new customers.]]></comment>
+<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D-Secure validation will be used based on the <a href="https://mage2.pro/t/1611">risk rules</a> from your Checkout.com account.</li>
+<li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the new customers.</li></ul>]]></comment>
 					<depends>
 						<field id='enable'>1</field>
 						<field id='3d_secure_for_all'>0</field>
 					</depends>
+				</field>
+				<field
+					id='3d_secure_for_shipping_destinations'
+					translate='label'
+					type='select'
+					sortOrder='21'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='1'
+				>
+					<label>Force 3D-Secure validation for Partucular Shipping Destinations?</label>
+					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
+					<depends><field id='enable'>1</field></depends>
+				</field>
+				<field
+					id='3d_secure_for_shipping_destinations__countries'
+					translate='label'
+					type='Df\Framework\Data\Form\Element\Multiselect'
+					sortOrder='22'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='0'
+				>
+					<label>Countries</label>
+					<source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+					<can_be_empty>1</can_be_empty>
+					<depends>
+						<field id='enable'>1</field>
+						<!--
+						 	2016-03-08
+						 	«The negative syntax for the backend config field <depends> condition»
+                            https://mage2.pro/t/329
+						-->
+						<field id='3d_secure_for_shipping_destinations' negative='1'>0</field>
+					</depends>
+					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
+				</field>
+				<field
+					id='3d_secure_for_customer_ips'
+					translate='label'
+					type='select'
+					sortOrder='23'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='1'
+				>
+					<label>Force 3D-Secure validation for Partucular Customer Locations (detected by IP Address)?</label>
+					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
+					<depends><field id='enable'>1</field></depends>
+				</field>
+				<field
+					id='3d_secure_for_customer_ips__countries'
+					translate='label'
+					type='Df\Framework\Data\Form\Element\Multiselect'
+					sortOrder='24'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='0'
+				>
+					<label>Countries</label>
+					<source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+					<can_be_empty>1</can_be_empty>
+					<depends>
+						<field id='enable'>1</field>
+						<!--
+						 	2016-03-08
+						 	«The negative syntax for the backend config field <depends> condition»
+                            https://mage2.pro/t/329
+						-->
+						<field id='3d_secure_for_customer_ips' negative='1'>0</field>
+					</depends>
+					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
 				</field>
             </group>
         </section>
