@@ -107,7 +107,7 @@ class Charge extends \Df\Core\O {
 		 * С настройками Личного кабинета по умолчанию
 		 * 3D-Secure будет насильно использоваться для платежей размером не меньше 150 долларов.
 		 */
-		$result->setChargeMode(1);
+		$result->setChargeMode($this->use3DS() ? 2 : 1);
 		/**
 		 * 2016-04-21
 		 * How are an order's getCustomerEmail() and setCustomerEmail() methods
@@ -450,6 +450,22 @@ class Charge extends \Df\Core\O {
 
 	/** @return string */
 	private function token() {return $this[self::$P__TOKEN];}
+
+	/**
+	 * 2016-05-13
+	 * @return bool
+	 */
+	private function use3DS() {
+		if (!isset($this->{__METHOD__})) {
+			/** @var bool $result */
+			$result = S::s()->force3DS_forAll();
+			if (!$result) {
+
+			}
+			$this->{__METHOD__} = $result;
+		}
+		return $this->{__METHOD__};
+	}
 
 	/**
 	 * 2016-05-06

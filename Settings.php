@@ -61,6 +61,63 @@ class Settings extends \Df\Core\Settings {
 	public function enable($s = null) {return $this->b(__FUNCTION__, $s);}
 
 	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D-Secure validation for All Customers?»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return bool
+	 */
+	public function force3DS_forAll($s = null) {return $this->b(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string
+	 */
+	public function force3DS_forIPs($s = null) {return $this->v(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?» →
+	 * «Countries»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string[]
+	 */
+	public function force3DS_forIPs_countries($s = null) {return $this->csv(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D-Secure validation for the New Customers?»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return bool
+	 */
+	public function force3DS_forNew($s = null) {return $this->b(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Force 3D-Secure validation for the Particular Shipping Destinations?»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string
+	 */
+	public function force3DS_forShippingDestinations($s = null) {
+		return $this->v(__FUNCTION__, $s);
+	}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Force 3D-Secure validation for the Particular Shipping Destinations?» → «Countries»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string[]
+	 */
+	public function force3DS_forShippingDestinations_countries($s = null) {
+		return $this->csv(__FUNCTION__, $s);
+	}
+
+	/**
 	 * 2016-03-14
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Metadata»
 	 * @param null|string|int|ScopeInterface $s [optional]

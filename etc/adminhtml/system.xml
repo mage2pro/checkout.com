@@ -333,7 +333,7 @@
 					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
 				</field>
 				<field
-					id='3d_secure_for_all'
+					id='force3DS_forAll'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Checkbox'
 					sortOrder='19'
@@ -348,7 +348,7 @@
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
-					id='3d_secure_for_new'
+					id='force3DS_forNew'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Checkbox'
 					sortOrder='20'
@@ -363,11 +363,11 @@
 <li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the new customers.</li></ul>]]></comment>
 					<depends>
 						<field id='enable'>1</field>
-						<field id='3d_secure_for_all'>0</field>
+						<field id='force3DS_forAll'>0</field>
 					</depends>
 				</field>
 				<field
-					id='3d_secure_for_shipping_destinations'
+					id='force3DS_forShippingDestinations'
 					translate='label'
 					type='select'
 					sortOrder='21'
@@ -375,12 +375,15 @@
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for Partucular Shipping Destinations?</label>
+					<label>Force 3D-Secure validation for the Particular Shipping Destinations?</label>
 					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
-					<depends><field id='enable'>1</field></depends>
+					<depends>
+						<field id='enable'>1</field>
+						<field id='force3DS_forAll'>0</field>
+					</depends>
 				</field>
 				<field
-					id='3d_secure_for_shipping_destinations__countries'
+					id='force3DS_forShippingDestinations_countries'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
 					sortOrder='22'
@@ -393,17 +396,18 @@
 					<can_be_empty>1</can_be_empty>
 					<depends>
 						<field id='enable'>1</field>
+						<field id='force3DS_forAll'>0</field>
 						<!--
 						 	2016-03-08
 						 	«The negative syntax for the backend config field <depends> condition»
                             https://mage2.pro/t/329
 						-->
-						<field id='3d_secure_for_shipping_destinations' negative='1'>0</field>
+						<field id='force3DS_forShippingDestinations' negative='1'>0</field>
 					</depends>
 					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
 				</field>
 				<field
-					id='3d_secure_for_customer_ips'
+					id='force3DS_forIPs'
 					translate='label'
 					type='select'
 					sortOrder='23'
@@ -411,12 +415,12 @@
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for Partucular Customer Locations (detected by IP Address)?</label>
+					<label>Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?</label>
 					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
-					id='3d_secure_for_customer_ips__countries'
+					id='force3DS_forIPs_countries'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
 					sortOrder='24'
@@ -429,12 +433,13 @@
 					<can_be_empty>1</can_be_empty>
 					<depends>
 						<field id='enable'>1</field>
+						<field id='force3DS_forAll'>0</field>
 						<!--
 						 	2016-03-08
 						 	«The negative syntax for the backend config field <depends> condition»
                             https://mage2.pro/t/329
 						-->
-						<field id='3d_secure_for_customer_ips' negative='1'>0</field>
+						<field id='force3DS_forIPs' negative='1'>0</field>
 					</depends>
 					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
 				</field>
