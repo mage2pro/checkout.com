@@ -7,15 +7,12 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
-use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Settings as S;
-use Dfe\CheckoutCom\Source\Action;
 use Exception as E;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
-use Magento\Framework\Webapi\Exception;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
 use Magento\Payment\Model\Method\AbstractMethod as M;
@@ -189,7 +186,7 @@ class Method extends \Df\Payment\Method {
 	 *
 	 * Есть мысль проводить для транзакций Flagged процедуру Review.
 	 */
-	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->action();}
+	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
@@ -371,49 +368,6 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-05-08
-	 * 2016-05-09
-	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
-	 * то параметр autoCapture шлюзом игнорируется,
-	 * и нужно отдельно проводить транзакцию capture.
-	 * https://mage2.pro/t/1565
-	 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
-	 * @used-by \Dfe\CheckoutCom\Method::getConfigPaymentAction()
-	 * @return string
-	 */
-	private function action() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
-				$this->isChargeFlagged() || !$this->waitForCapture()
-				? M::ACTION_AUTHORIZE
-				: $this->actionDesired()
-			;
-		}
-		return $this->{__METHOD__};
-	}
-
-	/**
-	 * 2016-05-09
-	 * Чтобы не попасть в рекурсию, выделил этот метод из метода
-	 * @used-by \Dfe\CheckoutCom\Method::action()
-	 * Этот метод возвращает то действие, которое настроил администратор.
-	 * Однако для транзакции необязательно будет использовано именно это действие:
-	 * если платёжный шлюз пометил транзакцаю как «Flagged»,
-	 * то для транзакции будет насильно использовано действие authorize.
-	 * @return string
-	 */
-	private function actionDesired() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
-				$this->isTheCustomerNew()
-				? S::s()->actionForNew()
-				: S::s()->actionForReturned()
-			;
-		}
-		return $this->{__METHOD__};
-	}
-
-	/**
 	 * 2016-04-21
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
@@ -540,7 +494,7 @@ class Method extends \Df\Payment\Method {
 			 */
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
-			if (!self::isChargeValid($response)) {
+			if (!$this->r()->valid()) {
 				/**
 				 * 2016-05-08
 				 * Если платёжный шлюз отклонил транзакцию,
@@ -556,7 +510,7 @@ class Method extends \Df\Payment\Method {
 					}
 				 * Вот что с этим добром делать? Надо подумать...
 				 */
-				df_error(df_dump($this->responseA([
+				df_error(df_dump($this->r()->a([
 					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
 				])));
 			}
@@ -568,7 +522,7 @@ class Method extends \Df\Payment\Method {
 			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 */
-			$payment->setTransactionId($this->magentoTransactionId());
+			$payment->setTransactionId($this->r()->magentoTransactionId());
 			/** @var Card $card */
 			$card = $response->getCard();
 			/**
@@ -587,7 +541,7 @@ class Method extends \Df\Payment\Method {
 			 * Транзакция ситается завершённой, если явно не указать «false».
 			 */
 			$payment->setIsTransactionClosed($capture);
-			if ($this->isChargeFlagged()) {
+			if ($this->r()->flagged()) {
 				/**
 				 * 2016-05-06
 				 * Не получается здесь явно устанавливать состояние заказа
@@ -619,29 +573,16 @@ class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-08
 	 * Чтобы не попасть в рекурсию, использую здесь @uses \Dfe\CheckoutCom\Method::actionDesired()
-	 * вместо @see \Dfe\CheckoutCom\Method::actionDesired()
+	 * вместо @see \Dfe\CheckoutCom\Method::action()
 	 * Этот метод говорит, хочет ли администратор capture.
 	 * Однако для транзакции необязательно будет использовано именно это действие:
 	 * если платёжный шлюз пометил транзакцаю как «Flagged»,
 	 * то для транзакции будет насильно использовано действие authorize.
 	 * @return bool
 	 */
-	private function isCaptureDesired() {return M::ACTION_AUTHORIZE_CAPTURE === $this->actionDesired();}
-
-	/**
-	 * 2016-05-09
-	 * «[Checkout.com] - What is a «Flagged» transaction?» https://mage2.pro/t/1565
-		{
-			"id": "charge_test_253DB7144E5Z7A98EED4",
-			"responseMessage": "40142 - Threshold Risk",
-			"responseAdvancedInfo": "",
-			"responseCode": "10100",
-			"status": "Flagged",
-			"authCode": "188986"
-		}
-	 * @return bool
-	 */
-	private function isChargeFlagged() {return self::$S__FLAGGED === $this->response()->getStatus();}
+	private function isCaptureDesired() {
+		return M::ACTION_AUTHORIZE_CAPTURE === S::s()->actionDesired($this->o()->getCustomerId());
+	}
 
 	/**
 	 * 2016-04-23
@@ -678,116 +619,21 @@ class Method extends \Df\Payment\Method {
 	private function log($message) {df_log($message);}
 
 	/**
-	 * 2016-05-11
-	 * Этот метод решает описанную ниже проблему.
-	 *
-	 * 2016-05-10
-	 * Если мы проводили платёж с параметром autoCapture,
-	 * то Checkout.com на самом деле сразу проводит 2 транзации: authorize и capture.
-	 * При этом в ответе Checkout.com присылает только идентификатор транзации authorize.
-	 * А получается, что мы присваиваем этот идентификатор транзакции capture внутри Magento.
-	 *
-	 * 2016-05-11
-	 * Кстати, в документации так и сказано:
-	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
-	 * «To process a refund the merchant must send the Charge ID of the Captured transaction»
-	 * «For an Automatic Capture, the Charge Response will contain
-	 * the Charge ID of the Auth Charge. This ID cannot be used.»
-	 *
-	 * 2016-05-11
-	 * Вчера я думал, что в описанной выше ситуации (autoCapture)
-	 * мы не можем узнать идентификатор транзации capture по идентификатору транзации authorize.
-	 * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
-	 * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
-	 * «This is a quick way to view a charge status, rather than searching through webhooks»
-	 * @return string
-	 * @throws \Exception
-	 */
-	private function magentoTransactionId() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var ChargeResponse $response */
-		    $response = $this->response();
-			/**
-			 * 2016-05-11
-			 * Раньше тут стояло просто ('Y' !== $response->getAutoCapture())
-			 * Это неправильно, потому что транзакция могла быть помечена как Flagged,
-			 * и тогда такая транзакция эквивалентна authorize, а не capture,
-			 * хотя в ответе параметр autoCapture будет иметь значение 'Y'.
-			 *
-			 * 2016-05-15
-			 * Раньше тут стояло:
-			 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
-			 */
-			/** @var string $result */
-			if (M::ACTION_AUTHORIZE === $this->action()) {
-				$result = $response->getId();
-			}
-			else {
-				try {
-					/**
-					 * 2016-05-11
-					 * Когда выполняешь этот код без отладчика,
-					 * то в результате приходит не 2 транзации в состояниях Authorized и Сaptured,
-					 * а одна транзакция в состоянии Pending.
-					 * В этом случае надо просто подождать...
-					 * Потом в ответе приходит одна транзакция в состоянии Authorized.
-					 * Надо снова подождать...
-					 *
-					 * 2016-05-15
-					 * Вчера пришлось ждать транзакцию в состоянии Captured аж 14 секунд.
-					 * Я пришёл к мысли, что не стоит реального покупателя заставлять так ждать,
-					 * и поэтому для реальных покупателей лучше ВСЕГДА
-					 * в Magento первой транзакцией делать Authorize, а далее,
-					 * если администратор магазина указал в настройках, что он хочет транзацию Capture,
-					 * то принимать транзакцию Capture через Webhooks.
-					 */
-					/** @var int $numRetries */
-					/**
-					 * 2016-05-15
-					 * Пока максимум приходилось ждать 14 секунд,
-					 * но на всякий случай поставил 60.
-					 * Можно, конечно, ждать и дольше, но вряд ли это нужно.
-					 */
-					$numRetries = 60;
-					$result = null;
-					while ($numRetries && !$result) {
-						/** @var ChargeHistory $history */
-						$history = $this->api()->getChargeHistory($response->getId());
-						df_log(print_r($history->getCharges(), true));
-						/**
-						 * 2016-05-11
-						 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
-						 * «[Checkout.com]
-						 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
-						 * sample response»
-						 * https://mage2.pro/t/1601
-						 */
-						/** @var ChargeResponse $chargeCapture */
-						$chargeCapture = df_first($history->getCharges());
-						if ('Captured' === $chargeCapture->getStatus()) {
-							$result = $chargeCapture->getId();
-						}
-						else {
-							sleep(1);
-							$numRetries--;
-						}
-					}
-				}
-				catch (\Exception $e) {
-					df_log($e);
-					throw $e;
-				}
-			}
-			$this->{__METHOD__} = $result;
-		}
-		return $this->{__METHOD__};
-	}
-
-	/**
 	 * 2016-05-15
 	 * @return bool
 	 */
 	private function needLog() {return true;}
+
+	/**
+	 * 2016-05-15
+	 * @return Response
+	 */
+	private function r() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = Response::s($this->response(), $this->o());
+		}
+		return $this->{__METHOD__};
+	}
 
 	/**
 	 * 2016-05-08
@@ -804,7 +650,7 @@ class Method extends \Df\Payment\Method {
 	private function redirectUrl() {
 		if (!isset($this->{__METHOD__})) {
 			/** @var string|null $result */
-			$result = $this->responseA('redirectUrl');
+			$result = $this->r()->a('redirectUrl');
 			if ($result) {
 				/**
 				 * 2016-05-07
@@ -845,34 +691,6 @@ class Method extends \Df\Payment\Method {
 			));
 		});}
 		return $this->_response;
-	}
-
-	/**
-	 * 2016-05-08
-	 * @param string|string[]|null $key [optional]
-	 * @return array(string => string)
-	 */
-	private function responseA($key = null) {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_json_decode($this->response()->json);
-			df_log($this->response()->json);
-		}
-		return is_null($key) ? $this->{__METHOD__} : (
-			is_array($key)
-			? df_clean(dfa_select_ordered($this->{__METHOD__}, $key))
-			: dfa($this->{__METHOD__}, $key)
-		);
-	}
-
-	/**
-	 * 2016-05-15
-	 * @return bool
-	 */
-	private function waitForCapture() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_is_localhost() || S::s()->waitForCapture();
-		}
-		return $this->{__METHOD__};
 	}
 
 	/**
@@ -929,21 +747,6 @@ class Method extends \Df\Payment\Method {
 	const REDIRECT_URL = 'dfe_redirect_url';
 
 	/**
-	 * 2016-05-09
-	 * «[Checkout.com] - What is a «Flagged» transaction?» https://mage2.pro/t/1565
-		{
-			"id": "charge_test_253DB7144E5Z7A98EED4",
-			"responseMessage": "40142 - Threshold Risk",
-			"responseAdvancedInfo": "",
-			"responseCode": "10100",
-			"status": "Flagged",
-			"authCode": "188986"
-		}
-	 * @var string
-	 */
-	private static $S__FLAGGED = 'Flagged';
-
-	/**
 	 * 2016-03-06
 	 * @var string
 	 */
@@ -973,25 +776,6 @@ class Method extends \Df\Payment\Method {
 	 */
 	public static function amountReverse(II $payment, $amount) {
 		return $amount / self::amountFactor($payment);
-	}
-
-	/**
-	 * 2016-05-08
-	 * 2016-05-09
-	 * Учёл ещё состояние Flagged: https://mage2.pro/t/1565
-		{
-			"id": "charge_test_253DB7144E5Z7A98EED4",
-			"responseMessage": "40142 - Threshold Risk",
-			"responseAdvancedInfo": "",
-			"responseCode": "10100",
-			"status": "Flagged",
-			"authCode": "188986"
-		}
-	 * @param ChargeResponse $charge
-	 * @return bool
-	 */
-	public static function isChargeValid(ChargeResponse $charge) {
-		return in_array($charge->getStatus(), ['Authorised', self::$S__FLAGGED]);
 	}
 
 	/**

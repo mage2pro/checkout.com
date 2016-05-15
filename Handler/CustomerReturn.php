@@ -4,6 +4,7 @@ use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Method;
+use Dfe\CheckoutCom\Response;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
@@ -50,8 +51,10 @@ class CustomerReturn {
 		$api = S::s()->apiCharge($order->getStore());
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
+		/** @var Response $r */
+		$r = Response::s($charge, $order);
 		/** @var bool $result */
-		$result = Method::isChargeValid($charge);
+		$result = $r->valid();
 		if (!$result) {
 			/**
 			 * 2016-05-06
@@ -76,13 +79,7 @@ class CustomerReturn {
 			 */
 			$method->setStore($order->getStoreId());
 			$method->responseSet($charge);
-			DfPayment::processActionS(
-				$payment
-				, 'Y' === $charge->getAutoCapture()
-					? M::ACTION_AUTHORIZE_CAPTURE
-					: M::ACTION_AUTHORIZE
-				, $order
-			);
+			DfPayment::processActionS($payment, $r->action(), $order);
 			DfPayment::updateOrderS(
 				$payment
 				, $order

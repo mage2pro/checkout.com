@@ -7,20 +7,14 @@ use com\checkout\ApiServices\Charges\ChargeService;
 use Magento\Framework\App\ScopeInterface;
 class Settings extends \Df\Core\Settings {
 	/**
-	 * 2016-03-15
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
+	 * 2016-05-15
+	 * @param int $customerId
 	 * @param null|string|int|ScopeInterface $s [optional]
 	 * @return string
 	 */
-	public function actionForNew($s = null) {return $this->v(__FUNCTION__, $s);}
-
-	/**
-	 * 2016-03-15
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a Returned Customer»
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return string
-	 */
-	public function actionForReturned($s = null) {return $this->v(__FUNCTION__, $s);}
+	public function actionDesired($customerId, $s = null) {
+		return df_customer_is_new($customerId) ? $this->actionForNew($s) : $this->actionForReturned($s);
+	}
 
 	/**
 	 * 2016-05-05
@@ -158,6 +152,22 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	protected function prefix() {return 'df_payment/checkout_com/';}
+
+	/**
+	 * 2016-03-15
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string
+	 */
+	private function actionForNew($s = null) {return $this->v(__FUNCTION__, $s);}
+
+	/**
+	 * 2016-03-15
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a Returned Customer»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return string
+	 */
+	private function actionForReturned($s = null) {return $this->v(__FUNCTION__, $s);}
 
 	/**
 	 * 2016-03-02
