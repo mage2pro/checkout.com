@@ -384,7 +384,7 @@ class Method extends \Df\Payment\Method {
 	private function action() {
 		if (!isset($this->{__METHOD__})) {
 			$this->{__METHOD__} =
-				$this->isChargeFlagged()
+				$this->isChargeFlagged() || !$this->waitForCapture()
 				? M::ACTION_AUTHORIZE
 				: $this->actionDesired()
 			;
@@ -642,9 +642,7 @@ class Method extends \Df\Payment\Method {
 		}
 	 * @return bool
 	 */
-	private function isChargeFlagged() {
-		return self::$S__FLAGGED === $this->response()->getStatus();
-	}
+	private function isChargeFlagged() {return self::$S__FLAGGED === $this->response()->getStatus();}
 
 	/**
 	 * 2016-05-11
@@ -682,9 +680,13 @@ class Method extends \Df\Payment\Method {
 			 * Это неправильно, потому что транзакция могла быть помечена как Flagged,
 			 * и тогда такая транзакция эквивалентна authorize, а не capture,
 			 * хотя в ответе параметр autoCapture будет иметь значение 'Y'.
+			 *
+			 * 2016-05-15
+			 * Раньше тут стояло:
+			 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
 			 */
 			/** @var string $result */
-			if ('Y' !== $response->getAutoCapture() || $this->isChargeFlagged()) {
+			if (M::ACTION_AUTHORIZE === $this->action()) {
 				$result = $response->getId();
 			}
 			else {
@@ -692,14 +694,28 @@ class Method extends \Df\Payment\Method {
 					/**
 					 * 2016-05-11
 					 * Когда выполняешь этот код без отладчика,
-					 * то в результате приходит не 2 транзации authorized и captured,
-					 * а одна транзакция pending.
+					 * то в результате приходит не 2 транзации в состояниях Authorized и Сaptured,
+					 * а одна транзакция в состоянии Pending.
 					 * В этом случае надо просто подождать...
-					 * Потом в ответе приходит одна транзакция Authorized.
+					 * Потом в ответе приходит одна транзакция в состоянии Authorized.
 					 * Надо снова подождать...
+					 *
+					 * 2016-05-15
+					 * Вчера пришлось ждать транзакцию в состоянии Captured аж 14 секунд.
+					 * Я пришёл к мысли, что не стоит реального покупателя заставлять так ждать,
+					 * и поэтому для реальных покупателей лучше ВСЕГДА
+					 * в Magento первой транзакцией делать Authorize, а далее,
+					 * если администратор магазина указал в настройках, что он хочет транзацию Capture,
+					 * то принимать транзакцию Capture через Webhooks.
 					 */
 					/** @var int $numRetries */
-					$numRetries = 10;
+					/**
+					 * 2016-05-15
+					 * Пока максимум приходилось ждать 14 секунд,
+					 * но на всякий случай поставил 60.
+					 * Можно, конечно, ждать и дольше, но вряд ли это нужно.
+					 */
+					$numRetries = 60;
 					$result = null;
 					while ($numRetries && !$result) {
 						/** @var ChargeHistory $history */
@@ -807,6 +823,17 @@ class Method extends \Df\Payment\Method {
 			? df_clean(dfa_select_ordered($this->{__METHOD__}, $key))
 			: dfa($this->{__METHOD__}, $key)
 		);
+	}
+
+	/**
+	 * 2016-05-15
+	 * @return bool
+	 */
+	private function waitForCapture() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = df_is_localhost() || S::s()->waitForCapture();
+		}
+		return $this->{__METHOD__};
 	}
 
 	/**

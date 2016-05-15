@@ -156,7 +156,7 @@
 					showInStore='1'
 				>
 					<label>Webhook</label>
-					<comment><![CDATA[<a href='https://mage2.pro/t/977'>set it in your Checkout.com account</a>]]></comment>
+					<comment><![CDATA[<a href='https://mage2.pro/t/1620'>How to setup the Webhook? </a>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
@@ -187,10 +187,29 @@
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
+					id='waitForCapture'
+					translate='label'
+					type='Df\Framework\Data\Form\Element\Checkbox'
+					sortOrder='12'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='1'
+				>
+					<label>Wait for the «Capture» transaction on an order placement if the Payment Action is «Capture»?</label>
+					<backend_model>Df\Config\Backend\Checkbox</backend_model>
+					<comment><![CDATA[
+Normally, the «Capture» transaction should be handled on a Webhook notification, so do not enable this mode, if you have already <a href='https://mage2.pro/t/1620'>set up the Webhook</a>.
+<br/>Enable this mode only for a first-time quick testing, when the Webhook is not yet set up (setting up the Webhook is a manual operation, you should ask the Checkout.com personnel for it and wait).<br/>When the mode is enabled, an order placement could be delayed up to 10-20 seconds due to the Checkout.com architecture.
+<br/>The mode is always enabled in the «localhost» environment.]]></comment>
+					<depends>
+						<field id='enable'>1</field>
+					</depends>
+				</field>
+				<field
 					id='description'
 					translate='label'
 					type='textarea'
-					sortOrder='12'
+					sortOrder='13'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -240,7 +259,7 @@
 					id='statement'
 					translate='label'
 					type='text'
-					sortOrder='13'
+					sortOrder='14'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -258,7 +277,7 @@
 					id='metadata'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
-					sortOrder='14'
+					sortOrder='15'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -272,7 +291,7 @@
 					id='min_order_total'
 					translate='label'
 					type='text'
-					sortOrder='15'
+					sortOrder='16'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -286,7 +305,7 @@
 					id='max_order_total'
 					translate='label'
 					type='text'
-					sortOrder='16'
+					sortOrder='17'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -300,7 +319,7 @@
 					id='country_restriction'
 					translate='label'
 					type='select'
-					sortOrder='17'
+					sortOrder='18'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -313,7 +332,7 @@
 					id='countries'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
-					sortOrder='18'
+					sortOrder='19'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='0'
@@ -336,7 +355,7 @@
 					id='force3DS_forAll'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Checkbox'
-					sortOrder='19'
+					sortOrder='20'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -351,7 +370,7 @@
 					id='force3DS_forNew'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Checkbox'
-					sortOrder='20'
+					sortOrder='21'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -370,7 +389,7 @@
 					id='force3DS_forShippingDestinations'
 					translate='label'
 					type='select'
-					sortOrder='21'
+					sortOrder='22'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -386,7 +405,7 @@
 					id='force3DS_forShippingDestinations_countries'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
-					sortOrder='22'
+					sortOrder='23'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='0'
@@ -410,7 +429,7 @@
 					id='force3DS_forIPs'
 					translate='label'
 					type='select'
-					sortOrder='23'
+					sortOrder='24'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='1'
@@ -423,7 +442,7 @@
 					id='force3DS_forIPs_countries'
 					translate='label'
 					type='Df\Framework\Data\Form\Element\Multiselect'
-					sortOrder='24'
+					sortOrder='25'
 					showInDefault='1'
 					showInWebsite='1'
 					showInStore='0'
