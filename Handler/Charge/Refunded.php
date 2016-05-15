@@ -74,8 +74,13 @@ class Refunded extends Charge {
 		/** @var CreditmemoService|ICreditmemoService $cmi */
 		$cmi = df_om()->create(ICreditmemoService::class);
 		$cmi->refund($this->cm(), false);
-		// 2016-03-28
-		// @todo Надо отослать покупателю письмо-оповещение о возврате оплаты.
+		/**
+		 * 2016-03-28
+		 * @todo Надо отослать покупателю письмо-оповещение о возврате оплаты.
+		 * 2016-05-15
+		 * Что интересно, при возврате из административной части Magent 2
+		 * покупатель тоже не получает уведомление.
+		 */
 		return $this->cm()->getId();
 	}
 

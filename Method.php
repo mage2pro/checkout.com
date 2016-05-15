@@ -227,7 +227,7 @@ class Method extends \Df\Payment\Method {
 			$payment->unsetData(self::CUSTOM_TRANS_ID);
 		}
 		else {
-			self::leh(function() use($payment, $amount) {
+			$this->leh(function() use($payment, $amount) {
 				/** @var ChargeRefund $refund */
 				$refund = new ChargeRefund;
 				/**
@@ -310,7 +310,7 @@ class Method extends \Df\Payment\Method {
 			$payment->unsetData(self::CUSTOM_TRANS_ID);
 		}
 		else {
-			self::leh(function() use($payment) {
+			$this->leh(function() use($payment) {
 				/** @var Transaction|false|null $auth */
 				$auth = $payment->getAuthorizationTransaction();
 				if ($auth) {
@@ -430,7 +430,7 @@ class Method extends \Df\Payment\Method {
 	 * @return void
 	 */
 	private function capturePreauthorized(Transaction $auth, II $payment, $amount = null) {
-		self::leh(function() use($auth, $payment, $amount) {
+		$this->leh(function() use($auth, $payment, $amount) {
 			/**
 			 * 2016-05-03
 			 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
@@ -520,7 +520,6 @@ class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-07
 	 * @override
-	 * @see https://stripe.com/docs/charges
 	 * @see \Df\Payment\Method::capture()
 	 * @param II|I|OP $payment
 	 * @param float|null $amount [optional]
@@ -645,6 +644,40 @@ class Method extends \Df\Payment\Method {
 	private function isChargeFlagged() {return self::$S__FLAGGED === $this->response()->getStatus();}
 
 	/**
+	 * 2016-04-23
+	 * @param callable $function
+	 * @return mixed
+	 * @throws LE
+	 */
+	private function leh($function) {
+		/** @var string|null $label */
+		if (!$this->needLog()) {
+			$label = null;
+		}
+		else {
+			/** @var array(string => string|int) $bt1 */
+			$bt1 = debug_backtrace()[1];
+			$label = $bt1['class'] . '::' . $bt1['function'];
+			$this->log($label . ' BEFORE');
+		}
+		/** @var mixed $result */
+		try {$result = $function();}
+		catch (CE $e) {throw new LE(__($e->getErrorMessage()), $e);}
+		catch (E $e) {throw df_le($e);}
+		if ($label) {
+			$this->log($label . ' AFTER');
+		}
+		return $result;
+	}
+
+	/**
+	 * 2016-05-15
+	 * @param string $message
+	 * @return void
+	 */
+	private function log($message) {df_log($message);}
+
+	/**
 	 * 2016-05-11
 	 * Этот метод решает описанную ниже проблему.
 	 *
@@ -749,6 +782,12 @@ class Method extends \Df\Payment\Method {
 		}
 		return $this->{__METHOD__};
 	}
+
+	/**
+	 * 2016-05-15
+	 * @return bool
+	 */
+	private function needLog() {return true;}
 
 	/**
 	 * 2016-05-08
@@ -964,19 +1003,5 @@ class Method extends \Df\Payment\Method {
 		/** @var string[] $m1000 */
 		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
 		return in_array($payment->getOrder()->getBaseCurrencyCode(), $m1000) ? 1000 : 100;
-	}
-
-	/**
-	 * 2016-04-23
-	 * @param callable $function
-	 * @return mixed
-	 * @throws LE
-	 */
-	private static function leh($function) {
-		/** @var mixed $result */
-		try {$result = $function();}
-		catch (CE $e) {throw new LE(__($e->getErrorMessage()), $e);}
-		catch (E $e) {throw df_le($e);}
-		return $result;
 	}
 }
