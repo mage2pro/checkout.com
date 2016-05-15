@@ -2,13 +2,19 @@
 namespace Dfe\CheckoutCom\Handler;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
+use Df\Sales\Model\Order as DfOrder;
+use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Response;
 use Dfe\CheckoutCom\Settings as S;
+use Magento\Framework\DB\Transaction;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
+use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Sales\Model\Service\InvoiceService;
 class CustomerReturn {
 	/**
 	 * 2016-05-05
@@ -18,6 +24,7 @@ class CustomerReturn {
 	 * @return bool
 	 */
 	public static function p($token) {
+		df_log(__METHOD__);
 		/**
 		 * 2016-05-08 (дополнение)
 		 * И размещение заказа, и провека 3D-Secure
@@ -31,7 +38,7 @@ class CustomerReturn {
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/topic/1561
 		 */
-		/** @var Order $order */
+		/** @var Order|DfOrder $order */
 		$order = df_checkout_session()->getLastRealOrder();
 		/**
 		 * 2016-05-08
@@ -49,8 +56,17 @@ class CustomerReturn {
 		 */
 		/** @var ChargeService $api */
 		$api = S::s()->apiCharge($order->getStore());
+		/**
+		 * 2016-05-15
+		 * Даже если в запросе было autoCapture = true,
+		 * здесь по токену мы всё равно имеем транзакцию Authorize, а не Capture.
+		 * Более того, событие charge.captured может вызываться
+		 * как до возвращения покупателя в магазин после проверки 3D-Secure, так и после
+		 * (наблюдал оба случая).
+		 */
 		/** @var Charge $charge */
 		$charge = $api->verifyCharge($token);
+		df_log($charge->json);
 		/** @var Response $r */
 		$r = Response::s($charge, $order);
 		/** @var bool $result */
@@ -66,29 +82,77 @@ class CustomerReturn {
 			 * Идентично:
 			 * df_checkout_session()->getLastRealOrder()->cancel()->save();
 			 */
-			$order->cancel()->save();
+			$order->cancel();
+			$order->save();
 			df_checkout_session()->restoreQuote();
 		}
 		else {
-			/** @var Method $method */
-			$method = $payment->getMethodInstance();
-			/**
-			 * 2016-05-08
-			 * По аналогии с @see \Magento\Sales\Model\Order\Payment::place()
-			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L326
-			 */
-			$method->setStore($order->getStoreId());
-			$method->responseSet($charge);
-			DfPayment::processActionS($payment, $r->action(), $order);
-			DfPayment::updateOrderS(
-				$payment
-				, $order
-				, Order::STATE_PROCESSING
-				, $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
-				, $isCustomerNotified = true
-			);
-			$order->save();
+			self::action($order, $payment, $charge, $r->action());
+			if (
+				M::ACTION_AUTHORIZE === $r->action()
+				&& 'Y' === $charge->getAutoCapture()
+				&& !$r->flagged()
+			) {
+				/** @var Charge $captureCharge */
+				$captureCharge = Response::getCaptureCharge($charge->getId());
+				$order->unsetData(Order::PAYMENT);
+				$payment = $order->getPayment();
+				$payment->unsetData('method_instance');
+				$payment[Method::WEBHOOK_CASE] = true;
+				$payment[Method::CUSTOM_TRANS_ID] = $captureCharge->getId();
+				/** @var InvoiceService $invoiceService */
+				$invoiceService = df_o(InvoiceService::class);
+				/** @var Invoice|DfInvoice $invoice */
+				$invoice = $invoiceService->prepareInvoice($order);
+				df_register('current_invoice', $invoice);
+				$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+				$invoice->register();
+				$order->setIsInProcess(true);
+				$order->setCustomerNoteNotify(true);
+				/** @var Transaction $t */
+				$t = df_db_transaction();
+				$t->addObject($invoice);
+				$t->addObject($order);
+				$t->save();
+				/** @var InvoiceSender $sender */
+				$sender = df_o(InvoiceSender::class);
+				$sender->send($invoice);
+				//self::action($order, $payment, $captureCharge, M::ACTION_AUTHORIZE_CAPTURE);
+			}
 		}
 		return $result;
+	}
+
+	/**
+	 * 2016-05-16
+	 * @param Order $order
+	 * @param Payment $payment
+	 * @param Charge $charge
+	 * @param string $action
+	 * @return void
+	 */
+	private static function action(Order $order, Payment $payment, Charge $charge, $action) {
+		/** @var Method $method */
+		$method = $payment->getMethodInstance();
+		$method->setStore($order->getStoreId());
+		if (M::ACTION_AUTHORIZE === $action) {
+			/**
+			 * 2016-05-15
+			 * Отключаем это оповещение, потому что мы проведём Capture вручную.
+			 */
+			$method->disableEvent($charge->getId(), 'charge.captured');
+		}
+		$method->responseSet($charge);
+		/** @var Response $r */
+		$r = Response::s($charge, $order);
+		DfPayment::processActionS($payment, $action, $order);
+		DfPayment::updateOrderS(
+			$payment
+			, $order
+			, Order::STATE_PROCESSING
+			, $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
+			, $isCustomerNotified = true
+		);
+		$order->save();
 	}
 }

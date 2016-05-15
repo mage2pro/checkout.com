@@ -104,7 +104,7 @@ abstract class Charge extends Handler {
 					 * а потому будем использовать его в методе @see \Dfe\CheckoutCom\Method::capture()
 					 * @used-by \Dfe\CheckoutCom\Method::capture()
 					 */
-					$result[Method::CUSTOM_TRANS_ID] =  $this->id();
+					$result[Method::CUSTOM_TRANS_ID] = $this->id();
 				}
 			}
 			$this->{__METHOD__}[$id] = df_n_set($result);

@@ -52,13 +52,6 @@ class Captured extends Charge {
 			if (!$this->order()->canInvoice()) {
 				throw new LE(__('The order does not allow an invoice to be created.'));
 			}
-			/**
-			 * 2016-05-11
-			 * @todo Надо присваивать транзации capture правильный идентификатор вместо
-			 * <идентификатор транзации authorize>-capture,
-			 * потому что иначе при пришествии оповещения о refund
-			 * мы просто не найдём нашу транзакцию capture.
-			 */
 			$this->order()->setIsInProcess(true);
 			$this->order()->setCustomerNoteNotify(true);
 			/** @var Transaction $t */

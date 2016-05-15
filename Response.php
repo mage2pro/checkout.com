@@ -3,6 +3,7 @@ namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
+use com\checkout\ApiServices\SharedModels\Charge as SCharge;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
@@ -108,67 +109,11 @@ class Response extends \Df\Core\O {
 			 * Раньше тут стояло:
 			 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
 			 */
-			/** @var string $result */
-			if (M::ACTION_AUTHORIZE === $this->action()) {
-				$result = $response->getId();
-			}
-			else {
-				try {
-					/**
-					 * 2016-05-11
-					 * Когда выполняешь этот код без отладчика,
-					 * то в результате приходит не 2 транзации в состояниях Authorized и Сaptured,
-					 * а одна транзакция в состоянии Pending.
-					 * В этом случае надо просто подождать...
-					 * Потом в ответе приходит одна транзакция в состоянии Authorized.
-					 * Надо снова подождать...
-					 *
-					 * 2016-05-15
-					 * Вчера пришлось ждать транзакцию в состоянии Captured аж 14 секунд.
-					 * Я пришёл к мысли, что не стоит реального покупателя заставлять так ждать,
-					 * и поэтому для реальных покупателей лучше ВСЕГДА
-					 * в Magento первой транзакцией делать Authorize, а далее,
-					 * если администратор магазина указал в настройках, что он хочет транзацию Capture,
-					 * то принимать транзакцию Capture через Webhooks.
-					 */
-					/** @var int $numRetries */
-					/**
-					 * 2016-05-15
-					 * Пока максимум приходилось ждать 14 секунд,
-					 * но на всякий случай поставил 60.
-					 * Можно, конечно, ждать и дольше, но вряд ли это нужно.
-					 */
-					$numRetries = 60;
-					$result = null;
-					while ($numRetries && !$result) {
-						/** @var ChargeHistory $history */
-						$history = $this->api()->getChargeHistory($response->getId());
-						df_log(print_r($history->getCharges(), true));
-						/**
-						 * 2016-05-11
-						 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
-						 * «[Checkout.com]
-						 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
-						 * sample response»
-						 * https://mage2.pro/t/1601
-						 */
-						/** @var Charge $chargeCapture */
-						$chargeCapture = df_first($history->getCharges());
-						if ('Captured' === $chargeCapture->getStatus()) {
-							$result = $chargeCapture->getId();
-						}
-						else {
-							sleep(1);
-							$numRetries--;
-						}
-					}
-				}
-				catch (\Exception $e) {
-					df_log($e);
-					throw $e;
-				}
-			}
-			$this->{__METHOD__} = $result;
+			$this->{__METHOD__} =
+				M::ACTION_AUTHORIZE === $this->action()
+				? $response->getId()
+				: self::getCaptureCharge($response->getId())->getId()
+			;
 		}
 		return $this->{__METHOD__};
 	}
@@ -185,21 +130,18 @@ class Response extends \Df\Core\O {
 			"status": "Flagged",
 			"authCode": "188986"
 		}
+	 *
+	 * 2016-05-15
+	 * Хотя в интерфейсе Checkout.com статус может быть «Authorised - 3D»,
+	 * в объекте он всё равно будет просто «Authorised».
+	 *
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @return bool
 	 */
 	public function valid() {
-		return in_array($this->charge()->getStatus(), ['Authorised', self::$S__FLAGGED]);
+		return in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);
 	}
-
-	/**
-	 * 2016-04-21
-	 * https://github.com/CKOTech/checkout-php-library#example
-	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
-	 * @return ChargeService
-	 */
-	private function api() {return S::s()->apiCharge();}
 
 	/** @return Charge */
 	private function charge() {return $this[self::$P__CHARGE];}
@@ -233,6 +175,78 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-15
+	 * @param string $authId
+	 * @return Charge
+	 * @throws \Exception
+	 */
+	public static function getCaptureCharge($authId) {
+		/** @bar Charge $result */
+		$result = null;
+		try {
+			/**
+			 * 2016-05-11
+			 * Когда выполняешь этот код без отладчика,
+			 * то в результате приходит не 2 транзации в состояниях Authorized и Сaptured,
+			 * а одна транзакция в состоянии Pending.
+			 * В этом случае надо просто подождать...
+			 * Потом в ответе приходит одна транзакция в состоянии Authorized.
+			 * Надо снова подождать...
+			 *
+			 * 2016-05-15
+			 * Вчера пришлось ждать транзакцию в состоянии Captured аж 14 секунд.
+			 * Я пришёл к мысли, что не стоит реального покупателя заставлять так ждать,
+			 * и поэтому для реальных покупателей лучше ВСЕГДА
+			 * в Magento первой транзакцией делать Authorize, а далее,
+			 * если администратор магазина указал в настройках, что он хочет транзацию Capture,
+			 * то принимать транзакцию Capture через Webhooks.
+			 */
+			/** @var int $numRetries */
+			/**
+			 * 2016-05-15
+			 * Пока максимум приходилось ждать 14 секунд,
+			 * но на всякий случай поставил 60.
+			 * Можно, конечно, ждать и дольше, но вряд ли это нужно.
+			 */
+			$numRetries = 60;
+			$result = null;
+			while ($numRetries && !$result) {
+				/** @var ChargeHistory $history */
+				$history = S::s()->apiCharge()->getChargeHistory($authId);
+				df_log(print_r($history->getCharges(), true));
+				/**
+				 * 2016-05-11
+				 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
+				 * «[Checkout.com]
+				 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
+				 * sample response»
+				 * https://mage2.pro/t/1601
+				 */
+				/** @var SCharge $sCharge */
+				$sCharge = df_first($history->getCharges());
+				/**
+				 * 2016-05-15
+				 * Хотя в интерфейсе Checkout.com статус может быть «Captured - 3D»,
+				 * в объекте он всё равно будет просто «Captured».
+				 */
+				if (self::S__CAPTURED === $sCharge->getStatus()) {
+					$result = S::s()->apiCharge()->getCharge($sCharge->getId());
+				}
+				else {
+					sleep(1);
+					$numRetries--;
+				}
+			}
+		}
+		catch (\Exception $e) {
+			df_log($e);
+			throw $e;
+		}
+		df_assert($result);
+		return $result;
+	}
+
+	/**
+	 * 2016-05-15
 	 * @param Charge $charge
 	 * @param Order $order
 	 * @return $this
@@ -246,11 +260,26 @@ class Response extends \Df\Core\O {
 		return $cache[$charge->getId()];
 	}
 
+	/**
+	 * 2016-05-15
+	 * Хотя в интерфейсе Checkout.com статус может быть «Captured - 3D»,
+	 * в объекте он всё равно будет просто «Captured».
+	 * @var string
+	 */
+	const S__CAPTURED = 'Captured';
+
 	/** @var string */
 	private static $P__CHARGE = 'charge';
 	/** @var string */
 	private static $P__ORDER = 'order';
 
+	/**
+	 * 2016-05-15
+	 * Хотя в интерфейсе Checkout.com статус может быть «Authorised - 3D»,
+	 * в объекте он всё равно будет просто «Authorised».
+	 * @var string
+	 */
+	private static $S__AUTHORISED = 'Authorised';
 	/**
 	 * 2016-05-09
 	 * «[Checkout.com] - What is a «Flagged» transaction?» https://mage2.pro/t/1565

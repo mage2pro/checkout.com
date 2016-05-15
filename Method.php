@@ -165,6 +165,34 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
+	 * 2016-05-11
+	 * Отключаем оповещение о действии
+	 * (по причине того, что это действие делали мы сами).
+	 * @param string $transactionId
+	 * @param string $eventId
+	 * @return void
+	 */
+	public function disableEvent($transactionId, $eventId) {
+		/** @var ChargeResponse $charge */
+		$charge = $this->api()->getCharge($transactionId);
+		/** @var array(string => string) $metadata */
+		$metadata = df_nta($charge->getMetadata());
+		/** @var string[] $events */
+		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, ''));
+		if (!in_array($eventId, $events)) {
+			$events[]= $eventId;
+		}
+		$metadata[self::DISABLED_EVENTS] = df_csv($events);
+		// 2016-05-11
+		// «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
+		/** @var ChargeUpdate $update */
+		$update = new ChargeUpdate;
+		$update->setChargeId($transactionId);
+		$update->setMetadata($metadata);
+		$this->api()->UpdateCardCharge($update);
+	}
+
+	/**
 	 * @override
 	 * @see \Df\Payment\Method::getConfigPaymentAction()
 	 * @return string
@@ -425,7 +453,7 @@ class Method extends \Df\Payment\Method {
 			 		...
 				}
 			 */
-			df_assert_eq('Captured', $response->getStatus());
+			df_assert_eq(Response::S__CAPTURED, $response->getStatus());
 			/**
 			 * 2016-05-09
 			 * Как видно из приведённого выше ответа сервера,
@@ -441,34 +469,6 @@ class Method extends \Df\Payment\Method {
 			 */
 			$payment->setTransactionId($response->getId());
 		});
-	}
-
-	/**
-	 * 2016-05-11
-	 * Отключаем оповещение о действии
-	 * (по причине того, что это действие делали мы сами).
-	 * @param string $transactionId
-	 * @param string $eventId
-	 * @return void
-	 */
-	private function disableEvent($transactionId, $eventId) {
-		/** @var ChargeResponse $charge */
-		$charge = $this->api()->getCharge($transactionId);
-		/** @var array(string => string) $metadata */
-		$metadata = df_nta($charge->getMetadata());
-		/** @var string[] $events */
-		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, ''));
-		if (!in_array($eventId, $events)) {
-			$events[]= $eventId;
-		}
-		$metadata[self::DISABLED_EVENTS] = df_csv($events);
-		// 2016-05-11
-		// «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
-		/** @var ChargeUpdate $update */
-		$update = new ChargeUpdate;
-		$update->setChargeId($transactionId);
-		$update->setMetadata($metadata);
-		$this->api()->UpdateCardCharge($update);
 	}
 
 	/**
