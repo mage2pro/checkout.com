@@ -60,30 +60,11 @@ define ([
 			return !key ? result : result[key];
 		},
 		/**
-		 * 2016-03-01
-		 * 2016-03-08
-		 * Раньше реализация была такой:
-		 * return _.keys(this.getCcAvailableTypes())
-		 *
-		 * https://support.stripe.com/questions/which-cards-and-payment-types-can-i-accept-with-stripe
-		 * «Which cards and payment types can I accept with Stripe?
-		 * With Stripe, you can charge almost any kind of credit or debit card:
-		 * U.S. businesses can accept
-		  		Visa, MasterCard, American Express, JCB, Discover, and Diners Club.
-		 * Australian, Canadian, European, and Japanese businesses can accept
-		 * 		Visa, MasterCard, and American Express.»
-		 *
-		 * Не стал делать реализацию на сервере, потому что там меня не устраивал
-		 * порядок следования платёжных систем (первой была «American Express»)
-		 * https://github.com/magento/magento2/blob/cf7df72/app/code/Magento/Payment/etc/payment.xml#L10-L44
-		 * А изменить этот порядок коротко не получается:
-		 * https://github.com/magento/magento2/blob/487f5f45/app/code/Magento/Payment/Model/CcGenericConfigProvider.php#L105-L124
-		 *
+		 * 2016-05-18
+		 * @todo Спросил, какие типы банковских карт поддерживаются:
 		 * @returns {String[]}
 	 	 */
-		getCardTypes: function() {
-			return ['VI', 'MC', 'AE'];
-		},
+		getCardTypes: function() {return ['VI', 'MC', 'AE'];},
 		/** @returns {String} */
 		getCode: function() {return this.code;},
 		/**
