@@ -5,40 +5,12 @@ define ([
 	, 'Df_Checkout/js/data'
 	, 'mage/translate'
 	, 'underscore'
-	/**
-	 * 2016-04-17
-	 * How to get the customer's data on the frontend checkout page's client side (with JavaScript)
-	 * using the «Magento_Customer/js/model/customer» object?
-	 * https://mage2.pro/t/1245
-	 *
-	 * The «Magento_Customer/js/model/customer» JavaScript object interface
-	 * https://mage2.pro/t/1252
-	 */
-	, 'Magento_Customer/js/model/customer'
-	/**
-	 * 2016-04-17
-	 * How is the «Magento_Customer/js/customer-data» object implemented and used?
-	 * https://mage2.pro/t/1246
-	 */
-	, 'Magento_Customer/js/customer-data'
-	/**
-	 * 2016-04-17
-	 * How is the «Magento_Checkout/js/checkout-data» object implemented and used?
-	 * https://mage2.pro/t/1293
-	 *
-	 * How to get the checkout data on the frontend checkout page's client side (with JavaScript)?
-	 * https://mage2.pro/t/1292
-	 *
-	 * https://mage2.pro/t/1294
-	 * The «Magento_Checkout/js/checkout-data» JavaScript object interface and its implementation
-	 */
-	, 'Magento_Checkout/js/checkout-data'
 	, 'Dfe_CheckoutCom/action/place-order'
 	, 'Magento_Checkout/js/model/payment/additional-validators'
 	, 'Magento_Checkout/js/action/redirect-on-success'
 ], function(
-	Component, $, df, dfCheckout, $t, _, customer, customerData
-	, checkoutData, placeOrderAction, additionalValidators, redirectOnSuccessAction
+	Component, $, df, dfCheckout, $t, _,
+	placeOrderAction, additionalValidators, redirectOnSuccessAction
 ) {
 	'use strict';
 	return Component.extend({
@@ -110,15 +82,9 @@ define ([
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
 			this.initDf();
-			/*console.log(dfCheckout.email());
-			console.log(customer);
-			console.log(customerData);
-			console.log(window.customerData);
-			console.log(checkoutData); */
-			//CheckoutKit.setPublishableKey(this.config('publishableKey'));
 			// 2016-03-09
 			// «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?
-			/** {String|Boolean} */
+			/** @type {String|Boolean} */
 			var prefill = this.config('prefill');
 			if ($.isPlainObject(prefill)) {
 				this.creditCardNumber(prefill['number']);
@@ -228,10 +194,10 @@ define ([
 				 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js#create-card-token
 				 */
 				CheckoutKit.createCardToken({
-				    number: $('[data-checkout="card-number"]', $form).val()
-					,expiryMonth: $('[data-checkout="expiry-month"]', $form).val()
-					,'expiryYear': $('[data-checkout="expiry-year"]', $form).val()
-					,cvv: $('[data-checkout="cvv"]', $form).val()
+					cvv: $('[data="cvv"]', $form).val()
+					,expiryMonth: $('[data="expiry-month"]', $form).val()
+					,expiryYear: $('[data="expiry-year"]', $form).val()
+					,number: $('[data="card-number"]', $form).val()
 				}, function(response) {
 					_this.token = response.id;
 					_this.placeOrder();
