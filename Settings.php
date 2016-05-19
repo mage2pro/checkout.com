@@ -139,6 +139,14 @@ class Settings extends \Df\Core\Settings {
 	public function statement($s = null) {return $this->v(__FUNCTION__, $s);}
 
 	/**
+	 * 2016-03-02
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Mode?»
+	 * @param null|string|int|ScopeInterface $s [optional]
+	 * @return bool
+	 */
+	public function test($s = null) {return $this->b(__FUNCTION__, $s);}
+
+	/**
 	 * 2016-05-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Wait for «Capture» transaction on an order placement if the Payment Action is «Capture»?»
 	 * @param null|string|int|ScopeInterface $s [optional]
@@ -184,14 +192,6 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	private function liveSecretKey($s = null) {return $this->p(__FUNCTION__, $s);}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Mode?»
-	 * @param null|string|int|ScopeInterface $s [optional]
-	 * @return bool
-	 */
-	public function test($s = null) {return $this->b(__FUNCTION__, $s);}
 
 	/**
 	 * 2016-03-02

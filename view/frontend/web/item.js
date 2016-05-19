@@ -188,6 +188,7 @@ define ([
 		pay: function() {
 			var _this = this;
 			this.initDf().done(function() {
+				/** @type {jQuery} HTMLFormElement */
 				var $form = $('form.dfe-checkout-com');
 				/**
 				 * 2016-04-21
