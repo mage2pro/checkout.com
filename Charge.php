@@ -508,7 +508,4 @@ class Charge extends \Df\Core\O {
 			, self::$P__TOKEN => $token
 		]))->_build();
 	}
-
-	/** @return $this */
-	public static function s() {static $r; return $r ? $r : $r = new self;}
 }
