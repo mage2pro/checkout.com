@@ -69,7 +69,7 @@ class Refunded extends Charge {
 	protected function process() {
 		/**
 		 * 2016-05-11
-		 * @todo Надо ещё устанавливать присланное в запросе примечание к заказу.
+		 * @todo Надо ещё устанавливать присланное в запросе примечание к возврату.
 		 */
 		/** @var CreditmemoService|ICreditmemoService $cmi */
 		$cmi = df_om()->create(ICreditmemoService::class);
@@ -78,7 +78,7 @@ class Refunded extends Charge {
 		 * 2016-03-28
 		 * @todo Надо отослать покупателю письмо-оповещение о возврате оплаты.
 		 * 2016-05-15
-		 * Что интересно, при возврате из административной части Magent 2
+		 * Что интересно, при возврате из административной части Magento 2
 		 * покупатель тоже не получает уведомление.
 		 */
 		return $this->cm()->getId();
