@@ -37,31 +37,31 @@ class Charge extends \Df\Core\O {
 		 * Max length of 100 characters.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 * 2016-05-03
-		 * Не является обязательным, но в целом приятно,
-		 * когда в графе «Track ID» значится номер заказа вместо «Unknown».
+		 * It is not required, but it is pleasant to have the order number in the «Track ID» row
+		 * instead of «Unknown» value.
 		 *
 		 * 2016-05-08
-		 * Вот теперь «Track ID» стал нам жизненно необходим,
-		 * потому что именно по нему мы определяем, какой заказ оплачивал покупатель
-		 * после возвращения покупателя с проверки 3D-Secure.
+		 * Since now, the «Track ID» is vital for us,
+		 * because it is used for the payment identification
+		 * when the customer is returned to the store after 3D-Secure verification.
 		 *
-		 * Предыдущей попыткой решения было
-		 * $result->setUdf1($this->payment()->getId());
-		 * однако это неправильно, потому что в момент размещения заказа
-		 * ни заказ, ни платёж ещё не сохранены в БД,
-		 * в то же время increment_id для заказа создаётся заранее,
-		 * именно для того, чтобы к нему можно было привязываться.
+		 * My previous attempt was $result->setUdf1($this->payment()->getId());
+		 * but it is wrong, because the order does not have ID on its placement,
+		 * it is not saved in the database yet.
+		 * But Increment ID is pregenerated, and we can rely on it.
 		 *
-		 * Ещё более ранней попыткой решения проблемы было создание транзакции.
-		 * однако типы транзакций зашиты в системе, и новый тип создавать проблематично.
+		 * My pre-previous attept was to record a custom transaction to the database,
+		 * but Magento 2 has a fixed number of transaction types,
+		 * and it would take a lot of effort to add a new transaction type.
 		 *
-		 * 2016-05-08 (дополнение)
-		 * Ещё глубже проникнув в проблему, я понял, что привязка charge к заказу
-		 * всё-таки не является обязательной:
-		 * ведь и размещение заказа, и провека 3D-Secure
-		 * происходят в контексте сессии покупателя,
-		 * и мы можем получить последний размещённый покупателем заказ
-		 * простым вызовом @see \Magento\Checkout\Model\Session::getLastRealOrder()
+		 * 2016-05-08 (addition)
+		 * After thinking more deeply I understand,
+		 * that the linking a Checkout.com Charge to Magento Order is not required,
+		 * because an order placement and 3D-Secure verification is done
+		 * in the context of the current customer session,
+		 * and we can get the order information from the session
+		 * on the customer return from 3D-Secure verification.
+		 * So we can just call @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
 		$result->setTrackId($this->order()->getIncrementId());
