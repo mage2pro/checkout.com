@@ -462,7 +462,15 @@ class Charge extends \Df\Core\O {
 				S::s()->force3DS_forAll()
 				|| S::s()->force3DS_forNew() && df_customer_is_new($this->order()->getCustomerId())
 				|| S::s()->force3DS_forShippingDestinations($this->address()->getCountryId())
-				|| S::s()->force3DS_forIPs(df_visitor()->iso2())
+				/**
+				 * 2016-05-31
+				 * Сегодня заметил, что при запросе из PHP freegeoip.net перестал возвращать мне значение,
+				 * а при запросе из браузера — по прежнему возвращает.
+				 * Видимо, freegeoip.net забанил мой User-Agent?
+				 * В любом случае, нельзя полагаться, что freegeoip.net вернёт непустой ответ.
+				 * @uses df_visitor()
+				 */
+				|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->address()->getCountryId())
 			;
 		}
 		return $this->{__METHOD__};
