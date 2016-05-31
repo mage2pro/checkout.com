@@ -9,6 +9,12 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * 1) при возвращении покупателя в магазин после проверки 3D-Secure.
 	 * 2) при оповещениях (Webhooks).
 	 * В первом случае запрос имеет тип GET и содержит параметр «cko-payment-token».
+	 *
+	 * 2016-05-30
+	 * Checkout.com does not encrypt or sign the webhooks' data.
+	 * Also, it does not require HTTPS protocol for webhooks.
+	 * @todo I think, we need to validate the data using http://developers.checkout.com/docs/server/api-reference/charges/verify-charge
+	 *
 	 * @override
 	 * @see \Magento\Framework\App\Action\Action::execute()
 	 * @return \Magento\Framework\Controller\Result\Redirect

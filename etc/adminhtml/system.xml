@@ -155,7 +155,8 @@
 				<field 
 					id='webhook' 
 					translate='label' 
-					type='Dfe\CheckoutCom\Element\Webhook'
+					type='Df\Framework\Data\Form\Element\Webhook'
+					dfWebhook_routePath='dfe-checkout-com'
 					sortOrder='9'
 					showInDefault='1' 
 					showInWebsite='0'
