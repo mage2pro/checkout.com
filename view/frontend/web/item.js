@@ -79,6 +79,12 @@ define ([
 		*/
 		initialize: function() {
 			this._super();
+			/**
+			 * 2016-06-01
+			 * Оказывается, хитрость заключается в том, что анонимный покупатель может менять свой email.
+			 * Получается, что нам имеет смысл инициализировать CheckoutKit
+			 * только по нажатию покупателем кнопки Place Order.
+			 */
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
 			this.initDf();
@@ -118,19 +124,8 @@ define ([
 					 */
 					debugMode: this.isTest()
 					,publicKey: this.config('publishableKey')
-					/**
-					 * 2016-04-14
-					 * «Charges Required-Field Matrix»
-					 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
-					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token
-					 *
-					 * 2016-04-17
-					 * How to get the current customer's email on the frontend checkout screen?
-					 * https://mage2.pro/t/1295
-					 */
-					,customerEmail: dfCheckout.email()
+					//,customerEmail: dfCheckout.email()
 					,ready: function(event) {
-						console.log("CheckoutKit.js is ready");
 						// 2016-04-14
 						// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
 						//CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
@@ -168,14 +163,17 @@ define ([
 						});
 						deferred.resolve();
 					}
-					,apiError: function (event) {deferred.reject();}
+					,apiError: function(event) {
+						deferred.reject();
+					}
 				};
 				/** @type {String} */
 				var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
+				require.undef(library);
+				delete window.CheckoutKit;
 				// 2016-04-11
 				// CheckoutKit не использует AMD и прикрепляет себя к window.
-				require([library], function() {
-				});
+				require([library], function() {});
 				this._initDf = deferred.promise();
 			}
 			return this._initDf;
@@ -199,6 +197,17 @@ define ([
 					,expiryMonth: $('[data="expiry-month"]', $form).val()
 					,expiryYear: $('[data="expiry-year"]', $form).val()
 					,number: $('[data="card-number"]', $form).val()
+					/**
+					 * 2016-04-14
+					 * «Charges Required-Field Matrix»
+					 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
+					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token
+					 *
+					 * 2016-04-17
+					 * How to get the current customer's email on the frontend checkout screen?
+					 * https://mage2.pro/t/1295
+					 */
+					,'email-address': dfCheckout.email()
 				}, function(response) {
 					_this.token = response.id;
 					_this.placeOrder();
