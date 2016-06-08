@@ -1,7 +1,14 @@
 <?php
 namespace Dfe\CheckoutCom;
-use com\checkout\ApiServices\Charges\ChargeService;
-use com\checkout\ApiServices\Charges\ResponseModels\Charge;
+/**
+ * 2016-06-08
+ * I renamed it to get rid of the following
+ * Magento 2 compiler (bin/magento setup:di:compile) failure:
+ * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+ * because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
+ * http://stackoverflow.com/questions/17746481
+ */
+use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\ApiServices\SharedModels\Charge as SCharge;
 use Dfe\CheckoutCom\Settings as S;
@@ -143,7 +150,7 @@ class Response extends \Df\Core\O {
 		return in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);
 	}
 
-	/** @return Charge */
+	/** @return CCharge */
 	private function charge() {return $this[self::$P__CHARGE];}
 
 	/** @return Order */
@@ -168,7 +175,7 @@ class Response extends \Df\Core\O {
 	protected function _construct() {
 		parent::_construct();
 		$this
-			->_prop(self::$P__CHARGE, Charge::class)
+			->_prop(self::$P__CHARGE, CCharge::class)
 			->_prop(self::$P__ORDER, Order::class)
 		;
 	}
@@ -176,11 +183,11 @@ class Response extends \Df\Core\O {
 	/**
 	 * 2016-05-15
 	 * @param string $authId
-	 * @return Charge
+	 * @return CCharge
 	 * @throws \Exception
 	 */
 	public static function getCaptureCharge($authId) {
-		/** @bar Charge $result */
+		/** @bar CCharge $result */
 		$result = null;
 		try {
 			/**
@@ -247,11 +254,11 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-15
-	 * @param Charge $charge
+	 * @param CCharge $charge
 	 * @param Order $order
 	 * @return $this
 	 */
-	public static function s(Charge $charge, Order $order) {
+	public static function s(CCharge $charge, Order $order) {
 		/** @var array(string => $this) */
 		static $cache;
 		if (!isset($cache[$charge->getId()])) {

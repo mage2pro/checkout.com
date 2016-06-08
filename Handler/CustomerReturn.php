@@ -1,7 +1,16 @@
 <?php
 namespace Dfe\CheckoutCom\Handler;
 use com\checkout\ApiServices\Charges\ChargeService;
-use com\checkout\ApiServices\Charges\ResponseModels\Charge;
+/**
+ * 2016-06-08
+ * I renamed it to get rid of the following
+ * Magento 2 compiler (bin/magento setup:di:compile) failure:
+ * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+ * because the name is already in use
+ * in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
+ * http://stackoverflow.com/questions/17746481
+ */
+use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Df\Sales\Model\Order\Payment as DfPayment;
@@ -64,7 +73,7 @@ class CustomerReturn {
 		 * как до возвращения покупателя в магазин после проверки 3D-Secure, так и после
 		 * (наблюдал оба случая).
 		 */
-		/** @var Charge $charge */
+		/** @var CCharge $charge */
 		$charge = $api->verifyCharge($token);
 		df_log($charge->json);
 		/** @var Response $r */
@@ -93,7 +102,7 @@ class CustomerReturn {
 				&& 'Y' === $charge->getAutoCapture()
 				&& !$r->flagged()
 			) {
-				/** @var Charge $captureCharge */
+				/** @var CCharge $captureCharge */
 				$captureCharge = Response::getCaptureCharge($charge->getId());
 				$order->unsetData(Order::PAYMENT);
 				$payment = $order->getPayment();
@@ -127,11 +136,11 @@ class CustomerReturn {
 	 * 2016-05-16
 	 * @param Order $order
 	 * @param Payment $payment
-	 * @param Charge $charge
+	 * @param CCharge $charge
 	 * @param string $action
 	 * @return void
 	 */
-	private static function action(Order $order, Payment $payment, Charge $charge, $action) {
+	private static function action(Order $order, Payment $payment, CCharge $charge, $action) {
 		/** @var Method $method */
 		$method = $payment->getMethodInstance();
 		$method->setStore($order->getStoreId());
