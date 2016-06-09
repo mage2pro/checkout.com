@@ -72,7 +72,7 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	public function force3DS_forIPs($countryIso2, $s = null) {
-		return $this->nwb(__FUNCTION__, 'countries', $countryIso2, $s);
+		return $this->nwbn(__FUNCTION__, 'countries', $countryIso2, $s);
 	}
 
 	/**
@@ -92,7 +92,7 @@ class Settings extends \Df\Core\Settings {
 	 * @return string
 	 */
 	public function force3DS_forShippingDestinations($countryIso2, $s = null) {
-		return $this->nwb(__FUNCTION__, 'countries', $countryIso2, $s);
+		return $this->nwbn(__FUNCTION__, 'countries', $countryIso2, $s);
 	}
 
 	/**
