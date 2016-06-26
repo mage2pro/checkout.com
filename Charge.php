@@ -393,12 +393,38 @@ class Charge extends \Df\Core\O {
 	/** @return string */
 	private function currencyCode() {return $this->order()->getBaseCurrencyCode();}
 
-	/** @return array(string => string) */
+	/**
+	 * 2016-06-25
+	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
+	 * @return array(string => string)
+	 */
 	private function metaData() {
-		return array_combine(
-			dfa_select(Metadata::s()->map(), S::s()->metadata())
-			,dfa_select($this->metaVars(), S::s()->metadata())
-		);
+		// 2016-06-25
+		// http://stackoverflow.com/a/28447380
+		/** @var \DateTime $now */
+		$now = new \DateTime(null, new \DateTimeZone('Europe/London'));
+		// something like "2015-02-11T06:16:47+0100" (ISO 8601)
+		/** @var string $nowS */
+		$nowS = $now->format('Y-m-d\TH:i:sO');
+		return [
+			'server' => implode(' / ', [dfa($_SERVER, 'SERVER_SOFTWARE'), dfa($_SERVER, 'HTTP_USER_AGENT')])
+			,'quote_id' => $this->order()->getIncrementId()
+			// 2016-06-25
+			// Magento version
+			,'magento_version' => df_magento_version()
+			// 2016-06-26
+			// The version of the your Magento/Checkout plugin the merchant is using
+			,'plugin_version' => df_package_version('mage2pro/checkout.com')
+			// 2016-06-25
+			// The version of our PHP core library (if you are using the our PHP core library)
+			,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION
+			// 2016-06-25
+			// JS/API/Kit
+			,'integration_type' => 'Kit'
+			// 2016-06-25
+			// Merchant\'s server time
+			,'time' => $nowS
+		];
 	}
 
 	/**

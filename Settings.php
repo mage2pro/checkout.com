@@ -96,14 +96,6 @@ class Settings extends \Df\Core\Settings {
 	}
 
 	/**
-	 * 2016-03-14
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Metadata»
-	 * @param null|string|int|S $s [optional]
-	 * @return string[]
-	 */
-	public function metadata($s = null) {return $this->csv(__FUNCTION__, $s);}
-
-	/**
 	 * 2016-03-09
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?»
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()

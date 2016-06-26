@@ -281,20 +281,6 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 					<validate>validate-length maximum-length-22</validate>
 				</field>
 				<field
-					id='metadata'
-					translate='label'
-					type='Df\Framework\Data\Form\Element\Multiselect'
-					sortOrder='15'
-					showInDefault='1'
-					showInWebsite='1'
-					showInStore='1'
-				>
-					<label>Metadata</label>
-					<source_model>Dfe\CheckoutCom\Source\Metadata</source_model>
-					<comment><![CDATA[It will be displayed in the Checkout.com web interface <a href="https://mage2.pro/t/932">alongside the payment</a>.]]></comment>
-					<depends><field id='enable'>1</field></depends>
-				</field>
-				<field
 					id='min_order_total'
 					translate='label'
 					type='text'
