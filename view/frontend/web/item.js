@@ -7,7 +7,7 @@ define ([
 	, 'underscore'
 	, 'Dfe_CheckoutCom/action/place-order'
 	, 'Magento_Checkout/js/model/payment/additional-validators'
-	, 'Magento_Checkout/js/action/redirect-on-success'
+	, 'Df_Checkout/js/action/redirect-on-success'
 ], function(
 	Component, $, df, dfCheckout, $t, _,
 	placeOrderAction, additionalValidators, redirectOnSuccessAction
