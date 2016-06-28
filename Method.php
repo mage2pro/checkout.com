@@ -115,7 +115,6 @@ class Method extends \Df\Payment\Method {
 	 * 2016-03-06
 	 * @override
 	 * @see \Df\Payment\Method::capture()
-	 * @see https://stripe.com/docs/charges
 	 *
 	 * $amount содержит значение в учётной валюте системы.
 	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L37-L37
@@ -124,7 +123,7 @@ class Method extends \Df\Payment\Method {
 	 * @param II|I|OP $payment
 	 * @param float $amount
 	 * @return $this
-	 * @throws \Stripe\Error\Card
+	 * @throws E|LE
 	 */
 	public function capture(II $payment, $amount) {
 		if (!$payment[self::WEBHOOK_CASE]) {
@@ -479,7 +478,7 @@ class Method extends \Df\Payment\Method {
 	 * @param float|null $amount [optional]
 	 * @param bool|null $capture [optional]
 	 * @return $this
-	 * @throws \Stripe\Error\Card
+	 * @throws E|LE
 	 */
 	private function charge(II $payment, $amount = null, $capture = true) {
 		/** @var Transaction|false|null $auth */
@@ -711,7 +710,7 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-02-29
-	 * @used-by Dfe/Stripe/etc/frontend/di.xml
+	 * @used-by Dfe/CheckoutCom/etc/frontend/di.xml
 	 * @used-by \Dfe\CheckoutCom\ConfigProvider::getConfig()
 	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */

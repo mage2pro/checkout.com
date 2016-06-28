@@ -62,8 +62,8 @@ abstract class Handler extends \Df\Core\O {
 		try {
 			/**
 			 * 2016-05-13
-			 * В отличие от Stripe, у Checkout.com разделителем частей идентификатора события
-			 * является только точка, символ подчёркивания не используется.
+			 * Unlike Stripe, Checkout.com does not use the underline character («_»)
+			 * as an event's parts separator, it uses only dot («.») as a separator.
 			 * http://developers.checkout.com/docs/server/api-reference/webhooks
 			 */
 			/** @var string $suffix */
