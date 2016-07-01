@@ -58,6 +58,8 @@ define ([
 		},
 		/**
 		 * 2016-05-04
+		 * Перекрыли родительский метод,
+		 * чтобы подставить свой placeOrderAction вместо родительского.
 		 * @override
 		 * https://github.com/magento/magento2/blob/981d1f/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L161-L165
 		 * @return {jQuery.Deferred}
