@@ -5,7 +5,7 @@ define ([
 	, 'Df_Checkout/js/data'
 	, 'mage/translate'
 	, 'underscore'
-	, 'Dfe_CheckoutCom/action/place-order'
+	, 'Df_Checkout/js/action/place-order'
 	, 'Magento_Checkout/js/model/payment/additional-validators'
 	, 'Df_Checkout/js/action/redirect-on-success'
 ], function(
@@ -65,7 +65,7 @@ define ([
 		 * @return {jQuery.Deferred}
 		*/
 		getPlaceOrderDeferredObject: function() {
-			return $.when(placeOrderAction(this.getData(), this.messageContainer));
+			return $.when(placeOrderAction(this.getData(), this.messageContainer, 'dfe-checkout-com'));
 		},
 		/**
 		 * 2016-03-08
