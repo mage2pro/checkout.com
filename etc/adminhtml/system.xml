@@ -29,6 +29,8 @@
                 showInStore='1'
             >
                 <label>Checkout.com</label>
+				<dfExtension>Dfe\CheckoutCom\Ext</dfExtension>
+				<frontend_model>Df\Config\Block\System\Config\Form\Fieldset\Ext</frontend_model>
                 <field
                     id='enable'
                     translate='label'
