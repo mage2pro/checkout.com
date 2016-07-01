@@ -8,6 +8,7 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
+use Df\Payment\PlaceOrder;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Settings as S;
 use Exception as E;
@@ -665,7 +666,7 @@ class Method extends \Df\Payment\Method {
 				 *
 				 * Извлекаем его здесь: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
 				 */
-				$this->iiaSet(self::REDIRECT_URL, $result);
+				$this->iiaSet(PlaceOrder::RESPONSE, $result);
 				/**
 				 * 2016-05-06
 				 * Письмо-оповещение о заказе здесь ещё не должно отправляться.
@@ -737,13 +738,6 @@ class Method extends \Df\Payment\Method {
 	 * @used-by \Dfe\CheckoutCom\Handler::isInitiatedByMyself()
 	 */
 	const DISABLED_EVENTS = 'disabled_events';
-
-	/**
-	 * 2016-05-04
-	 * @used-by \Dfe\CheckoutCom\Method::charge()
-	 * @used-by
-	 */
-	const REDIRECT_URL = 'dfe_redirect_url';
 
 	/**
 	 * 2016-03-06

@@ -5,7 +5,7 @@
 >
 	<route url='/V1/dfe-checkout-com/:cartId/place-order' method='POST'>
 		<service 
-			class='Dfe\CheckoutCom\PlaceOrder'
+			class='Df\Payment\PlaceOrder'
 			method='guest'
 		/>
 		<resources>
@@ -14,7 +14,7 @@
 	</route>
 	<route url='/V1/dfe-checkout-com/mine/place-order' method='POST'>
 		<service 
-			class='Dfe\CheckoutCom\PlaceOrder'
+			class='Df\Payment\PlaceOrder'
 			method='registered'
 		/>
 		<resources>
