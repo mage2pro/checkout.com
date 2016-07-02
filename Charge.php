@@ -16,7 +16,7 @@ use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Item as OrderItem;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
 use Magento\Store\Model\Store;
-class Charge extends \Df\Core\O {
+class Charge extends \Df\Payment\Charge\WithToken {
 	/**
 	 * 2016-05-06
 	 * @return CardTokenChargeCreate
@@ -24,7 +24,7 @@ class Charge extends \Df\Core\O {
 	private function _build() {
 		/** @var CardTokenChargeCreate $result */
 		$result = new CardTokenChargeCreate;
-		df_assert($this->order()->getIncrementId());
+		df_assert($this->o()->getIncrementId());
 		/**
 		 * 2016-05-08
 		 * How To Use Billing Descriptors to Decrease Chargebacks
@@ -64,8 +64,8 @@ class Charge extends \Df\Core\O {
 		 * So we can just call @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
-		$result->setTrackId($this->order()->getIncrementId());
-		$result->setCustomerName($this->address()->getName());
+		$result->setTrackId($this->o()->getIncrementId());
+		$result->setCustomerName($this->addressSB()->getName());
 		/**
 		 * 2016-04-21
 		 * «The authorised charge must captured within 7 days
@@ -119,7 +119,7 @@ class Charge extends \Df\Core\O {
 		 * «Either email or customerId required.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 */
-		$result->setEmail($this->order()->getCustomerEmail());
+		$result->setEmail($this->o()->getCustomerEmail());
 		/**
 		 * 2016-04-23
 		 * Нельзя одновременно устанавливать и email, и customerId.
@@ -169,7 +169,7 @@ class Charge extends \Df\Core\O {
 		 * «Customer/Card holder Ip.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 */
-		$result->setCustomerIp($this->order()->getRemoteIp());
+		$result->setCustomerIp($this->o()->getRemoteIp());
 		/**
 		 * 2016-04-21
 		 * «A valid card token (with prefix card_tok_)»
@@ -196,29 +196,12 @@ class Charge extends \Df\Core\O {
 
 	/**
 	 * 2016-05-06
-	 * @return OrderAddress
-	 */
-	private function address() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var OrderAddress $result */
-			$result = $this->order()->getShippingAddress();
-			$this->{__METHOD__} = $result ? $result : $this->order()->getBillingAddress();
-			df_assert($this->{__METHOD__});
-		}
-		return $this->{__METHOD__};
-	}
-
-	/** @return float */
-	private function amount() {return $this[self::$P__AMOUNT];}
-
-	/**
-	 * 2016-05-06
 	 * @return CAddress
 	 */
 	private function cAddress() {
 		if (!isset($this->{__METHOD__})) {
 			/** @var OrderAddress $a */
-			$a = $this->address();
+			$a = $this->addressSB();
 			/** @var CAddress $result */
 			$result = new CAddress;
 			/**
@@ -302,7 +285,7 @@ class Charge extends \Df\Core\O {
 			try {
 				/** @var ParsedPhone $parsedPhone */
 			    $parsedPhone = $phoneParser->parse(
-					$this->address()->getTelephone(), $this->address()->getCountryId()
+					$this->addressSB()->getTelephone(), $this->addressSB()->getCountryId()
 				);
 				/**
 				 * 2016-04-23
@@ -390,9 +373,6 @@ class Charge extends \Df\Core\O {
 		return $result;
 	}
 
-	/** @return string */
-	private function currencyCode() {return $this->order()->getBaseCurrencyCode();}
-
 	/**
 	 * 2016-06-25
 	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
@@ -408,7 +388,7 @@ class Charge extends \Df\Core\O {
 		$nowS = $now->format('Y-m-d\TH:i:sO');
 		return [
 			'server' => implode(' / ', [dfa($_SERVER, 'SERVER_SOFTWARE'), dfa($_SERVER, 'HTTP_USER_AGENT')])
-			,'quote_id' => $this->order()->getIncrementId()
+			,'quote_id' => $this->o()->getIncrementId()
 			// 2016-06-25
 			// Magento version
 			,'magento_version' => df_magento_version()
@@ -433,16 +413,10 @@ class Charge extends \Df\Core\O {
 	 */
 	private function metaVars() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = Metadata::vars($this->store(), $this->order());
+			$this->{__METHOD__} = Metadata::vars($this->store(), $this->o());
 		}
 		return $this->{__METHOD__};
 	}
-
-	/** @return Order */
-	private function order() {return $this->payment()->getOrder();}
-
-	/** @return InfoInterface|Info|OrderPayment */
-	private function payment() {return $this[self::$P__PAYMENT];}
 
 	/** @return bool */
 	private function needCapture() {return $this[self::$P__NEED_CAPTURE];}
@@ -453,7 +427,7 @@ class Charge extends \Df\Core\O {
 	 * @return void
 	 */
 	private function setProducts(CardTokenChargeCreate $request) {
-		foreach ($this->order()->getItems() as $item) {
+		foreach ($this->o()->getItems() as $item) {
 			/** @var OrderItem $item */
 			/**
 			 * 2016-03-24
@@ -472,12 +446,6 @@ class Charge extends \Df\Core\O {
 		}
 	}
 
-	/** @return Store */
-	private function store() {return $this->order()->getStore();}
-
-	/** @return string */
-	private function token() {return $this[self::$P__TOKEN];}
-
 	/**
 	 * 2016-05-13
 	 * @return bool
@@ -486,8 +454,8 @@ class Charge extends \Df\Core\O {
 		if (!isset($this->{__METHOD__})) {
 			$this->{__METHOD__} =
 				S::s()->force3DS_forAll()
-				|| S::s()->force3DS_forNew() && df_customer_is_new($this->order()->getCustomerId())
-				|| S::s()->force3DS_forShippingDestinations($this->address()->getCountryId())
+				|| S::s()->force3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
+				|| S::s()->force3DS_forShippingDestinations($this->addressSB()->getCountryId())
 				/**
 				 * 2016-05-31
 				 * Сегодня заметил, что при запросе из PHP freegeoip.net перестал возвращать мне значение,
@@ -496,7 +464,7 @@ class Charge extends \Df\Core\O {
 				 * В любом случае, нельзя полагаться, что freegeoip.net вернёт непустой ответ.
 				 * @uses df_visitor()
 				 */
-				|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->address()->getCountryId())
+				|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
 			;
 		}
 		return $this->{__METHOD__};
@@ -509,22 +477,11 @@ class Charge extends \Df\Core\O {
 	 */
 	protected function _construct() {
 		parent::_construct();
-		$this
-			->_prop(self::$P__AMOUNT, RM_V_FLOAT)
-			->_prop(self::$P__NEED_CAPTURE, RM_V_BOOL, false)
-			->_prop(self::$P__PAYMENT, InfoInterface::class)
-			->_prop(self::$P__TOKEN, RM_V_STRING_NE)
-		;
+		$this->_prop(self::$P__NEED_CAPTURE, RM_V_BOOL, false);
 	}
 
 	/** @var string */
-	private static $P__AMOUNT = 'amount';
-	/** @var string */
 	private static $P__NEED_CAPTURE = 'need_capture';
-	/** @var string */
-	private static $P__PAYMENT = 'payment';
-	/** @var string */
-	private static $P__TOKEN = 'token';
 
 	/**
 	 * 2016-05-06
@@ -536,7 +493,7 @@ class Charge extends \Df\Core\O {
 	 */
 	public static function build(InfoInterface $payment, $token, $amount = null, $capture = true) {
 		return (new self([
-			self::$P__AMOUNT => $amount ? $amount : $payment->getBaseAmountOrdered()
+			self::$P__AMOUNT => $amount
 			, self::$P__NEED_CAPTURE => $capture
 			, self::$P__PAYMENT => $payment
 			, self::$P__TOKEN => $token

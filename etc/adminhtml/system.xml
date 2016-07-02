@@ -383,7 +383,7 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 						-->
 						<field id='force3DS_forShippingDestinations' negative='1'>0</field>
 					</depends>
-					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
+					<comment><![CDATA[]]></comment>
 				</field>
 				<field
 					id='force3DS_forIPs'
