@@ -1,5 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Controller\Index;
+use Df\Framework\Controller\Result\Json;
 use Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Handler\CustomerReturn;
 class Index extends \Magento\Framework\App\Action\Action {
@@ -56,7 +57,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * 2016-05-05
 	 * Обработка оповещений (Webhooks).
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
-	 * @return \Df\Framework\Controller\Result\Json
+	 * @return Json
 	 */
 	private function webhook() {
 		$this->log(__METHOD__);
@@ -66,6 +67,6 @@ class Index extends \Magento\Framework\App\Action\Action {
 		/** @var string $response */
 		$response = Handler::p(df_json_decode($request));
 		$this->log($response);
-		return df_controller_json($response);
+		return Json::i($response);
 	}
 }
