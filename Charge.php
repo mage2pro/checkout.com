@@ -6,7 +6,6 @@ use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
 use com\checkout\ApiServices\SharedModels\Product as CProduct;
 use Dfe\CheckoutCom\Settings as S;
-use Dfe\CheckoutCom\Source\Metadata;
 use libphonenumber\PhoneNumberUtil as PhoneParser;
 use libphonenumber\PhoneNumber as ParsedPhone;
 use Magento\Payment\Model\Info;
@@ -134,7 +133,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «A description that can be added to this object.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 */
-		$result->setDescription(df_var(S::s()->description(), $this->metaVars()));
+		$result->setDescription($this->text(S::s()->description()));
 		/**
 		 * 2016-04-21
 		 * «Expressed as a non-zero positive integer
@@ -405,17 +404,6 @@ class Charge extends \Df\Payment\Charge\WithToken {
 			// Merchant\'s server time
 			,'time' => $nowS
 		];
-	}
-
-	/**
-	 * 2016-05-06
-	 * @return array(string => string)
-	 */
-	private function metaVars() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = Metadata::vars($this->store(), $this->o());
-		}
-		return $this->{__METHOD__};
 	}
 
 	/** @return bool */
