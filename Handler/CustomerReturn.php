@@ -27,7 +27,7 @@ use Magento\Sales\Model\Service\InvoiceService;
 class CustomerReturn {
 	/**
 	 * 2016-05-05
-	 * Возвращение покупателя в магазин после проверки 3D-Secure.
+	 * Redirect the user to the store after the 3D-Secure verification
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
 	 * @param string $token
 	 * @return bool
@@ -36,14 +36,14 @@ class CustomerReturn {
 		df_log(__METHOD__);
 		/**
 		 * 2016-05-08 (дополнение)
-		 * И размещение заказа, и провека 3D-Secure
-		 * происходят в контексте сессии покупателя,
-		 * и мы можем получить последний размещённый покупателем заказ
-		 * простым вызовом @see \Magento\Checkout\Model\Session::getLastRealOrder()
+		 * The order placement and the 3D-Secure verification
+		 * both occur in the user sessions.
+		 * We can also get the user's last placed order
+		 * by calling @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 *
-		 * Мы также могли получить increment_id последнего заказа вызовом $charge->getTrackId(),
-		 * а затем загрузить заказ по increment_id:
+		 * We can also get the increment_id through the last order call $charge->getTrackId(),
+		 * and then fetch the order by increment_id:
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/topic/1561
 		 */
@@ -51,11 +51,12 @@ class CustomerReturn {
 		$order = df_checkout_session()->getLastRealOrder();
 		/**
 		 * 2016-05-08
-		 * Вообще говоря, у заказа может быть много платежей,
-		 * и @uses \Magento\Sales\Model\Order::getPayment()
-		 * возвращает платёж от балды: https://mage2.pro/t/1559
-		 * Однако в нашем случае непосредственно после размещения заказа и проверки 3D-Secure
-		 * платёж гарантированно только один, поэтому получаем его самым простым способом.
+		 * Generally speaking an order can be made out of many payments,
+		 * and @uses \Magento\Sales\Model\Order::getPayment()
+		 * returns the payment from : https://mage2.pro/t/1559
+		 * However in this case, immediately after placing the order 
+		 * and doing the 3D-Secure verification, the payment is only guaranteed
+		 * after retriving it 
 		 */
 		/** @var Payment|DfPayment $payment */
 		$payment = $order->getPayment();
@@ -67,11 +68,11 @@ class CustomerReturn {
 		$api = S::s()->apiCharge($order->getStore());
 		/**
 		 * 2016-05-15
-		 * Даже если в запросе было autoCapture = true,
-		 * здесь по токену мы всё равно имеем транзакцию Authorize, а не Capture.
-		 * Более того, событие charge.captured может вызываться
-		 * как до возвращения покупателя в магазин после проверки 3D-Secure, так и после
-		 * (наблюдал оба случая).
+		 * Even in the case of a request with autoCapture = true,
+		 * at this point the token still has an Authorize status, and not a Capture status.
+		 * Also, a charge.captured event may be triggered when the user is redirected to the store
+		 * after the 3D-Secure verification.
+		 * (both cases were observed)
 		 */
 		/** @var CCharge $charge */
 		$charge = $api->verifyCharge($token);
@@ -88,7 +89,7 @@ class CustomerReturn {
 			 */
 			/**
 			 * 2016-05-06
-			 * Идентично:
+			 * Similarly:
 			 * df_checkout_session()->getLastRealOrder()->cancel()->save();
 			 */
 			$order->cancel();
@@ -147,7 +148,7 @@ class CustomerReturn {
 		if (M::ACTION_AUTHORIZE === $action) {
 			/**
 			 * 2016-05-15
-			 * Отключаем это оповещение, потому что мы проведём Capture вручную.
+			 * Disable this event because we trigger Capture manually.
 			 */
 			$method->disableEvent($charge->getId(), 'charge.captured');
 		}

@@ -19,7 +19,7 @@ class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMapper {
 				//$result['descriptor'] = $descriptor;
 				/**
 				 * 2016-05-09
-				 * Пытался здесь поставить код:
+				 * Tried to put the code here
 				 * $result['descriptor'] = $descriptor;
 				 * но он не работает:
 					{

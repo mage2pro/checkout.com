@@ -37,11 +37,11 @@ class Response extends \Df\Core\O {
 	/**
 	 * 2016-05-08
 	 * 2016-05-09
-	 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
-	 * то параметр autoCapture шлюзом игнорируется,
-	 * и нужно отдельно проводить транзакцию capture.
+	 * It turns out that if a payment gateway transaction returns a «Flagged» state,
+	 * The parameter autoCapture is ignored by the gateway
+	 * A transaction capture needs to be separately triggered 
 	 * https://mage2.pro/t/1565
-	 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
+	 * It is then a good idea to do a Review procedure on such transactions.
 	 * @used-by \Dfe\CheckoutCom\Method::getConfigPaymentAction()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
@@ -76,25 +76,24 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-11
-	 * Этот метод решает описанную ниже проблему.
+	 * This method solves the problem described below
 	 *
 	 * 2016-05-10
-	 * Если мы проводили платёж с параметром autoCapture,
-	 * то Checkout.com на самом деле сразу проводит 2 транзации: authorize и capture.
-	 * При этом в ответе Checkout.com присылает только идентификатор транзации authorize.
-	 * А получается, что мы присваиваем этот идентификатор транзакции capture внутри Magento.
+	 * If autoCapture is enabled, Checkout.com executes 2 transactions: Authorize and Capture.
+ 	 * The response sent back by Checkout.com only contains the Authorize transaction ID. 
+	 * We assign this Authorize transaction ID within Magento
 	 *
 	 * 2016-05-11
-	 * Кстати, в документации так и сказано:
+	 * Side note stated in the documentation:
 	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
 	 * «To process a refund the merchant must send the Charge ID of the Captured transaction»
 	 * «For an Automatic Capture, the Charge Response will contain
 	 * the Charge ID of the Auth Charge. This ID cannot be used.»
 	 *
 	 * 2016-05-11
-	 * Вчера я думал, что в описанной выше ситуации (autoCapture)
-	 * мы не можем узнать идентификатор транзации capture по идентификатору транзации authorize.
-	 * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
+	 * About the use case described above (autoCapture)
+	 * We cannot get Capture transaction ID from the Authorize transaction ID.
+ 	 * But we can use «Get Charge History» for this request :
 	 * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
 	 * «This is a quick way to view a charge status, rather than searching through webhooks»
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
@@ -107,13 +106,13 @@ class Response extends \Df\Core\O {
 		    $response = $this->charge();
 			/**
 			 * 2016-05-11
-			 * Раньше тут стояло просто ('Y' !== $response->getAutoCapture())
-			 * Это неправильно, потому что транзакция могла быть помечена как Flagged,
-			 * и тогда такая транзакция эквивалентна authorize, а не capture,
-			 * хотя в ответе параметр autoCapture будет иметь значение 'Y'.
+			 * Previously this was simply done: ('Y' !== $response->getAutoCapture())
+			 * This is wrong, because the transaction can be marked as Flagged,
+			 * and in that case the transaction will be equivalent to Authorize
+			 * although the response will have autoCapture set to 'Y'.
 			 *
 			 * 2016-05-15
-			 * Раньше тут стояло:
+			 * Previously:
 			 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
 			 */
 			$this->{__METHOD__} =
@@ -128,7 +127,7 @@ class Response extends \Df\Core\O {
 	/**
 	 * 2016-05-08
 	 * 2016-05-09
-	 * Учёл ещё состояние Flagged: https://mage2.pro/t/1565
+	 * Handled the additional "Flagged" status: https://mage2.pro/t/1565
 		{
 			"id": "charge_test_253DB7144E5Z7A98EED4",
 			"responseMessage": "40142 - Threshold Risk",
@@ -139,8 +138,8 @@ class Response extends \Df\Core\O {
 		}
 	 *
 	 * 2016-05-15
-	 * Хотя в интерфейсе Checkout.com статус может быть «Authorised - 3D»,
-	 * в объекте он всё равно будет просто «Authorised».
+	 * Although Checkout.com's interface can show «Authorised - 3D»,
+	 * the object will remain «Authorised».
 	 *
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
@@ -192,27 +191,26 @@ class Response extends \Df\Core\O {
 		try {
 			/**
 			 * 2016-05-11
-			 * Когда выполняешь этот код без отладчика,
-			 * то в результате приходит не 2 транзации в состояниях Authorized и Сaptured,
-			 * а одна транзакция в состоянии Pending.
-			 * В этом случае надо просто подождать...
-			 * Потом в ответе приходит одна транзакция в состоянии Authorized.
-			 * Надо снова подождать...
+			 * When this code is executed without a debugger,
+			 * the response doesn't contain 2 transactions (Authorized and Сaptured),
+			 * but one transaction (Pending).
+			 * If this happens, we should wait...
+			 * then the response will show 1 Authorized transaction.
+			 * We have to wait again...
 			 *
 			 * 2016-05-15
-			 * Вчера пришлось ждать транзакцию в состоянии Captured аж 14 секунд.
-			 * Я пришёл к мысли, что не стоит реального покупателя заставлять так ждать,
-			 * и поэтому для реальных покупателей лучше ВСЕГДА
-			 * в Magento первой транзакцией делать Authorize, а далее,
-			 * если администратор магазина указал в настройках, что он хочет транзацию Capture,
-			 * то принимать транзакцию Capture через Webhooks.
+			 * When testing, transactions were taking up to 14 seconds to get Captured.
+			 * I concluded that we should force the real buyer to wait,
+			 * it is therefore always better to do a first Authorize transaction,
+			 * and then if the Magento merchant Captured the transaction from the Checkout.com hub,
+			 * capture the transaction on Magento using Webhooks
 			 */
 			/** @var int $numRetries */
 			/**
 			 * 2016-05-15
-			 * Пока максимум приходилось ждать 14 секунд,
-			 * но на всякий случай поставил 60.
-			 * Можно, конечно, ждать и дольше, но вряд ли это нужно.
+			 * For now the maximum wait time was 14 seconds.
+			 * The limit is set to 60 seconds just in case.
+			 * It can be set to more, but it is unlikely that more than 60s are required.
 			 */
 			$numRetries = 60;
 			$result = null;
@@ -222,7 +220,8 @@ class Response extends \Df\Core\O {
 				df_log(print_r($history->getCharges(), true));
 				/**
 				 * 2016-05-11
-				 * Транзация capture содержится в массиве первой, затем идёт транзация authorize.
+				 * The Captured transaction is returned in the first array of the response.
+				 * The Authorised transaction is in the second one
 				 * «[Checkout.com]
 				 * @uses \com\checkout\ApiServices\Charges\ChargeService::getChargeHistory()
 				 * sample response»
@@ -232,8 +231,8 @@ class Response extends \Df\Core\O {
 				$sCharge = df_first($history->getCharges());
 				/**
 				 * 2016-05-15
-				 * Хотя в интерфейсе Checkout.com статус может быть «Captured - 3D»,
-				 * в объекте он всё равно будет просто «Captured».
+				 * Although Checkout.com's interface can show «Captured - 3D»,
+	 			 * the object will remain «Captured».
 				 */
 				if (self::S__CAPTURED === $sCharge->getStatus()) {
 					$result = S::s()->apiCharge()->getCharge($sCharge->getId());
@@ -269,8 +268,8 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-15
-	 * Хотя в интерфейсе Checkout.com статус может быть «Captured - 3D»,
-	 * в объекте он всё равно будет просто «Captured».
+	 * Although Checkout.com's interface can show «Captured - 3D»,
+	 * the object will remain «Captured».
 	 * @var string
 	 */
 	const S__CAPTURED = 'Captured';
@@ -282,8 +281,8 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-15
-	 * Хотя в интерфейсе Checkout.com статус может быть «Authorised - 3D»,
-	 * в объекте он всё равно будет просто «Authorised».
+	 * Although Checkout.com's interface can show «Authorised - 3D»,
+	 * the object will remain «Authorised».
 	 * @var string
 	 */
 	private static $S__AUTHORISED = 'Authorised';

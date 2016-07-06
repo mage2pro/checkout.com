@@ -4,7 +4,7 @@ use Dfe\CheckoutCom\Handler;
 class DefaultT extends Handler {
 	/**
 	 * 2016-05-11
-	 * Перекрываем метод, чтобы вернуть «Not implemented.» вместо «The event is not for our store.»
+	 * Override the method in order to return «Not implemented.» instead of «The event is not for our store.»
 	 * @override
 	 * @see \Dfe\CheckoutCom\eligible::p()
 	 * @used-by \Dfe\CheckoutCom\Handler::p()

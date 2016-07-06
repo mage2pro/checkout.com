@@ -17,7 +17,7 @@ class Captured extends Charge {
 	/**
 	 * 2016-03-25
 	 * @override
-	 * Делаем по аналогии с @see \Magento\Sales\Controller\Adminhtml\Order\Invoice\Save::execute()
+	 * Similar to: @see \Magento\Sales\Controller\Adminhtml\Order\Invoice\Save::execute()
 	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Controller/Adminhtml/Order/Invoice/Save.php#L102-L235
 	 * How does the backend invoicing work? https://mage2.pro/t/933
 	 * @see \Dfe\CheckoutCom\Handler::_process()
@@ -28,18 +28,18 @@ class Captured extends Charge {
 	protected function process() {
 		/**
 		 * 2016-05-11
-		 * Транзакция находится в состоянии «Flagged».
-		 * Нам нужно выполнить операцию Accept Payment.
+		 * The transaction is «Flagged».
+		 * Accept Payment operation should be performed.
 		 */
 		if ($this->order()->isPaymentReview()) {
 			/**
 			 * 2016-05-11
-			 * Система норовит установить автоматический идентификатор для транзакции capture здесь:
+			 * The magento backend tries to store an automatic identifier for transaction capture:
 			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-			 * А потом будет использовать его здесь:
+			 * It will then be used here:
 			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-			 * Чтобы перехитрить систему, запоминаем нужный нам идентификатор транзакции,
-			 * а потому будем использовать его в методе @see \Dfe\CheckoutCom\Method::capture()
+			 * In order to bypass the magento backend, we store the correct transaction ID
+			 * so we can use it in this method @see \Dfe\CheckoutCom\Method::capture()
 			 */
 			$this->payment()->accept();
 			$this->order()->save();
@@ -87,9 +87,9 @@ class Captured extends Charge {
 			 * 2016-03-26
 			 * @used-by \Magento\Sales\Model\Order\Invoice::register()
 			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Invoice.php#L599-L609
-			 * Используем именно \Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE,
-			 * а не \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
-			 * чтобы была создана транзакция capture.
+			 * We use \Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE,
+			 * and not \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
+			 * that was created by the transaction capture.
 			 */
 			$result->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
 			$result->register();
