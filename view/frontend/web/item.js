@@ -33,7 +33,6 @@ define ([
 		},
 		/**
 		 * 2016-05-18
-		 * @todo Спросил, какие типы банковских карт поддерживаются:
 		 * @returns {String[]}
 	 	 */
 		getCardTypes: function() {return ['VI', 'MC', 'AE'];},
@@ -47,8 +46,8 @@ define ([
 			return {
 				/**
 				 * 2016-05-03
-				 * Если не засунуть «token» внутрь «additional_data»,
-				 * то получим сбой:
+				 * If «token» is not included in «additional_data»,
+				 * we get the below error:
 				 * «Property "Token" does not have corresponding setter
 				 * in class "Magento\Quote\Api\Data\PaymentInterface»
 				 */
@@ -58,8 +57,8 @@ define ([
 		},
 		/**
 		 * 2016-05-04
-		 * Перекрыли родительский метод,
-		 * чтобы подставить свой placeOrderAction вместо родительского.
+		 * We have overriden the parent method,
+		 * to use our placeOrderAction instead of the parent's.
 		 * @override
 		 * https://github.com/magento/magento2/blob/981d1f/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L161-L165
 		 * @return {jQuery.Deferred}
@@ -83,9 +82,9 @@ define ([
 			this._super();
 			/**
 			 * 2016-06-01
-			 * Оказывается, хитрость заключается в том, что анонимный покупатель может менять свой email.
-			 * Получается, что нам имеет смысл инициализировать CheckoutKit
-			 * только по нажатию покупателем кнопки Place Order.
+			 * To note: anonymous user can change his email.
+			 * We should then only initiate CheckoutKit
+			 * when the buyer clicks the "Place Order" button
 			 */
 			// 2016-04-14
 			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
@@ -114,7 +113,7 @@ define ([
 				window.CKOConfig = {
 					/**
 					 * 2016-04-20
-					 * Этот флаг только включает запись диагностических сообщений в консоль.
+					 * This flag only triggers showing debugging messages in the console
 					 *
 					 * «Setting debugMode to true is highly recommended during the integration process;
 					 * the browser’s console will display helpful information
@@ -239,26 +238,26 @@ define ([
 							self.afterPlaceOrder();
 							/**
 							 * 2016-05-04
-							 * Перенаправление на проверку 3D-Secure.
-							 * Сделано по аналогии с redirectOnSuccessAction.execute()
+							 * Redirect to do a 3D-Secure verification.
+							 * Similar to: redirectOnSuccessAction.execute()
 							 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
 							 *
 							 * 2016-05-09
-							 * При отсутствии необходимости проверки 3D-Secure
-							 * метод @see \Dfe\CheckoutCom\PlaceOrder::response() возвращает null:
+							 * If 3D-Secure is not necessary,
+							 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
 							 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
-							 * который затем конвертируется методом
+							 * which is then converted by
 							 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
-							 * в пустой массив:
+							 * to an empty array:
 							 * «A Web API request returns an empty array for a null response»
 							 * https://mage2.pro/t/1569
 							 *
-							 * Т.е. при отсутствии необходимости проверки 3D-Secure
-							 * значением переменной redirectUrl будет пустой массив.
-							 * Поэтому правильной проверкой является не if (redirectUrl),
-							 * а if (redirectUrl.length)
-							 * На всякий случай if (redirectUrl) тоже оставил: не хочется погибать,
-							 * если ядро Magento вдруг передумает и вернёт null.
+							 * When there is no need to do a 3D-Secure verification,
+							 * the value of redirectUrl will be an empty array.
+							 * So the correct test to be done is: if (redirectUrl),
+							 * and if (redirectUrl.length)
+							 * In all cases, we want to cope with the possibility of
+							 * Magento core unexpectedly returning null.
 							 */
 							if (redirectUrl && redirectUrl.length) {
 								window.location.replace(redirectUrl);

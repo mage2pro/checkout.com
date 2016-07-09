@@ -9,7 +9,7 @@ class Voided extends Charge {
 	 * 2016-05-10
 	 * @override
 	 * How is a payment authorization voiding implemented? https://mage2.pro/t/topic/938
-	 * Делаем по аналогии с @see \Magento\Sales\Controller\Adminhtml\Order\VoidPayment::execute()
+	 * Similar to @see \Magento\Sales\Controller\Adminhtml\Order\VoidPayment::execute()
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L10-L36
 	 * @see \Dfe\CheckoutCom\Handler::_process()
 	 * @used-by \Dfe\CheckoutCom\Handler::process()
@@ -18,8 +18,8 @@ class Voided extends Charge {
 	protected function process() {
 		/**
 		 * 2016-05-11
-		 * Транзакция находится в состоянии «Flagged».
-		 * Нам нужно выполнить операцию Accept Payment.
+		 * The transaction is «Flagged».
+		 * We need to void it.
 		 */
 		if ($this->order()->isPaymentReview()) {
 			$this->payment()->deny();

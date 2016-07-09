@@ -16,31 +16,30 @@ use Magento\Sales\Model\Service\CreditmemoService;
  * charge.refunded
  * http://developers.checkout.com/docs/server/api-reference/webhooks
  *
- * Если мы проводили платёж с параметром autoCapture,
- * то Checkout.com на самом деле сразу проводит 2 транзации: authorize и capture.
- * При этом в ответе Checkout.com присылает только идентификатор транзации authorize.
- * По идентификатору транзации authorize мы не можем узнать идентификатор транзакции capture.
- * Сюда же, в событие charge.refunded, Checkout.com присылает 2 идентификатора:
- * id: идентификатор транзакции refund
- * originalId: идентификатор транзакции capture.
+ * If autoCapture is enabled, Checkout.com executes 2 transactions: Authorize and Capture.
+ * The response sent back by Checkout.com only contains the Authorize transaction ID. 
+ * Using that ID it not possible to know the Capture transaction ID. 
+ * In the charge.refunded event Checkout.com sends back 2 IDs:
+ * id: refund transaction ID
+ * originalId: capture transaction ID
  *
  * 2016-05-11
- * Кстати, в документации так и сказано:
+ * Side note stated in the documentation:
  * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
  * «To process a refund the merchant must send the Charge ID of the Captured transaction»
  * «For an Automatic Capture, the Charge Response will contain
  * the Charge ID of the Auth Charge. This ID cannot be used.»
  *
  * 2016-05-11
- * Вчера я думал, что в описанной выше ситуации (autoCapture)
- * мы не можем узнать идентификатор транзации capture по идентификатору транзации authorize.
- * Но вот теперь пришёл к мысли использовать для этого запрос «Get Charge History»:
+ * About the use case described above (autoCapture)
+ * We cannot get Capture transaction ID from the Authorize transaction ID.
+ * But we can use «Get Charge History» for this request :
  * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
  *
  * 2016-05-11
- * Всё, решил проблему самым правильным способом :-)
- * Теперь в режиме autoCapture в Magento сохраняется идентификатор транзации capture,
- * как и должно быть.
+ * Problem was solved.
+ * autoCapture mode now is saved in the Magento Capture transaction ID
+ * as it should be.
  * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/3a1d36/Method.php#L593
  */
 class Refunded extends Charge {
@@ -49,18 +48,18 @@ class Refunded extends Charge {
 	 * @override
 	 * «How is an online refunding implemented?» https://mage2.pro/t/959
 	 *
-	 * Сначала хотел cделать по аналогии с @see \Magento\Paypal\Model\Ipn::_registerPaymentRefund()
+	 * First step is similar to @see \Magento\Paypal\Model\Ipn::_registerPaymentRefund()
 	 * https://github.com/magento/magento2/blob/9546277/app/code/Magento/Paypal/Model/Ipn.php#L467-L501
-	 * Однако используемый там метод @see \Magento\Sales\Model\Order\Payment::registerRefundNotification()
-	 * нерабочий: «Invalid method Magento\Sales\Model\Order\Creditmemo::register»
+	 * However, this method is used @see \Magento\Sales\Model\Order\Payment::registerRefundNotification()
+	 * And doesn't work: «Invalid method Magento\Sales\Model\Order\Creditmemo::register»
 	 * https://mage2.pro/t/1029
 	 *
-	 * Поэтому делаю по аналогии с
+	 * So we're doing the below, similarly to
 	 * @see \Magento\Sales\Controller\Adminhtml\Order\Creditmemo\Save::execute()
 	 *
 	 * 2016-03-28
-	 * @todo Пока поддерживается лишь сценарий полного возврата.
-	 * Надо сделать ещё частичный возврат, при это не забывать про бескопеечные валюты.
+	 * @todo While this scenario handles full refunds
+	 * We have to handle partial refunds and not forget about the fractionless currencies.
 	 *
 	 * @see \Dfe\CheckoutCom\Handler::_process()
 	 * @used-by \Dfe\CheckoutCom\Handler::process()
@@ -76,10 +75,10 @@ class Refunded extends Charge {
 		$cmi->refund($this->cm(), false);
 		/**
 		 * 2016-03-28
-		 * @todo Надо отослать покупателю письмо-оповещение о возврате оплаты.
+		 * @todo We should send the customer an email notification when refunds are made.
 		 * 2016-05-15
-		 * Что интересно, при возврате из административной части Magento 2
-		 * покупатель тоже не получает уведомление.
+		 * To note: when refunding from the admin patnel of Magento 2,
+		 * customer doesn't receive an email notification
 		 */
 		return $this->cm()->getId();
 	}
@@ -99,8 +98,8 @@ class Refunded extends Charge {
 			df_assert($result);
 			/**
 			 * 2016-03-28
-			 * Важно! Иначе order загрузит payment автоматически вместо нашего,
-			 * и флаг @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE будет утерян
+			 * Important! if not done the order will automatically capture the payment instead of us
+			 * and the flag @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE will be lost
 			 */
 			$result->getOrder()->setData(Order::PAYMENT, $this->payment());
 			$this->{__METHOD__} = $result;

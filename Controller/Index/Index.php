@@ -6,10 +6,10 @@ use Dfe\CheckoutCom\Handler\CustomerReturn;
 class Index extends \Magento\Framework\App\Action\Action {
 	/**
 	 * 2016-05-05
-	 * Сюда мы можем попать в 2-х случаях:
-	 * 1) при возвращении покупателя в магазин после проверки 3D-Secure.
-	 * 2) при оповещениях (Webhooks).
-	 * В первом случае запрос имеет тип GET и содержит параметр «cko-payment-token».
+	 * There are 2 cases:
+	 * 1) The buyer returns to the store after the 3D-Secure checks.
+	 * 2) Notifications (Webhooks).
+	 * In the first case, a GET request is used and contains the parameter «cko-payment-token».
 	 *
 	 * 2016-05-30
 	 * Checkout.com does not encrypt or sign the webhooks' data.
@@ -55,7 +55,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 
 	/**
 	 * 2016-05-05
-	 * Обработка оповещений (Webhooks).
+	 * Processing notifications (Webhooks).
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
 	 * @return Json
 	 */

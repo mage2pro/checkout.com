@@ -3,9 +3,7 @@ namespace Dfe\CheckoutCom\Source;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 /**
  * 2016-05-08
- * Режим review убрал, потому что мы ни как не можем повлиять на решение платёжного шлюза
- * использовать проверку 3D-Secure,
- * а администратор, разумеется, не сможет пройти проверку 3D-Secure за клиента.
+ * The Review mode is removed, because we are unable to bypass 3D-Secure validation if the payment gateway wants it, and an administration is unable to bypass such validation.
  */
 class Action extends \Df\Config\SourceT {
 	/**

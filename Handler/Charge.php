@@ -53,7 +53,7 @@ abstract class Charge extends Handler {
 			}
 			/**
 			 * 2016-03-26
-			 * Очень важно! Иначе order создать свой экземпляр payment:
+			 * Very Important! If not done the order will create a duplicate payment
 			 * @used-by \Magento\Sales\Model\Order::getPayment()
 			 */
 			$result[OrderInterface::PAYMENT] = $this->payment();
@@ -90,18 +90,18 @@ abstract class Charge extends Handler {
 					$result[Method::WEBHOOK_CASE] = true;
 					/**
 					 * 2016-05-11
-					 * Этот идентификатор надо будет устанавливать в сценариях Webhook.
-					 * Идентификатор приходит от платёжного шлюза.
-					 * Нам надо его установить,
-					 * чтобы Magento не создавала автоматические идентификаторы типа
-					 * <идентификатор родителя>-capture
+					 * This ID will have to be used in scenarios involving webhook.
+					 * The ID originates on the payment gateway.
+					 * We need to store it,
+					 * to prevent Magento from generating an automatic IDs like
+					 * <Parent Identifier>-capture
 					 *
-					 * Система норовит установить автоматический идентификатор для транзакции capture здесь:
+					 * The system attempts to store an automatic capture transation ID here:
 					 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-					 * А потом будет использовать его здесь:
+					 * It will be then used here:
 					 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-					 * Чтобы перехитрить систему, запоминаем нужный нам идентификатор транзакции,
-					 * а потому будем использовать его в методе @see \Dfe\CheckoutCom\Method::capture()
+					 * In order to cheat the system, we store the correct transaction ID,
+					 * so we can use it in this method: @see \Dfe\CheckoutCom\Method::capture()
 					 * @used-by \Dfe\CheckoutCom\Method::capture()
 					 */
 					$result[Method::CUSTOM_TRANS_ID] = $this->id();
@@ -114,11 +114,11 @@ abstract class Charge extends Handler {
 
 	/**
 	 * 2016-05-10
-	 * Идентификатор родительской транзации.
-	 * Например, на событие charge.refunded Chechout.com возвращает:
-	 * id - идентификатор транзакции refund
-	 * originalId - идентификатор транзакции capture.
-	 * originalId отсутствует только у оповещения о первичной транзации (charge.succeeded)
+	 * Parent Transaction ID
+	 * In the charge.refunded event Checkout.com sends back 2 IDs:
+ 	 * id: refund transaction ID
+ 	 * originalId: capture transaction ID
+	 * originalId is absent only for the primary transaction (charge.succeeded)
 	 * @return string|null
 	 */
 	protected function parentId() {return $this->o('originalId');}

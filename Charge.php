@@ -77,16 +77,16 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * Defines if the charge will be authorised ('n') or captured ('y').
 		 * Authorisations will expire in 7 days.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
-		 * Несмотря на то, что в документации буквы 'y' и 'n' — прописные,
-		 * в примерах везде используются заглавные.
+		 * Even though the documentation states 'y' and 'n' — in lowercase,
+		 * examples always use uppercase.
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#request-example
 		 *
 		 * 2016-05-09
-		 * Оказывается, что если платёжный шлюз наделяет транзакцию состоянием «Flagged»,
-		 * то параметр autoCapture шлюзом игнорируется,
-		 * и нужно отдельно проводить транзакцию capture.
+		 * It seems that if the payment gateway returns a «Flagged» transaction,
+		 * then the autoCapture param is ignored,
+		 * and we need to seperately do a Capture transaction.
 		 * https://mage2.pro/t/1565
-		 * Пришёл к разумной мысли для таких транзакций проводить процедуру Review.
+		 * It is then a good idea to do a Review procedure on such transactions.
 		 */
 		$result->setAutoCapture($this->needCapture() ? 'Y' : 'N');
 		/**
@@ -104,8 +104,8 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 *
 		 * 2016-05-03
-		 * С настройками Личного кабинета по умолчанию
-		 * 3D-Secure будет насильно использоваться для платежей размером не меньше 150 долларов.
+		 * In the risk settings dashboard
+		 * 3D-Secure is forced for transactions above 150 USD.
 		 */
 		$result->setChargeMode($this->use3DS() ? 2 : 1);
 		/**
@@ -121,8 +121,8 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		$result->setEmail($this->o()->getCustomerEmail());
 		/**
 		 * 2016-04-23
-		 * Нельзя одновременно устанавливать и email, и customerId.
-		 * Причём товары передаются только при указании email:
+		 * Email and CustomerId cannot be used simultaneously 
+		 * And the products field is only sent when using email
 		 * https://github.com/CKOTech/checkout-php-library/blob/7c9312e9/com/checkout/ApiServices/Charges/ChargesMapper.php#L142
 		 */
 		/*if ($order->getCustomerId()) {
@@ -322,9 +322,9 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Name of product. Max of 100 characters.»
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 */
-		// Простые варианты имеют имена типа «New Very Prive-36-Almond»,
-		// нам удобнее видеть имена простыми,
-		// как у настраиваемого товара: «New Very Prive»).
+		// Simple options have name similar to «New Very Prive-36-Almond»,
+		// we'd rather see 'normal' names
+		// like a custom product «New Very Prive»).
 		$result->setName(
 			$item->getParentItem()
 			? $item->getParentItem()->getName()
@@ -351,10 +351,10 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 		 *
 		 * 2016-05-03
-		 * Не используем здесь @see \Dfe\CheckoutCom\Method::amount(),
-		 * потому что нам в данном случае нужно передавать цену в рублях,
-		 * а не в копейках (в документации об э\том не сказано,
-		 * проверял посредством личного кабинета checkout.com).
+		 * Here we do not use @see \Dfe\CheckoutCom\Method::amount(),
+		 * because we're in a situation where we have to 
+		 * send rubles rather than kopeks
+		 * (couldn't find anything about that from the Checkout.com dashboard).
 		 */
 		$result->setPrice(df_order_item_price($item));
 		/**
@@ -377,34 +377,26 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
 	 * @return array(string => string)
 	 */
-	private function metaData() {
+	private function metaData() {return [
+		'server' => implode(' / ', [dfa($_SERVER, 'SERVER_SOFTWARE'), dfa($_SERVER, 'HTTP_USER_AGENT')])
+		,'quote_id' => $this->o()->getIncrementId()
 		// 2016-06-25
-		// http://stackoverflow.com/a/28447380
-		/** @var \DateTime $now */
-		$now = new \DateTime(null, new \DateTimeZone('Europe/London'));
-		// something like "2015-02-11T06:16:47+0100" (ISO 8601)
-		/** @var string $nowS */
-		$nowS = $now->format('Y-m-d\TH:i:sO');
-		return [
-			'server' => implode(' / ', [dfa($_SERVER, 'SERVER_SOFTWARE'), dfa($_SERVER, 'HTTP_USER_AGENT')])
-			,'quote_id' => $this->o()->getIncrementId()
-			// 2016-06-25
-			// Magento version
-			,'magento_version' => df_magento_version()
-			// 2016-06-26
-			// The version of the your Magento/Checkout plugin the merchant is using
-			,'plugin_version' => df_package_version('mage2pro/checkout.com')
-			// 2016-06-25
-			// The version of our PHP core library (if you are using the our PHP core library)
-			,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION
-			// 2016-06-25
-			// JS/API/Kit
-			,'integration_type' => 'Kit'
-			// 2016-06-25
-			// Merchant\'s server time
-			,'time' => $nowS
-		];
-	}
+		// Magento version
+		,'magento_version' => df_magento_version()
+		// 2016-06-26
+		// The version of the your Magento/Checkout plugin the merchant is using
+		,'plugin_version' => df_package_version('mage2pro/checkout.com')
+		// 2016-06-25
+		// The version of our PHP core library (if you are using the our PHP core library)
+		,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION
+		// 2016-06-25
+		// JS/API/Kit
+		,'integration_type' => 'Kit'
+		// 2016-06-25
+		// Merchant\'s server time
+		// Something like "2015-02-11T06:16:47+0100" (ISO 8601)
+		,'time' => df_now('Y-m-d\TH:i:sO', 'Europe/London')
+	];}
 
 	/** @return bool */
 	private function needCapture() {return $this[self::$P__NEED_CAPTURE];}
@@ -419,9 +411,9 @@ class Charge extends \Df\Payment\Charge\WithToken {
 			/** @var OrderItem $item */
 			/**
 			 * 2016-03-24
-			 * Если товар является настраиваемым, то
+			 * If the item is customisable then use
 			 * @uses \Magento\Sales\Model\Order::getItems()
-			 * будет содержать как настраиваемый товар, так и его простой вариант.
+			 * It will include the customised product and its simple version.
 			 */
 			if (!$item->getChildrenItems()) {
 				/**
@@ -446,10 +438,10 @@ class Charge extends \Df\Payment\Charge\WithToken {
 				|| S::s()->force3DS_forShippingDestinations($this->addressSB()->getCountryId())
 				/**
 				 * 2016-05-31
-				 * Сегодня заметил, что при запросе из PHP freegeoip.net перестал возвращать мне значение,
-				 * а при запросе из браузера — по прежнему возвращает.
-				 * Видимо, freegeoip.net забанил мой User-Agent?
-				 * В любом случае, нельзя полагаться, что freegeoip.net вернёт непустой ответ.
+				 * Today it seems that the PHP request to freegeoip.net stopped returning any value,
+				 * whereas it still returns results when the request is sent from the browser.
+				 * Apparently, freegeoip.net banned my User-Agent?
+				 * In all cases, we cannot rely on freegeoip.net and risk getting an empty response.
 				 * @uses df_visitor()
 				 */
 				|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())

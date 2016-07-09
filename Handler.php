@@ -24,7 +24,7 @@ abstract class Handler extends \Df\Core\O {
 	 */
 	protected function o($path = null) {
 		// 2016-03-25
-		// null может быть ключом массива: https://3v4l.org/hWmWC
+		// A null-value could ne a key of a PHP array: https://3v4l.org/hWmWC
 		if (!isset($this->{__METHOD__}[$path])) {
 			/** @var string|mixed $result */
 			$result = dfa_deep($this->_data, 'message');
@@ -41,9 +41,9 @@ abstract class Handler extends \Df\Core\O {
 
 	/**
 	 * 2016-05-11
-	 * Этот метод определяет, было ли действите инициировано в нашем же магазине.
-	 * Если да, то и обрабатывать его не надо
-	 * (более того, такая обработка может привести к сложнодиагностируемым сбоям).
+	 * This method determines whether this action is initiated in the same store.
+	 * If this is the case, then we do not handle it
+	 * (On a side note, this handling can lead to hard to debug failures).
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return bool
 	 */
@@ -89,7 +89,7 @@ abstract class Handler extends \Df\Core\O {
 			df_response()->setStatusCode(500);
 			if (df_is_it_my_local_pc()) {
 				// 2016-03-27
-				// Удобно видеть стек на экране.
+				// Show the stack trace on the screen
 				throw $e;
 			}
 			else {

@@ -7,7 +7,7 @@ var config = {
 	}
 	// 2016-04-11
 	// http://requirejs.org/docs/api.html#config-shim
-	// CheckoutKit не использует AMD и прикрепляет себя к window.
+	// CheckoutKit does not use AMD, it attaches itself to the window.
 	,shim: {
 		'Dfe_CheckoutCom/API/Sandbox': {exports: 'CheckoutKit'}
 		,'Dfe_CheckoutCom/API/Production': {exports: 'CheckoutKit'}
