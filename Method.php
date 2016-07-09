@@ -637,7 +637,7 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * Sample server response when 3D-Secure is forced:
+	 * A sample server response when 3D-Secure is forced:
 		{
 			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
 			"liveMode": false,
