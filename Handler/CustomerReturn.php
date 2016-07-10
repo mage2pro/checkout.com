@@ -153,8 +153,6 @@ class CustomerReturn {
 			$method->disableEvent($charge->getId(), 'charge.captured');
 		}
 		$method->responseSet($charge);
-		/** @var Response $r */
-		$r = Response::s($charge, $order);
 		DfPayment::processActionS($payment, $action, $order);
 		DfPayment::updateOrderS(
 			$payment
