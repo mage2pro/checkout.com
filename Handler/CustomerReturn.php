@@ -78,7 +78,7 @@ class CustomerReturn {
 		$charge = $api->verifyCharge($token);
 		df_log($charge->json);
 		/** @var Response $r */
-		$r = Response::s($charge, $order);
+		$r = Response::sp($charge, $order);
 		/** @var bool $result */
 		$result = $r->valid();
 		if (!$result) {

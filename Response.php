@@ -253,11 +253,13 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-05-15
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
+	 * @used-by \Dfe\CheckoutCom\Method::r()
 	 * @param CCharge $charge
 	 * @param Order $order
 	 * @return $this
 	 */
-	public static function s(CCharge $charge, Order $order) {
+	public static function sp(CCharge $charge, Order $order) {
 		/** @var array(string => $this) */
 		static $cache;
 		if (!isset($cache[$charge->getId()])) {

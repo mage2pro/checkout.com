@@ -627,7 +627,7 @@ class Method extends \Df\Payment\Method {
 	 */
 	private function r() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = Response::s($this->response(), $this->o());
+			$this->{__METHOD__} = Response::sp($this->response(), $this->o());
 		}
 		return $this->{__METHOD__};
 	}

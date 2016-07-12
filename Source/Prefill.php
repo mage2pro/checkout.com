@@ -1,5 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Source;
+/** @method static Prefill s() */
 class Prefill extends \Df\Config\SourceT {
 	/**
 	 * 2016-05-10
@@ -32,7 +33,4 @@ class Prefill extends \Df\Config\SourceT {
 		}
 		return $this->{__METHOD__};
 	}
-
-	/** @return self */
-	public static function s() {static $r; return $r ? $r : $r = new self;}
 }
