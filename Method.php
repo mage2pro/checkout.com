@@ -140,7 +140,7 @@ class Method extends \Df\Payment\Method {
 			 * <Parent Identifier>-capture
 			 * @used-by \Dfe\CheckoutCom\Method::capture()
 			 */
-			$this->applyCustomTransactionId($payment);
+			df_payment_apply_custom_transaction_id($payment);
 		}
 		return $this;
 	}
@@ -248,7 +248,7 @@ class Method extends \Df\Payment\Method {
 			 * <Parent Identifier>-capture
 			 * @used-by \Dfe\CheckoutCom\Method::capture()
 			 */
-			$this->applyCustomTransactionId($payment);
+			df_payment_apply_custom_transaction_id($payment);
 		}
 		else {
 			$this->leh(function() use($payment, $amount) {
@@ -329,7 +329,7 @@ class Method extends \Df\Payment\Method {
 			 * as Magento doesn't create automatic type IDs
 			 * @used-by \Dfe\CheckoutCom\Method::capture()
 			 */
-			$this->applyCustomTransactionId($payment);
+			df_payment_apply_custom_transaction_id($payment);
 		}
 		else {
 			$this->leh(function() use($payment) {
