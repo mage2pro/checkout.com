@@ -651,7 +651,7 @@ class Method extends \Df\Payment\Method {
 				 *
 				 * Get it here: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
 				 */
-				$this->iiaSet(PlaceOrder::RESPONSE, $result);
+				$this->iiaSet(PlaceOrder::DATA, $result);
 				/**
 				 * 2016-05-06
 				 * An additional notification email should not be sent.
