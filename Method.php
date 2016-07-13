@@ -299,18 +299,6 @@ class Method extends \Df\Payment\Method {
 	public function responseSet(ChargeResponse $response) {$this->_response = $response;}
 
 	/**
-	 * 2016-03-08
-	 * @override
-	 * @see \Df\Payment\Method::setStore()
-	 * @param int $storeId
-	 * @return void
-	 */
-	public function setStore($storeId) {
-		parent::setStore($storeId);
-		S::s()->setScope($storeId);
-	}
-
-	/**
 	 * 2016-05-03
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#void-a-charge
 	 * @override
