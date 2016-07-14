@@ -95,6 +95,12 @@ class CustomerReturn {
 			$order->cancel();
 			$order->save();
 			df_checkout_session()->restoreQuote();
+			/**
+			 * 2016-07-14
+			 * @todo It would be nice to show an explanation message to the customer
+			 * when it returns to the store after an unsuccessful payment attempt.
+			 */
+			df_payment_error();
 		}
 		else {
 			self::action($order, $payment, $charge, $r->action());
