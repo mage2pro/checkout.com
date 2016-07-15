@@ -248,6 +248,21 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 					<validate>validate-length maximum-length-22</validate>
 				</field>
 				<field
+					id='messageFailure'
+					translate='label'
+					type='Df\Framework\Form\Element\Textarea'
+					dfRows='3'
+					sortOrder='15'
+					showInDefault='1'
+					showInWebsite='1'
+					showInStore='1'
+				>
+					<label>Failure Message</label>
+					<comment><![CDATA[The failure message will be displayed to the customer on the checkout screen when the customer returns from the allPay payment page to the store after an unsuccessful payment attempt.
+<br/>You can use HTML tags in the message.]]></comment>
+					<depends><field id='enable'>1</field></depends>
+				</field>
+				<field
 					id='min_order_total'
 					translate='label'
 					type='text'
