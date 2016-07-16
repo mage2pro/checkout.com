@@ -26,8 +26,8 @@ use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-09
-	 * Status «Flagged» equivalent to «Authorised»:
-	 * A capture or a void can be triggered.
+	 * A «Flagged» payment can be handled the same way as an «Authorised» payment:
+	 * we can «capture» or «void» it.
 	 * @override
 	 * @see \Df\Payment\Method::acceptPayment()
 	 * @param II|I|OP $payment
@@ -35,8 +35,8 @@ class Method extends \Df\Payment\Method {
 	 */
 	public function acceptPayment(II $payment) {
 		// 2016-03-15
-		// Suggests $this->charge($payment) is not entirely true:
-		// An invoice is then created.
+		// The obvious $this->charge($payment) is not quite correct,
+		// because an invoice will not be created in this case.
 		$payment->capture();
 		return true;
 	}
@@ -87,15 +87,16 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * Review mode is disabled because 3D-Secure mode cannot be triggered 
- 	 * from the Magento side for testing.
- 	 * Administrators can obviously test this for merchants
+	 * I have disabled the Review mode, because if Checkout.com wants 3D-Secure,
+	 * the shop can not prevent it, and it will break the Review mode,
+	 * because a shop's administrator is unable to pass 3D-Secure validation
+	 * for a customer's bank card.
+	 *
 	 * 2016-05-09
-	 * It turns out that if a payment gateway transaction returns a «Flagged» state,
-	 * The parameter autoCapture is ignored by the gateway
-	 * A transaction capture needs to be separately triggered 
-	 * https://mage2.pro/t/1565
-	 * It is then a good idea to do a Review procedure on such transactions
+	 * If Checkout.com marks a payment as «Flagged»,
+	 * then it ignores the «autoCapture» request parameter,
+	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
+	 * So we can employ the Review mode for such payments.
 	 *
 	 * @override
 	 * @see \Df\Payment\Method::canReviewPayment()
@@ -116,12 +117,13 @@ class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see \Df\Payment\Method::capture()
 	 *
-	 * $amount ontains the value in base currency.
+	 * @param II|I|OP $payment
+	 *
+	 * $amount is a money value in the shop's base currency.
 	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L37-L37
 	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L76-L82
-	 *
-	 * @param II|I|OP $payment
 	 * @param float $amount
+	 *
 	 * @return $this
 	 * @throws E|LE
 	 */
@@ -132,13 +134,9 @@ class Method extends \Df\Payment\Method {
 		else {
 			/**
 			 * 2016-05-11
-			 * Webhook Scenario
-			 * Set transaction Capture ID,
-			 * returned by the payment gateway.
-			 * We need to store it,
-			 * as Magento doesn't create automatic type IDs
-			 * <Parent Identifier>-capture
-			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 * A Webhook scenario.
+			 * We set the Checkout.com payment ID the Magento transaction ID
+			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-capture.
 			 */
 			df_payment_apply_custom_transaction_id($payment);
 		}
@@ -147,8 +145,8 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-09
-	 * Status «Flagged» equivalent to «Authorised»:
-	 * A capture or a void can be triggered.
+	 * A «Flagged» payment can be handled the same way as an «Authorised» payment:
+	 * we can «capture» or «void» it.
 	 * @override
 	 * @see \Df\Payment\Method::denyPayment()
 	 * @param II|I|OP  $payment
@@ -157,7 +155,7 @@ class Method extends \Df\Payment\Method {
 	public function denyPayment(II $payment) {
 		/**
 		 * 2016-05-09
-		 * Similarly to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
+		 * Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
 		 */
 		$payment->void(new \Magento\Framework\DataObject());
 		return true;
@@ -165,8 +163,9 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-11
-	 * Disable the alert event
-	 * (as we already triggered it ourselves).
+	 * Mark an event as already processed,
+	 * so when Checkout.com will notify us about the event,
+	 * we will just skip this notification.
 	 * @param string $transactionId
 	 * @param string $eventId
 	 * @return void
@@ -197,21 +196,19 @@ class Method extends \Df\Payment\Method {
 	 * @return string
 	 *
 	 * 2016-05-07
-	 * In this case we can only use @used-by \Magento\Sales\Model\Order\Payment::place()
-	 * And there our method is invoked from 2 places and in different ways.
+	 * We can arrive here only from @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * but from 2 different code points.
 	 *
 	 * 2016-05-08
-	 * If necessary, check that 3D-Secure returns null.
+	 * Returns null, if 3D-Secure validation is needed.
 	 * @used-by \Magento\Sales\Model\Order\Payment::place()
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
 	 *
 	 * 2016-05-09
-	 * It seems that if the payment gateway returns a «Flagged» transaction,
-	 * then the autoCapture param is ignored,
-	 * and we need to seperately do a Capture transaction.
-	 * https://mage2.pro/t/1565
-	 *
-	 * It is then a good idea to do a Review procedure on such transactions
+	 * If Checkout.com marks a payment as «Flagged»,
+	 * then it ignores the «autoCapture» request parameter,
+	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
+	 * So we can employ the Review mode for such payments.
 	 */
 	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->r()->action();}
 
@@ -226,10 +223,10 @@ class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-15
 	 * 2016-05-11
-	 * It seems that in a refund request we can specify a description
-	 * and a list ofr products with their price and quantities:
+	 * Checkout.com refund request supports a description
+	 * and a list of refunded items (products with prices and quantities):
 	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
-	 * @todo We need to support this
+	 * @todo Use this feature.
 	 * @override
 	 * @see \Df\Payment\Method::refund()
 	 * @param II|I|OP|DfPayment $payment
@@ -240,13 +237,9 @@ class Method extends \Df\Payment\Method {
 		if ($payment[self::WEBHOOK_CASE]) {
 			/**
 			 * 2016-05-11
-			 * Webhook scenario
-			 * Set the transaction capture ID,
-			 * returned by the payment gateway.
-			 * We need to store it,
-			 * as Magento doesn't create automatic type IDs
-			 * <Parent Identifier>-capture
-			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 * A Webhook scenario.
+			 * We set the Checkout.com payment ID the Magento transaction ID
+			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-refund.
 			 */
 			df_payment_apply_custom_transaction_id($payment);
 		}
@@ -256,15 +249,14 @@ class Method extends \Df\Payment\Method {
 				$refund = new ChargeRefund;
 				/**
 				 * 2016-05-09
-				 * the Capture transaction ID if different from the previous transaction ID.
-				 * For refund transactions we will need to specify
-				 * a capture transaction ID.
+				 * The «capture» transaction's ID differs from the previous transaction's ID.
+				 * We should use the «capture» transaction's ID
+				 * as a parameter of the Checkout.com «refund» transaction.
 				 *
-				 * It calls $payment->getRefundTransactionId()
-				 * and $payment->getParentTransactionId()
-				 * They return the same value
+				 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
+				 * return the same value.
 				 *
-				 * refund_transaction_id is set here:
+				 * «refund_transaction_id» is set here:
 				 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 				 */
 				$refund->setChargeId($payment->getRefundTransactionId());
@@ -274,7 +266,7 @@ class Method extends \Df\Payment\Method {
 				$response = $this->api()->refundCardChargeRequest($refund);
 				/**
 				 * 2016-05-09
-				 * If successful, the server response is as follows:
+				 * A sample success response:
 					{
 						"id": "charge_test_033B66645E5K7A9812E5",
 						"originalId": "charge_test_427BB6745E5K7A9813C9",
@@ -310,12 +302,9 @@ class Method extends \Df\Payment\Method {
 		if ($payment[self::WEBHOOK_CASE]) {
 			/**
 			 * 2016-05-11
-			 * Webhook Scenario
-			 * Set the transaction capture ID,
-			 * returned by the payment gateway.
-			 * We need to store it,
-			 * as Magento doesn't create automatic type IDs
-			 * @used-by \Dfe\CheckoutCom\Method::capture()
+			 * A Webhook scenario.
+			 * We set the Checkout.com payment ID the Magento transaction ID
+			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-void.
 			 */
 			df_payment_apply_custom_transaction_id($payment);
 		}
@@ -329,8 +318,8 @@ class Method extends \Df\Payment\Method {
 					/**
 					 * 2016-05-03
 					 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
-					 * Although the documentation states the the track_id param is optional,
-					 * a Void Charge of an empty object fails:
+					 * Although the documentation states that the «track_id» parameter is optional,
+					 * the transaction will fail with empty ChargeVoid object:
 					  {
 					 	"errorCode": "70000",
 					 	"message": "Validation error",
@@ -345,9 +334,8 @@ class Method extends \Df\Payment\Method {
 					$response = $this->api()->voidCharge($auth->getTxnId(), $void);
 					/**
 					 * 2016-05-13
-					 * The transaction ID to be voided has to be same in Magento
-					 * as in Checkout.com,
-					 * otherwise it will be in the format <ID transaction authorize>-void
+					 * This makes the «void» transaction ID the same in Magento and in Checkout.com
+					 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
 					 */
 					$payment->setTransactionId($response->getId());
 				}
@@ -420,7 +408,7 @@ class Method extends \Df\Payment\Method {
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
 			 * 2016-06-08
-			 * If successful, the server response is as follows:
+			 * A sample success response:
 				{
 					"id": "charge_test_910FE7244E5J7A98EFFA",
 					"originalId": "charge_test_352BA7344E5Z7A98EFE5",
@@ -441,16 +429,13 @@ class Method extends \Df\Payment\Method {
 			df_assert_eq(Response::S__CAPTURED, $response->getStatus());
 			/**
 			 * 2016-05-09
-			 * As shown in the above server response,
-			 * the Catpure ID is different from the previous transaction
-			 * It seems that for refund transactions
-			 * we will need to specify
-			 * the transaction Capture ID,
-			 * so we will need to save it.
-			 *
-			 * This payment already contains transaction_id
-			 * of type <предыдущая транзакция>-capture,
-			 * we correct it by setting its own one.
+			 * As you can see in the sample response above,
+			 * the «capture» transaction's ID differs from the ID of the previous transaction.
+			 * We would need the «capture» transaction's ID for a future «refund» transaction,
+			 * so save it.
+			 * The payment is already assigned an autogenerated transaction ID like
+			 * <the previous transaction>-capture,
+			 * so we owerwrite the ID when we set the new one.
 			 */
 			$payment->setTransactionId($response->getId());
 		});
@@ -482,8 +467,7 @@ class Method extends \Df\Payment\Method {
 			if (!$this->r()->valid()) {
 				/**
 				 * 2016-05-08
-				 * If the payment gateway rejects the transaction,
-				 * we get a response in the below format:
+				 * A sample failure response:
 					{
 						"id": "charge_test_153AF6744E5J7A98E1D9",
 						"responseMessage": "40144 - Threshold Risk - Decline",
@@ -493,7 +477,7 @@ class Method extends \Df\Payment\Method {
 						"authCode": "00000"
 						...
 					}
-				 * we need to think of what's best to be done
+				 * @todo We need to think how to handle it the best way.
 				 */
 				df_error(df_dump($this->r()->a([
 					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
@@ -501,7 +485,7 @@ class Method extends \Df\Payment\Method {
 			}
 			/**
 			 * 2016-05-02
-			 * Otherwise the «void» operation (Cancellation of transaction Auth) won't be available:
+			 * Without it, a «void» operation will be unavailable:
 			 * «How is a payment authorization voiding implemented?»
 			 * https://mage2.pro/t/938
 			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
@@ -520,7 +504,7 @@ class Method extends \Df\Payment\Method {
 			$payment->setCcType($card->getPaymentMethod());
 			/**
 			 * 2016-03-15
-			 * Similarly, another «void» operation (Cancellation of transaction Auth) won't be available:
+			 * Without it, a «void» operation will be unavailable:
 			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 * The transaction is considered complete unless «false» is explicitly specified.
@@ -529,18 +513,19 @@ class Method extends \Df\Payment\Method {
 			if ($this->r()->flagged()) {
 				/**
 				 * 2016-05-06
-				 * It is impossible to explicitly set the order status here
-				 * @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
-				 * Call $order->setState(O::STATE_PAYMENT_REVIEW);
-				 * because it's a fallback state:
+				 * Unfortunately, we can set
+				 * the @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state here
+				 * with the code $order->setState(O::STATE_PAYMENT_REVIEW);
+				 * because the state will be owerwritten:
 				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
 				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
 				 *
-				 * we should therefore do it differently.
-				 * IsTransactionPending flag will be created in the same method
+				 * So, we are acting differently.
+				 * The «IsTransactionPending» flag will be read
+				 * in the same method:
 				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
 				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-				 * And the state will be set @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW
+				 * And the @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state will be set.
 				 */
 				$payment->setIsTransactionPending(true);
 				/**
@@ -557,12 +542,13 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * To avoid recurring calls use @uses \Dfe\CheckoutCom\Method::actionDesired()
+	 * We use @uses \Dfe\CheckoutCom\Method::actionDesired()
 	 * instead of @see \Dfe\CheckoutCom\Method::action()
-	 * This method specifies whether the admin wants to capture.
-	 * However this action is optional,
-	 * if the payment gateway marked the transaction as «Flagged»,
-	 * then the transaction will be forced to use the Authorize Action.
+	 * to avoid a infinite recursion.
+	 *
+	 * If Checkout.com marks a payment as «flagged»,
+	 * then the @see \Dfe\CheckoutCom\Method::isCaptureDesired() method's result will be ignored,
+	 * and the «authorize» action will be used instead.
 	 * @return bool
 	 */
 	private function isCaptureDesired() {
@@ -622,7 +608,7 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * A sample server response when 3D-Secure is forced:
+	 * A sample response when a 3D-Secure validation is needed:
 		{
 			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
 			"liveMode": false,
@@ -639,22 +625,17 @@ class Method extends \Df\Payment\Method {
 			if ($result) {
 				/**
 				 * 2016-05-07
-				 * If necessary, do a 3D-Secure verification
-				 * $response->getId() sends back the ID and the token.
-				 * The transaction is not creating
-				 * $payment->setTransactionId($response->getId());
-				 * is not called.
-				 *
-				 * Instead of creating a transaction ID, we use the udf1 field:
-				 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/d8dcfd/Charge.php#L37
-				 * @see \Dfe\CheckoutCom\Charge::_build()
-				 *
-				 * Get it here: https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f57128/Controller/Index/Index.php#L65
+				 * If a 3D-Secure validation is needed,
+				 * then $response->getId() returns a token (see a sample response above),
+				 * not the transaction's ID.
+				 * In this case, we postpone creating a Magento transaction yet,
+				 * so we do not call $payment->setTransactionId($response->getId());
 				 */
 				$this->iiaSet(PlaceOrder::DATA, $result);
 				/**
 				 * 2016-05-06
-				 * An additional notification email should not be sent.
+				 * Postpone sending an order confirmation email to the customer,
+				 * because the customer should pass 3D-Secure validation first.
 				 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
 				 */
 				$this->o()->setCanSendNewEmailFlag(false);
@@ -704,8 +685,8 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-11
-	 * This flag used in the metadata of a transaction stores a list of the events
-	 * that we ignore because they were triggrered by our own actions.
+	 * It is a metadata key, which stores the list of Checkout.com events,
+	 * which we will ignore (do not process), because they are already processed.
 	 * @used-by \Dfe\CheckoutCom\Method::disableEvent()
 	 * @used-by \Dfe\CheckoutCom\Handler::isInitiatedByMyself()
 	 */
