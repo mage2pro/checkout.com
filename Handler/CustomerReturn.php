@@ -22,7 +22,6 @@ use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
-use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Service\InvoiceService;
 class CustomerReturn {
 	/**
@@ -37,8 +36,8 @@ class CustomerReturn {
 		/**
 		 * 2016-05-08 (дополнение)
 		 * The order placement and the 3D-Secure verification
-		 * both occur in the user sessions.
-		 * We can also get the user's last placed order
+		 * both occur in the user's sessions.
+		 * So we can get the user's last order
 		 * by calling @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 *
@@ -128,9 +127,7 @@ class CustomerReturn {
 				$t->addObject($invoice);
 				$t->addObject($order);
 				$t->save();
-				/** @var InvoiceSender $sender */
-				$sender = df_o(InvoiceSender::class);
-				$sender->send($invoice);
+				df_invoice_send_email($invoice);
 				//self::action($order, $payment, $captureCharge, M::ACTION_AUTHORIZE_CAPTURE);
 			}
 		}
@@ -148,6 +145,7 @@ class CustomerReturn {
 	private static function action(Order $order, Payment $payment, CCharge $charge, $action) {
 		/** @var Method $method */
 		$method = $payment->getMethodInstance();
+		df_assert_is(Method::class, $method);
 		$method->setStore($order->getStoreId());
 		if (M::ACTION_AUTHORIZE === $action) {
 			/**

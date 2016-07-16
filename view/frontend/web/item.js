@@ -7,10 +7,11 @@ define ([
 	, 'underscore'
 	, 'Df_Checkout/js/action/place-order'
 	, 'Magento_Checkout/js/model/payment/additional-validators'
+	, 'Magento_Checkout/js/model/quote'
 	, 'Df_Checkout/js/action/redirect-on-success'
 ], function(
 	Component, $, df, dfCheckout, $t, _,
-	placeOrderAction, additionalValidators, redirectOnSuccessAction
+	placeOrderAction, additionalValidators, quote, redirectOnSuccessAction
 ) {
 	'use strict';
 	return Component.extend({
@@ -30,6 +31,37 @@ define ([
 			/** @type {Object} */
 			var result =  window.checkoutConfig.payment[this.getCode()];
 			return !key ? result : result[key];
+		},
+		/**
+		 * 2016-07-16
+		 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
+		 * @returns {String}
+		 */
+		debugMessage: function() {
+			if (df.undefined(this._debugMessage)) {
+				/** @type {String} */
+				var amountS = Math.round(100 * dfCheckout.grandTotal()).toString();
+				/** @type {String} */
+				var last2 = amountS.substring(amountS.length - 2);
+				/** @type {?String} */
+				var reason = ({
+					'05': '	Declined - Do Not Honour'
+					,'12': 'Invalid Transaction'
+					,'14': 'Invalid Card Number'
+					,'51': 'Insufficient Funds'
+					,'62': 'Restricted Card'
+					,'63': 'Security Violation'
+				})[last2];
+				this._debugMessage = !reason ? '' :
+					('The transaction <b><a href="{url}">will fail</a></b> by the reason «<b>{reason}</b>», '
+					 + 'because the payment amount ends with «<b>{last2}</b>».')
+						.replace('{url}', 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes')
+						.replace('{reason}', reason)
+						.replace('{last2}', last2)
+				;
+			}
+			return this._debugMessage;
+
 		},
 		/**
 		 * 2016-05-18
@@ -213,7 +245,6 @@ define ([
 					_this.token = response.id;
 					_this.placeOrder();
 				});
-
 			});
 		},
 		/**
