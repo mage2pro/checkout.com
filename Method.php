@@ -225,7 +225,7 @@ class Method extends \Df\Payment\Method {
 	 * 2016-05-11
 	 * Checkout.com refund request supports a description
 	 * and a list of refunded items (products with prices and quantities):
-	 * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/refund-card-charge
 	 * @todo Use this feature.
 	 * @override
 	 * @see \Df\Payment\Method::refund()
@@ -401,7 +401,7 @@ class Method extends \Df\Payment\Method {
 			 * Partial captures (capture amount is less than the authorised amount) are allowed.
 			 * Only one partial capture is allowed per authorised charge.
 			 * If not specified, the default is authorisation charge amount.»
-			 * http://developers.checkout.com/docs/server/api-reference/charges/capture-card-charge#request-payload-fields
+			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
 			$capture->setValue(self::amount($payment, $amount));
 			/** @var ChargeResponse $response */
@@ -700,7 +700,7 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-04-21
-	 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
 	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
 	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units

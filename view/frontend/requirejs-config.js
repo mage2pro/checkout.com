@@ -1,5 +1,5 @@
 // 2016-04-11
-// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
+// http://docs.checkout.com/getting-started/checkoutkit-js
 var config = {
 	paths: {
 		'Dfe_CheckoutCom/API/Sandbox': 'https://sandbox.checkout.com/js/v1/checkoutkit'

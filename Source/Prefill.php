@@ -11,7 +11,7 @@ class Prefill extends \Df\Config\SourceT {
 
 	/**
 	 * 2016-04-13
-	 * http://developers.checkout.com/docs/server/api-reference/charges/simulator#test-cards
+	 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#test-cards
 	 * @override
 	 * @see \Df\Config\Source::map()
 	 * @used-by \Df\Config\Source::toOptionArray()

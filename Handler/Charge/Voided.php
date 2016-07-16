@@ -3,7 +3,7 @@ namespace Dfe\CheckoutCom\Handler\Charge;
 use Dfe\CheckoutCom\Handler\Charge;
 // 2016-05-10
 // charge.voided
-// http://developers.checkout.com/docs/server/api-reference/webhooks
+// http://docs.checkout.com/getting-started/webhooks
 class Voided extends Charge {
 	/**
 	 * 2016-05-10

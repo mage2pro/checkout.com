@@ -4,7 +4,6 @@ use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Source\Prefill;
 use com\checkout\ApiServices\Charges\ChargeService;
-use Magento\Framework\App\ScopeInterface as S;
 /** @method static Settings s() */
 class Settings extends \Df\Payment\Settings {
 	/**

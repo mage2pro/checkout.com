@@ -64,7 +64,7 @@ abstract class Handler extends \Df\Core\O {
 			 * 2016-05-13
 			 * Unlike Stripe, Checkout.com does not use the underline character («_»)
 			 * as an event's parts separator, it uses only dot («.») as a separator.
-			 * http://developers.checkout.com/docs/server/api-reference/webhooks
+			 * http://docs.checkout.com/getting-started/webhooks
 			 */
 			/** @var string $suffix */
 			$suffix = df_implode_class('handler', explode('.', $request['eventType']));

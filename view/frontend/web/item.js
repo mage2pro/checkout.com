@@ -119,7 +119,7 @@ define ([
 			 * when the buyer clicks the "Place Order" button
 			 */
 			// 2016-04-14
-			// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
+			// http://docs.checkout.com/getting-started/checkoutkit-js
 			this.initDf();
 			// 2016-03-09
 			// «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?
@@ -150,9 +150,9 @@ define ([
 					 * «Setting debugMode to true is highly recommended during the integration process;
 					 * the browser’s console will display helpful information
 					 * such as key events including event data and/or any issues found.»
-					 * http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js
+					 * http://docs.checkout.com/getting-started/checkoutkit-js
 					 *
-					 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js
+					 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions
 					 * «The log action will only log messages on the console if debugMode is set to true.»
 					 */
 					debugMode: this.isTest()
@@ -160,11 +160,11 @@ define ([
 					//,customerEmail: dfCheckout.email()
 					,ready: function(event) {
 						// 2016-04-14
-						// http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
+						// http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
 						//CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
 						/**
 						 * 2016-04-20
-						 * http://developers.checkout.com/docs/browser/reference/handlers/checkoutkit-js
+						 * http://docs.checkout.com/reference/checkoutkit-js-reference/handlers
 						 * @type {*|Array}
 						 */
 						var ev = CheckoutKit.Events;
@@ -172,9 +172,9 @@ define ([
 						 * 2016-04-20
 						 * «If you do not want the <form> to be submitted automatically,
 						 * you can add an event listener to receive the card token.»
-						 * http://developers.checkout.com/docs/browser/integration-guide/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
+						 * http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
 						 *
-						 * http://developers.checkout.com/docs/browser/reference/handlers/checkoutkit-js
+						 * http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#example
 						 * CARD_TOKENISED
 						 * After a card is tokenised.
 						 * The event object will contain the card token.
@@ -187,7 +187,7 @@ define ([
 						});
 						/**
 						 * 2016-04-20
-						 * http://developers.checkout.com/docs/browser/reference/handlers/checkoutkit-js
+						 * http://docs.checkout.com/reference/checkoutkit-js-reference/handlers
 						 */
 						CheckoutKit.addEventHandler(ev.CARD_TOKENISATION_FAILED, function(event) {
 							_this.messageContainer.addErrorMessage({
@@ -223,7 +223,7 @@ define ([
 				var $form = $('form.dfe-checkout-com');
 				/**
 				 * 2016-04-21
-				 * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js#create-card-token
+				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
 				 */
 				CheckoutKit.createCardToken({
 					cvv: $('[data="cvv"]', $form).val()
@@ -234,7 +234,7 @@ define ([
 					 * 2016-04-14
 					 * «Charges Required-Field Matrix»
 					 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
-					 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token
+					 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token
 					 *
 					 * 2016-04-17
 					 * How to get the current customer's email on the frontend checkout screen?

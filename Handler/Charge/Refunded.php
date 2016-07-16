@@ -14,7 +14,7 @@ use Magento\Sales\Model\Service\CreditmemoService;
 /**
  * 2016-05-10
  * charge.refunded
- * http://developers.checkout.com/docs/server/api-reference/webhooks
+ * http://docs.checkout.com/getting-started/webhooks
  *
  * If autoCapture is enabled, Checkout.com executes 2 transactions: Authorize and Capture.
  * The response sent back by Checkout.com only contains the Authorize transaction ID. 
@@ -25,7 +25,7 @@ use Magento\Sales\Model\Service\CreditmemoService;
  *
  * 2016-05-11
  * Side note stated in the documentation:
- * http://developers.checkout.com/docs/server/api-reference/charges/refund-card-charge
+ * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/refund-card-charge
  * «To process a refund the merchant must send the Charge ID of the Captured transaction»
  * «For an Automatic Capture, the Charge Response will contain
  * the Charge ID of the Auth Charge. This ID cannot be used.»
@@ -34,7 +34,7 @@ use Magento\Sales\Model\Service\CreditmemoService;
  * About the use case described above (autoCapture)
  * We cannot get Capture transaction ID from the Authorize transaction ID.
  * But we can use «Get Charge History» for this request :
- * http://developers.checkout.com/docs/server/api-reference/charges/get-charge-history
+ * http://docs.checkout.com/reference/merchant-api-reference/charges/get-charge-history
  *
  * 2016-05-11
  * Problem was solved.

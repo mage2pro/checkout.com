@@ -27,7 +27,7 @@ https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Or
 				<actionForReturned>authorize_capture</actionForReturned>
 				<!--
 2016-06-28
-http://developers.checkout.com/docs/server/api-reference/charges
+http://docs.checkout.com/reference/merchant-api-reference/charges#the-charge-object
 «A description that can be added to this object.»
 				-->
 				<description>{order.id}</description>

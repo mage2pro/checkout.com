@@ -12,7 +12,7 @@ use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\InvoiceService;
 // 2016-05-10
 // charge.captured
-// http://developers.checkout.com/docs/server/api-reference/webhooks
+// http://docs.checkout.com/getting-started/webhooks
 class Captured extends Charge {
 	/**
 	 * 2016-03-25
