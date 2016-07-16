@@ -1,5 +1,5 @@
 define ([
-	'Magento_Payment/js/view/payment/cc-form'
+	'Df_Payment/js/view/payment/cc-form'
 	,'jquery'
 	, 'df'
 	, 'Df_Checkout/js/data'
@@ -53,7 +53,7 @@ define ([
 					,'63': 'Security Violation'
 				})[last2];
 				this._debugMessage = !reason ? '' :
-					('The transaction <b><a href="{url}">will fail</a></b> by the reason «<b>{reason}</b>», '
+					('The transaction will <b><a href="{url}">fail</a></b> by the reason «<b>{reason}</b>», '
 					 + 'because the payment amount ends with «<b>{last2}</b>».')
 						.replace('{url}', 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes')
 						.replace('{reason}', reason)
