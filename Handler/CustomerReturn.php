@@ -97,7 +97,7 @@ class CustomerReturn {
 			// 2016-07-14
 			// Show an explanation message to the customer
 			// when it returns to the store after an unsuccessful payment attempt.
-			df_checkout_error(S::s()->messageFailure());
+			df_checkout_error($r->messageForCustomer());
 		}
 		else {
 			self::action($order, $payment, $charge, $r->action());

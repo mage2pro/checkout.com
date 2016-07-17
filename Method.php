@@ -465,23 +465,7 @@ class Method extends \Df\Payment\Method {
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
 			if (!$this->r()->valid()) {
-				/**
-				 * 2016-05-08
-				 * A sample failure response:
-					{
-						"id": "charge_test_153AF6744E5J7A98E1D9",
-						"responseMessage": "40144 - Threshold Risk - Decline",
-						"responseAdvancedInfo": null,
-						"responseCode": "40144",
-						"status": "Declined",
-						"authCode": "00000"
-						...
-					}
-				 * @todo We need to think how to handle it the best way.
-				 */
-				df_error(df_dump($this->r()->a([
-					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
-				])));
+				throw new Exception($this->r());
 			}
 			/**
 			 * 2016-05-02
@@ -574,6 +558,7 @@ class Method extends \Df\Payment\Method {
 		}
 		/** @var mixed $result */
 		try {$result = $function();}
+		catch (Exception $e) {throw $e;}
 		catch (CE $e) {throw new LE(__($e->getErrorMessage()), $e);}
 		catch (E $e) {throw df_le($e);}
 		if ($label) {

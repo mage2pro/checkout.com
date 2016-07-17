@@ -14,7 +14,6 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Item as OrderItem;
 use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Magento\Store\Model\Store;
 class Charge extends \Df\Payment\Charge\WithToken {
 	/**
 	 * 2016-05-06

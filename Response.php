@@ -128,6 +128,21 @@ class Response extends \Df\Core\O {
 	}
 
 	/**
+	 * 2016-07-17
+	 * @used-by \Dfe\CheckoutCom\Exception::getMessageForCustomer()
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
+	 * @return string
+	 */
+	public function messageForCustomer() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = df_var(S::s()->messageFailure(), $this->a([
+				'responseMessage', 'responseAdvancedInfo'
+			]));
+		}
+		return $this->{__METHOD__};
+	}
+
+	/**
 	 * 2016-05-08
 	 * 2016-05-09
 	 * Added support for the «Flagged» status: https://mage2.pro/t/1565
