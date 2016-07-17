@@ -101,6 +101,7 @@ class CustomerReturn {
 		}
 		else {
 			self::action($order, $payment, $charge, $r->action());
+			df_order_send_email($order);
 			if (
 				M::ACTION_AUTHORIZE === $r->action()
 				&& 'Y' === $charge->getAutoCapture()
@@ -127,14 +128,6 @@ class CustomerReturn {
 				$t->addObject($invoice);
 				$t->addObject($order);
 				$t->save();
-				/**
-				 * 2016-07-17
-				 * The previous code was df_invoice_send_email($invoice);
-				 * Usually, when you have received a payment confirmation from a payment system,
-				 * you should use @see df_order_send_email() instead of @see df_invoice_send_email()
-				 * What is the difference between InvoiceSender and OrderSender? https://mage2.pro/t/1872
-				 */
-				df_order_send_email($order);
 				//self::action($order, $payment, $captureCharge, M::ACTION_AUTHORIZE_CAPTURE);
 			}
 		}
