@@ -29,7 +29,7 @@ class Prefill extends \Df\Config\SourceT {
 	 */
 	private function _config() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_http_json('https://mage2.pro/ext/checkout.com/test-card-data.json');
+			$this->{__METHOD__} = df_http_json_c('https://mage2.pro/ext/checkout.com/test-card-data.json');
 		}
 		return $this->{__METHOD__};
 	}
