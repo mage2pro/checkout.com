@@ -1,0 +1,16 @@
+/**
+
+*/
+
+.payment-field-container,
+.control > input.input-text {
+    margin-top: 10px;
+}
+
+.checkout-payment-method .ccard .fields > .year {
+    padding-left: 0px;
+}
+
+.add-new-card-module .field {
+    margin-top: 10px;
+}

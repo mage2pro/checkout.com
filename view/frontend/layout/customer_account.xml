@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd" label="Marketplace Dashboard" design_abstraction="custom">
+    <body>
+        <referenceBlock name="customer_account_navigation">
+            <block class="Magento\Framework\View\Element\Html\Link\Current" name="dfe-checkout-com.saved.cards">
+                <arguments>
+                    <argument name="path" xsi:type="string">Dfe_CheckoutCom/cards</argument>
+                    <argument name="label" xsi:type="string">Checkout.com Saved Cards</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

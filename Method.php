@@ -7,6 +7,8 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
+use com\checkout\ApiServices\Customers\RequestModels\CustomerCreate as CustomerRequest;
+use com\checkout\ApiServices\Customers\ResponseModels\Customer as CustomerResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrder;
 use Df\Sales\Model\Order\Payment as DfPayment;
@@ -24,6 +26,22 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
+	
+	/**
+     * $_helper.
+     *
+     * @var \Dfe\CheckoutCom\Helper\Data
+     */
+    protected $_helper;
+
+
+    public function __construct(
+        \Dfe\CheckoutCom\Helper\Data $helper
+    )
+    {
+        $this->_helper = $helper;
+    }
+
 	/**
 	 * 2016-05-09
 	 * A «Flagged» payment can be handled the same way as an «Authorised» payment:
@@ -452,6 +470,10 @@ class Method extends \Df\Payment\Method {
 	 * @throws E|LE
 	 */
 	private function charge(II $payment, $amount = null, $capture = true) {
+		
+		$paymentSource = $this->getInfoInstance()->getAdditionalInformation('paymentSource');
+		$saveCardForCustomer = $this->getInfoInstance()->getAdditionalInformation('saveCardForCustomer');
+
 		/** @var Transaction|false|null $auth */
 		$auth = !$capture ? null : $payment->getAuthorizationTransaction();
 		if ($auth) {
@@ -494,6 +516,16 @@ class Method extends \Df\Payment\Method {
 			 * The transaction is considered complete unless «false» is explicitly specified.
 			 */
 			$payment->setIsTransactionClosed($capture);
+
+			/**
+             * Check if payment source is Card Token and if save card checkbox is ticked
+             * and save customer card in DB accordingly
+             */
+
+			if ($paymentSource == 'token' && $saveCardForCustomer) {
+                $this->_helper->saveCheckoutComCustomer($response->getEmail(), $card->getCustomerId(), $card->getLast4(), $card->getId());
+			}
+
 			if ($this->r()->flagged()) {
 				/**
 				 * 2016-05-06
@@ -636,7 +668,23 @@ class Method extends \Df\Payment\Method {
 	 * @return ChargeResponse
 	 */
 	private function response() {
-		if (!isset($this->_response)) {$this->_response = self::leh(function() {
+		$paymentSource = $this->getInfoInstance()->getAdditionalInformation('paymentSource');
+
+        /**
+         * Check whether buyer is using a saved card or using a new one
+         * Saved card: charge with CardID
+         * New card: charge with Card Token
+         */
+
+		if ($paymentSource == 'customer' && !isset($this->_response)) {
+            $this->_response = self::leh(function() {
+			return $this->api()->chargeWithCardId(ChargeWithCardId::build(
+				$this->ii(), $this->getInfoInstance()->getAdditionalInformation('checkoutComSelectedCardId'), $this->_amount(), $this->isCaptureDesired()
+			));
+		});
+
+		}
+		elseif (!isset($this->_response)) {$this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardToken(Charge::build(
 				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
 			));
@@ -683,6 +731,8 @@ class Method extends \Df\Payment\Method {
 	 */
 	private static $TOKEN = 'token';
 
+	private static $CARDID = 'cardid';
+
 	/**
 	 * 2016-04-21
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
@@ -718,5 +768,35 @@ class Method extends \Df\Payment\Method {
 		/** @var string[] $m1000 */
 		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
 		return in_array($payment->getOrder()->getBaseCurrencyCode(), $m1000) ? 1000 : 100;
+	}
+
+	/**
+	 * Assign corresponding data.
+	 *
+	 * @param \Magento\Framework\DataObject|mixed $data
+	 *
+	 * @return $this
+	 *
+	 * @throws LocalizedException
+	 */
+	public function assignData(\Magento\Framework\DataObject $data)
+	{
+
+		parent::assignData($data);
+
+		$infoInstance = $this->getInfoInstance();
+		$additionalInfo = $data->getData('additional_data');
+
+        if (array_key_exists('token',$additionalInfo)) {
+            $infoInstance->setAdditionalInformation('token', $additionalInfo['token']);
+        }
+        if (array_key_exists('checkoutComSelectedCardId',$additionalInfo)) {
+            $infoInstance->setAdditionalInformation('checkoutComSelectedCardId', $additionalInfo['checkoutComSelectedCardId']);
+        }
+
+        $infoInstance->setAdditionalInformation('paymentSource', $additionalInfo['paymentSource']);
+		$infoInstance->setAdditionalInformation('saveCardForCustomer', $additionalInfo['saveCardForCustomer']);
+
+		return $this;
 	}
 }

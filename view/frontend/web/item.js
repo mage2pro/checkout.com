@@ -1,26 +1,99 @@
-define ([
-	'Df_Payment/js/view/payment/cc-form'
-	,'jquery'
-	, 'df'
-	, 'Df_Checkout/js/data'
-	, 'mage/translate'
-	, 'underscore'
-	, 'Df_Checkout/js/action/place-order'
-	, 'Magento_Checkout/js/model/payment/additional-validators'
-	, 'Magento_Checkout/js/model/quote'
-	, 'Df_Checkout/js/action/redirect-on-success'
-], function(
-	Component, $, df, dfCheckout, $t, _,
-	placeOrderAction, additionalValidators, quote, redirectOnSuccessAction
-) {
+define (
+    [
+        'Magento_Payment/js/view/payment/cc-form',
+        'ko',
+        'jquery',
+        'df',
+        'Df_Checkout/js/data',
+        'mage/translate',
+        'underscore',
+        'Df_Checkout/js/action/place-order',
+        'Magento_Checkout/js/model/payment/additional-validators',
+        'Magento_Checkout/js/view/payment/default',
+        'Magento_Checkout/js/action/set-payment-information',
+        'Magento_Checkout/js/action/select-payment-method',
+        'Magento_Checkout/js/checkout-data',
+        'Magento_Checkout/js/model/full-screen-loader',
+        'Df_Checkout/js/action/redirect-on-success'
+    ],
+    function(
+        Component,
+        ko,
+        $,
+        df,
+        dfCheckout,
+        $t,
+        _,
+        placeOrderAction,
+        additionalValidators,
+        redirectOnSuccessAction,
+        setPaymentInformationAction,
+        selectPaymentMethodAction,
+        checkoutData,
+        fullScreenLoader
+        ) {
 	'use strict';
 	return Component.extend({
 		defaults: {
-			active: false
-			,clientConfig: {id: 'dfe-checkout-com'}
-			,code: 'dfe_checkout_com'
-			,template: 'Dfe_CheckoutCom/item'
+			active: false,
+			clientConfig: {id: 'dfe-checkout-com'},
+			code: 'dfe_checkout_com',
+			template: 'Dfe_CheckoutCom/item',
+			isCardAvailable:null,
+			checkoutToken:null,
+			cardNumber:null,
+			paymentSource:'customer',
+			checkoutComSelectedCardId:null,
+			saveCardForCustomer:false,
+			savedCards:null,
+            isNewCardSelected:null
 		},
+
+		/**
+		 * @override
+		 */
+		initObservable: function () {
+			this._super()
+				.observe([
+					'isCardAvailable',
+					'checkoutToken',
+					'cardNumber',
+					'paymentSource',
+					'checkoutComSelectedCardId',
+					'saveCardForCustomer',
+                    'isNewCardSelected'
+				]);
+
+			return this;
+		},
+
+		/**
+		 * validate  to validate the payment method fields at checkout page
+		 * @return boolean
+		 */
+		validate: function () {
+			if($('.checkoutcom-card').is(':checked'))
+			{
+				return true;
+			}
+			else
+			{
+				this.messageContainer.addErrorMessage({message: $t("Please select a card or create a new card")});
+				return false;
+			}
+		},
+
+		/**
+		 * selectPaymentMethod called when payment method is selected
+		 * @return boolean
+		 */
+		selectPaymentMethod: function() {
+			selectPaymentMethodAction(this.getData());
+			checkoutData.setSelectedPaymentMethod(window.checkoutConfig.method);
+			return true;
+
+		},
+
 		imports: {onActiveChange: 'active'},
 		/**
 		 * 2016-03-02
@@ -83,10 +156,66 @@ define ([
 				 * «Property "Token" does not have corresponding setter
 				 * in class "Magento\Quote\Api\Data\PaymentInterface»
 				 */
-				additional_data: {token: this.token}
-				,method: this.item.method
+				'additional_data': {
+					token: this.token,
+					// cardNumber:this.cardNumber,
+					'paymentSource':this.paymentSource(),
+					'checkoutComSelectedCardId':this.checkoutComSelectedCardId(),
+					'saveCardForCustomer': this.saveCardForCustomer()
+				},
+				'method': this.item.method
 			};
 		},
+
+		/**
+		 * setCheckoutComSelectedCardId update selected card ID
+		 * @param HtmlObject element
+		 */
+        setCheckoutComSelectedCardId: function(element){
+            $("input[name=checkoutcom-new-card-payment]").prop("checked",false);
+            $('.add-new-card-module').hide();
+            this.isNewCardSelected = false;
+
+            this.checkoutComSelectedCardId($('input[name=checkoutcom-card-payment]:checked').val());
+		},
+        
+        /**
+         * setNewCardSelected update condition to trigger that a new card is being used
+         */
+        setNewCardSelected: function(){
+
+            $("input[name=checkoutcom-card-payment]").prop("checked",false);
+            $('.add-new-card-module').show();
+
+            if($('.new-card-selected').is(':checked'))
+                this.isNewCardSelected = true;
+            else
+                this.isNewCardSelected = false;
+
+        },
+
+		/**
+		 * setSaveCardForCustomer update condition to save customer card or not
+		 */
+		setSaveCardForCustomer: function(){
+			if($('.save-card-for-customer').is(':checked'))
+				this.saveCardForCustomer(1);
+			else
+				this.saveCardForCustomer(0);
+
+            if(!window.isCustomerLoggedIn) {
+                $('.save-card-for-customer').hide();
+                $('.save-card-for-customer-label').hide();
+            }
+		},
+
+		getCustomerSavedCards: function(){
+			this.savedCards = JSON.parse(window.checkoutConfig.payment.dfe_checkout_com.saved_cards);
+			if(this.savedCards.length > 0)
+				return this.savedCards;
+
+		},
+
 		/**
 		 * 2016-05-04
 		 * We have overriden the parent method,
@@ -217,35 +346,51 @@ define ([
 		*/
 		isTest: function() {return this.config('isTest');},
 		pay: function() {
+			var self = this ,
+                pay ;
 			var _this = this;
-			this.initDf().done(function() {
-				/** @type {jQuery} HTMLFormElement */
-				var $form = $('form.dfe-checkout-com');
-				/**
-				 * 2016-04-21
-				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
-				 */
-				CheckoutKit.createCardToken({
-					cvv: $('[data="cvv"]', $form).val()
-					,expiryMonth: $('[data="expiry-month"]', $form).val()
-					,expiryYear: $('[data="expiry-year"]', $form).val()
-					,number: $('[data="card-number"]', $form).val()
-					/**
-					 * 2016-04-14
-					 * «Charges Required-Field Matrix»
-					 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
-					 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token
-					 *
-					 * 2016-04-17
-					 * How to get the current customer's email on the frontend checkout screen?
-					 * https://mage2.pro/t/1295
-					 */
-					,'email-address': dfCheckout.email()
-				}, function(response) {
-					_this.token = response.id;
-					_this.placeOrder();
-				});
-			});
+			if (this.validate()) {
+                if (this.isNewCardSelected) {
+                    this.initDf().done(function () {
+                        /** @type {jQuery} HTMLFormElement */
+                        var $form = $('form.dfe-checkout-com');
+                        /**
+                         * 2016-04-21
+                         * http://developers.checkout.com/docs/browser/reference/actions/checkoutkit-js#create-card-token
+                         */
+                        CheckoutKit.createCardToken({
+                            cvv: $('[data="cvv"]', $form).val()
+                            , expiryMonth: $('[data="expiry-month"]', $form).val()
+                            , expiryYear: $('[data="expiry-year"]', $form).val()
+                            , number: $('[data="card-number"]', $form).val()
+                            /**
+                             * 2016-04-14
+                             * «Charges Required-Field Matrix»
+                             * http://developers.checkout.com/docs/server/integration-guide/charges#a1
+                             * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token
+                             *
+                             * 2016-04-17
+                             * How to get the current customer's email on the frontend checkout screen?
+                             * https://mage2.pro/t/1295
+                             */
+                            , 'email-address': dfCheckout.email()
+                        }, function (response) {
+
+                            self.checkoutToken(response.id);
+                            _this.token = response.id;
+                            self.paymentSource('token');
+                            self.isCardAvailable(true);
+                            _this.placeOrder();
+
+                        });
+
+                    });
+                }
+                else {
+                    self.paymentSource('customer');
+                    _this.placeOrder();
+                }
+            }
 		},
 		/**
 		 * 2016-05-04

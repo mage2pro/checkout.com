@@ -10,6 +10,7 @@ namespace Dfe\CheckoutCom\Patch;
  * http://stackoverflow.com/questions/17746481
  */
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as CCardTokenChargeCreate;
+use com\checkout\ApiServices\Charges\RequestModels\CardIdChargeCreate as CCardIdChargeCreate;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as Response;
 use com\checkout\helpers\ApiHttpClient;
 class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
@@ -31,6 +32,27 @@ class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
 			]
 		));
 	}
+
+
+    /**
+     * 2016-07-14
+     * @override
+     * @see \com\checkout\ApiServices\Charges\ChargeService::chargeWithCardId()
+     * @param CCardIdChargeCreate $requestModel
+     * @return Response
+     */
+    public function chargeWithCardId(CCardIdChargeCreate $requestModel) {
+        return new Response(ApiHttpClient::postRequest(
+            $this->_apiUrl->getCardChargesApiUri()
+            , $this->_apiSetting->getSecretKey()
+            , [
+                'authorization' => $this->_apiSetting->getSecretKey(),
+                'mode' => $this->_apiSetting->getMode(),
+                'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
+            ]
+        ));
+    }
+
 }
 
 
