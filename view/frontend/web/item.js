@@ -375,13 +375,15 @@ define (
                              */
                             , 'email-address': dfCheckout.email()
                         }, function (response) {
-
-                            self.checkoutToken(response.id);
-                            _this.token = response.id;
-                            self.paymentSource('token');
-                            self.isCardAvailable(true);
-                            _this.placeOrder();
-
+                           if(response.id) {
+                                self.checkoutToken(response.id);
+                                _this.token = response.id;
+                                self.paymentSource('token');
+                                _this.placeOrder();
+                            }
+                            else {
+                                _this.messageContainer.addErrorMessage({message: $t("Please verify your card details")});
+                            }
                         });
 
                     });
