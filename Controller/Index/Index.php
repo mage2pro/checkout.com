@@ -40,7 +40,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return string
 	 */
 	private function file() {
-		return df_is_it_my_local_pc()
+		return df_my_local()
 			? BP . '/_my/test/checkout.com/charge.voided.json'
 			: 'php://input'
 		;
@@ -51,7 +51,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @param mixed $message
 	 * @return void
 	 */
-	private function log($message) {if (!df_is_it_my_local_pc()) {df_log($message);}}
+	private function log($message) {if (!df_my_local()) {df_log($message);}}
 
 	/**
 	 * 2016-05-05
