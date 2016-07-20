@@ -96,7 +96,7 @@ implements CheckoutComCustomerInterface, IdentityInterface
      *
      * @param int $id
      *
-     * @return Dfe\CheckoutCom\Api\Data\StripeCustomerInterface
+     * @return Dfe\CheckoutCom\Api\Data\CheckoutComCustomerInterface
      */
     public function setId($id)
     {

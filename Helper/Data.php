@@ -150,7 +150,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * getSavedCards function to get saved cards of the customer.
      *
-     * @return Dfe\CheckoutCom\StripeCustomer
+     * @return Dfe\CheckoutCom\CheckoutComCustomer
      */
     public function getSavedCards()
     {

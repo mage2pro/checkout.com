@@ -59,7 +59,7 @@ class Cards extends \Magento\Framework\View\Element\Template
     /**
      * getSavedCards get customer saved cards
      * 
-     * @return Dfe\CheckoutCom\StripeCustomer
+     * @return Dfe\CheckoutCom\CheckoutComCustomer
      */
     public function getSavedCards()
     {
