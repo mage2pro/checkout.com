@@ -15,14 +15,12 @@ define ([
 ) {
 	'use strict';
 	return Component.extend({
-		defaults: {
-			clientConfig: {id: 'dfe-checkout-com'}
-			,code: 'dfe_checkout_com'
-			,template: 'Dfe_CheckoutCom/item'
-		},
+		defaults: {clientConfig: {id: 'dfe-checkout-com'}},
 		/**
 		 * 2016-07-16
 		 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
+		 * @override
+		 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
 		 * @returns {String}
 		 */
 		debugMessage: function() {
@@ -205,10 +203,10 @@ define ([
 				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
 				 */
 				CheckoutKit.createCardToken({
-					cvv: _this.dfForm('cvv')
-					,expiryMonth: _this.dfForm('expiry-month')
-					,expiryYear: _this.dfForm('expiry-year')
-					,number: _this.dfForm('card-number')
+					cvv: _this.dfCardVerification()
+					,expiryMonth: _this.dfCardExpirationMonth()
+					,expiryYear: _this.dfCardExpirationYear()
+					,number: _this.dfCardNumber()
 					/**
 					 * 2016-04-14
 					 * «Charges Required-Field Matrix»
