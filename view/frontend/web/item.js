@@ -200,17 +200,15 @@ define ([
 		pay: function() {
 			var _this = this;
 			this.initDf().done(function() {
-				/** @type {jQuery} HTMLFormElement */
-				var $form = $('form.dfe-checkout-com');
 				/**
 				 * 2016-04-21
 				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
 				 */
 				CheckoutKit.createCardToken({
-					cvv: $('[data="cvv"]', $form).val()
-					,expiryMonth: $('[data="expiry-month"]', $form).val()
-					,expiryYear: $('[data="expiry-year"]', $form).val()
-					,number: $('[data="card-number"]', $form).val()
+					cvv: _this.dfForm('cvv')
+					,expiryMonth: _this.dfForm('expiry-month')
+					,expiryYear: _this.dfForm('expiry-year')
+					,number: _this.dfForm('card-number')
 					/**
 					 * 2016-04-14
 					 * «Charges Required-Field Matrix»
