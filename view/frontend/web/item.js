@@ -197,11 +197,6 @@ define ([
 			}
 			return this._initDf;
 		},
-		/**
-		 * 2016-04-11
-		 * @return {Boolean}
-		*/
-		isTest: function() {return this.config('isTest');},
 		pay: function() {
 			var _this = this;
 			this.initDf().done(function() {
