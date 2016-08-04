@@ -16,21 +16,9 @@ define ([
 	'use strict';
 	return Component.extend({
 		defaults: {
-			active: false
-			,clientConfig: {id: 'dfe-checkout-com'}
+			clientConfig: {id: 'dfe-checkout-com'}
 			,code: 'dfe_checkout_com'
 			,template: 'Dfe_CheckoutCom/item'
-		},
-		imports: {onActiveChange: 'active'},
-		/**
-		 * 2016-03-02
-		 * @param {?String} key
-		 * @returns {Object}|{*}
-	 	 */
-		config: function(key) {
-			/** @type {Object} */
-			var result =  window.checkoutConfig.payment[this.getCode()];
-			return !key ? result : result[key];
 		},
 		/**
 		 * 2016-07-16
@@ -68,8 +56,6 @@ define ([
 		 * @returns {String[]}
 	 	 */
 		getCardTypes: function() {return ['VI', 'MC', 'AE'];},
-		/** @returns {String} */
-		getCode: function() {return this.code;},
 		/**
 		 * 2016-03-06
    		 * @override
