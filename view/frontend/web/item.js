@@ -231,7 +231,7 @@ define ([
 		 * @return {Boolean}
 		*/
 		placeOrder: function(data, event) {
-			var self = this;
+			var _this = this;
 			if (event) {
 				event.preventDefault();
 			}
@@ -240,10 +240,9 @@ define ([
 			if (result) {
 				this.isPlaceOrderActionAllowed(false);
 				this.getPlaceOrderDeferredObject()
-					.fail(function() {self.isPlaceOrderActionAllowed(true);})
+					.fail(function() {_this.isPlaceOrderActionAllowed(true);})
 					.done(
 						function(redirectUrl) {
-							self.afterPlaceOrder();
 							/**
 							 * 2016-05-04
 							 * Redirect to do a 3D-Secure verification.
@@ -270,7 +269,7 @@ define ([
 							if (redirectUrl && redirectUrl.length) {
 								window.location.replace(redirectUrl);
 							}
-							else if (self.redirectAfterPlaceOrder) {
+							else if (_this.redirectAfterPlaceOrder) {
 								redirectOnSuccessAction.execute();
 							}
 						}

@@ -1,6 +1,5 @@
 <?php
 namespace Dfe\CheckoutCom;
-use Dfe\CheckoutCom\Settings as S;
 /**
  * 2016-07-17
  * A sample failure response:
@@ -40,9 +39,11 @@ class Exception extends \Df\Payment\Exception {
 	 * @see \Df\Core\Exception::getMessageRm()
 	 * @return string
 	 */
-	public function getMessageRm() {return df_dump($this->_r->a([
-		'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
-	]));}
+	public function getMessageRm() {
+		return df_json_encode_pretty($this->_r->a(!$this->_r->hasId() ? null : [
+			'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
+		]));
+	}
 
 	/**
 	 * 2016-07-17

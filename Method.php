@@ -11,7 +11,6 @@ use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrder;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Settings as S;
-use Exception as E;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
@@ -125,7 +124,6 @@ class Method extends \Df\Payment\Method {
 	 * @param float $amount
 	 *
 	 * @return $this
-	 * @throws E|LE
 	 */
 	public function capture(II $payment, $amount) {
 		if (!$payment[self::WEBHOOK_CASE]) {
@@ -449,7 +447,7 @@ class Method extends \Df\Payment\Method {
 	 * @param float|null $amount [optional]
 	 * @param bool|null $capture [optional]
 	 * @return $this
-	 * @throws E|LE
+	 * @throws Exception
 	 */
 	private function charge(II $payment, $amount = null, $capture = true) {
 		/** @var Transaction|false|null $auth */
@@ -543,7 +541,7 @@ class Method extends \Df\Payment\Method {
 	 * 2016-04-23
 	 * @param callable $function
 	 * @return mixed
-	 * @throws LE
+	 * @throws \Exception
 	 */
 	private function leh($function) {
 		/** @var string|null $label */
@@ -558,9 +556,8 @@ class Method extends \Df\Payment\Method {
 		}
 		/** @var mixed $result */
 		try {$result = $function();}
-		catch (Exception $e) {throw $e;}
 		catch (CE $e) {throw new LE(__($e->getErrorMessage()), $e);}
-		catch (E $e) {throw df_le($e);}
+		catch (\Exception $e) {throw $e;}
 		if ($label) {
 			$this->log($label . ' AFTER');
 		}

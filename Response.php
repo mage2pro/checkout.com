@@ -7,6 +7,32 @@ namespace Dfe\CheckoutCom;
  * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
  * because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
  * http://stackoverflow.com/questions/17746481
+ *
+ * 2016-07-17
+ * A sample failure response:
+	{
+		"id": "charge_test_153AF6744E5J7A98E1D9",
+		"responseMessage": "40144 - Threshold Risk - Decline",
+		"responseAdvancedInfo": null,
+		"responseCode": "40144",
+		"status": "Declined",
+		"authCode": "00000"
+		...
+	}
+ *
+ * 2016-08-05
+ * A sample failure response when some request params are invalid:
+	{
+		"errorCode": "70000",
+		"message": "Validation error",
+		"errors": [
+			"Invalid value for 'token'"
+		],
+		"errorMessageCodes": [
+			"70006"
+		],
+		"eventId": "96320dfb-672c-4317-93d0-04317e8ea9bf"
+	}
  */
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
@@ -74,6 +100,14 @@ class Response extends \Df\Core\O {
 	public function flagged() {return self::$S__FLAGGED === $this->charge()->getStatus();}
 
 	/**
+	 * 2016-08-05
+	 * @used-by \Dfe\CheckoutCom\Exception::getMessageRm()
+	 * @used-by \Dfe\CheckoutCom\Response::messageForCustomer()
+	 * @return bool
+	 */
+	public function hasId() {return !!$this->a('id');}
+
+	/**
 	 * 2016-05-11
 	 * The method solves the problem described below.
 	 *
@@ -135,9 +169,14 @@ class Response extends \Df\Core\O {
 	 */
 	public function messageForCustomer() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_var(S::s()->messageFailure(), $this->a([
-				'responseMessage', 'responseAdvancedInfo'
-			]));
+			$this->{__METHOD__} =
+				$this->hasId()
+				? df_var(S::s()->messageFailure(), $this->a([
+					'responseMessage', 'responseAdvancedInfo'
+				]))
+				: __('Sorry, this payment method is not working now.'
+				 .'<br/>Please use another payment method.')
+			;
 		}
 		return $this->{__METHOD__};
 	}

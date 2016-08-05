@@ -11,7 +11,6 @@ namespace Dfe\CheckoutCom\Patch;
  */
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as CCardTokenChargeCreate;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as Response;
-use com\checkout\helpers\ApiHttpClient;
 class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
 	/**
 	 * 2016-05-08
@@ -21,15 +20,11 @@ class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
 	 * @return Response
 	 */
 	public function chargeWithCardToken(CCardTokenChargeCreate $requestModel) {
-		return new Response(ApiHttpClient::postRequest(
-			$this->_apiUrl->getCardTokensApiUri()
-			, $this->_apiSetting->getSecretKey()
-			, [
-				'authorization' => $this->_apiSetting->getSecretKey(),
-				'mode' => $this->_apiSetting->getMode(),
-				'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
-			]
-		));
+		return new Response(ApiHttpClient::postRequest($this->_apiUrl->getCardTokensApiUri(), [
+			'authorization' => $this->_apiSetting->getSecretKey(),
+			'mode' => $this->_apiSetting->getMode(),
+			'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
+		]));
 	}
 }
 
