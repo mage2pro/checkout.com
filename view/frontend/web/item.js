@@ -6,16 +6,37 @@ define ([
 	, 'mage/translate'
 	, 'underscore'
 	, 'Df_Checkout/js/action/place-order'
-	, 'Magento_Checkout/js/model/payment/additional-validators'
 	, 'Magento_Checkout/js/model/quote'
 	, 'Df_Checkout/js/action/redirect-on-success'
 ], function(
 	Component, $, df, dfCheckout, $t, _,
-	placeOrderAction, additionalValidators, quote, redirectOnSuccessAction
+	placeOrderAction, quote, redirectOnSuccessAction
 ) {
 	'use strict';
 	return Component.extend({
 		defaults: {clientConfig: {id: 'dfe-checkout-com'}},
+		/**
+		 * 2016-05-18
+		 * @returns {String[]}
+	 	 */
+		getCardTypes: function() {return ['VI', 'MC', 'AE'];},
+		/**
+		 * 2016-03-06
+   		 * @override
+   		 */
+		getData: function() {
+			return {
+				/**
+				 * 2016-05-03
+				 * If «token» is not included in «additional_data»,
+				 * we get the below error:
+				 * «Property "Token" does not have corresponding setter
+				 * in class "Magento\Quote\Api\Data\PaymentInterface»
+				 */
+				additional_data: {token: this.token}
+				,method: this.item.method
+			};
+		},
 		/**
 		 * 2016-07-16
 		 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
@@ -23,7 +44,7 @@ define ([
 		 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
 		 * @returns {String}
 		 */
-		debugMessage: function() {
+		getDebugMessage: function() {
 			if (df.undefined(this._debugMessage)) {
 				/** @type {String} */
 				var amountS = Math.round(100 * dfCheckout.grandTotal()).toString();
@@ -48,28 +69,6 @@ define ([
 			}
 			return this._debugMessage;
 
-		},
-		/**
-		 * 2016-05-18
-		 * @returns {String[]}
-	 	 */
-		getCardTypes: function() {return ['VI', 'MC', 'AE'];},
-		/**
-		 * 2016-03-06
-   		 * @override
-   		 */
-		getData: function() {
-			return {
-				/**
-				 * 2016-05-03
-				 * If «token» is not included in «additional_data»,
-				 * we get the below error:
-				 * «Property "Token" does not have corresponding setter
-				 * in class "Magento\Quote\Api\Data\PaymentInterface»
-				 */
-				additional_data: {token: this.token}
-				,method: this.item.method
-			};
 		},
 		/**
 		 * 2016-05-04
@@ -141,48 +140,8 @@ define ([
 					 */
 					debugMode: this.isTest()
 					,publicKey: this.config('publishableKey')
-					//,customerEmail: dfCheckout.email()
-					,ready: function(event) {
-						// 2016-04-14
-						// http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
-						//CheckoutKit.monitorForm('form.dfe-checkout-com', CheckoutKit.CardFormModes.CARD_TOKENISATION);
-						/**
-						 * 2016-04-20
-						 * http://docs.checkout.com/reference/checkoutkit-js-reference/handlers
-						 * @type {*|Array}
-						 */
-						var ev = CheckoutKit.Events;
-						/**
-						 * 2016-04-20
-						 * «If you do not want the <form> to be submitted automatically,
-						 * you can add an event listener to receive the card token.»
-						 * http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#step-2-capture-and-send-credit-card-details
-						 *
-						 * http://docs.checkout.com/getting-started/checkoutkit-js/charge-via-card-token#example
-						 * CARD_TOKENISED
-						 * After a card is tokenised.
-						 * The event object will contain the card token.
-						 * Example: {id: 'card_tok_111'}
-						 */
-						CheckoutKit.addEventHandler(ev.CARD_TOKENISED, function(event) {
-						    console.log('card token', event.data.id);
-							_this.token = event.data.id;
-							_this.placeOrder();
-						});
-						/**
-						 * 2016-04-20
-						 * http://docs.checkout.com/reference/checkoutkit-js-reference/handlers
-						 */
-						CheckoutKit.addEventHandler(ev.CARD_TOKENISATION_FAILED, function(event) {
-							_this.messageContainer.addErrorMessage({
-								'message': $t('The card tokenisation fails.')
-							});
-						});
-						deferred.resolve();
-					}
-					,apiError: function(event) {
-						deferred.reject();
-					}
+					,ready: function(event) {deferred.resolve();}
+					,apiError: function(event) {deferred.reject();}
 				};
 				/** @type {String} */
 				var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
@@ -195,88 +154,94 @@ define ([
 			}
 			return this._initDf;
 		},
-		pay: function() {
-			var _this = this;
-			this.initDf().done(function() {
-				/**
-				 * 2016-04-21
-				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
-				 */
-				CheckoutKit.createCardToken({
-					cvv: _this.dfCardVerification()
-					,expiryMonth: _this.dfCardExpirationMonth()
-					,expiryYear: _this.dfCardExpirationYear()
-					,number: _this.dfCardNumber()
-					/**
-					 * 2016-04-14
-					 * «Charges Required-Field Matrix»
-					 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
-					 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token
-					 *
-					 * 2016-04-17
-					 * How to get the current customer's email on the frontend checkout screen?
-					 * https://mage2.pro/t/1295
-					 */
-					,'email-address': dfCheckout.email()
-				}, function(response) {
-					_this.token = response.id;
-					_this.placeOrder();
-				});
-			});
-		},
 		/**
-		 * 2016-05-04
-		 * @override
-		 * https://github.com/magento/magento2/blob/981d1f/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L127-L159
-		 * @return {Boolean}
+		 * @used-by https://github.com/magento/magento2/blob/2.1.0/lib/web/knockoutjs/knockout.js#L3863
+		 * @param {this} _this
+		 * @param {jQuery.Event} event
 		*/
-		placeOrder: function(data, event) {
-			var _this = this;
-			if (event) {
-				event.preventDefault();
+		pay: function(_this, event) {
+			if (!this.selectedCardType()) {
+				this.showErrorMessage('It looks like you have entered an incorrect bank card number.');
 			}
-			/** @type {Boolean} */
-			var result = this.validate() || additionalValidators.validate();
-			if (result) {
-				this.isPlaceOrderActionAllowed(false);
-				this.getPlaceOrderDeferredObject()
-					.fail(function() {_this.isPlaceOrderActionAllowed(true);})
-					.done(
-						function(redirectUrl) {
+			else if (this.validate()) {
+				this.initDf().done(function() {
+					/**
+					 * 2016-04-21
+					 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
+					 */
+					CheckoutKit.createCardToken({
+						cvv: _this.dfCardVerification()
+						,expiryMonth: _this.dfCardExpirationMonth()
+						,expiryYear: _this.dfCardExpirationYear()
+						,number: _this.dfCardNumber()
+						/**
+						 * 2016-04-14
+						 * «Charges Required-Field Matrix»
+						 * http://developers.checkout.com/docs/server/integration-guide/charges#a1
+						 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token
+						 *
+						 * 2016-04-17
+						 * How to get the current customer's email on the frontend checkout screen?
+						 * https://mage2.pro/t/1295
+						 */
+						,'email-address': dfCheckout.email()
+					}, function(response) {
+						if ('error' === response.type) {
 							/**
-							 * 2016-05-04
-							 * Redirect to do a 3D-Secure verification.
-							 * Similar to: redirectOnSuccessAction.execute()
-							 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
-							 *
-							 * 2016-05-09
-							 * If 3D-Secure is not necessary,
-							 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
-							 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
-							 * which is then converted by
-							 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
-							 * to an empty array:
-							 * «A Web API request returns an empty array for a null response»
-							 * https://mage2.pro/t/1569
-							 *
-							 * When there is no need to do a 3D-Secure verification,
-							 * the value of redirectUrl will be an empty array.
-							 * So the correct test to be done is: if (redirectUrl),
-							 * and if (redirectUrl.length)
-							 * In all cases, we want to cope with the possibility of
-							 * Magento core unexpectedly returning null.
+							 * 2016-08-05
+							 * We can get error messages from the response:
+							 * response.title and response.description
+							 * But they are not informative and contain a text like
+							 * «Server Operation Failed»
+							 * «The last server operation failed.»
 							 */
-							if (redirectUrl && redirectUrl.length) {
-								window.location.replace(redirectUrl);
-							}
-							else if (_this.redirectAfterPlaceOrder) {
-								redirectOnSuccessAction.execute();
-							}
+							_this.showErrorMessage(
+								'It looks like you have entered incorrect bank card data.'
+							);
 						}
-					)
-				;
+						else {
+							_this.token = response.id;
+							_this.isPlaceOrderActionAllowed(false);
+							_this.getPlaceOrderDeferredObject()
+								.fail(function() {_this.isPlaceOrderActionAllowed(true);})
+								.done(
+									function(redirectUrl) {
+										/**
+										 * 2016-05-04
+										 * Redirect to do a 3D-Secure verification.
+										 * Similar to: redirectOnSuccessAction.execute()
+										 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
+										 *
+										 * 2016-05-09
+										 * If 3D-Secure is not necessary,
+										 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
+										 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
+										 * which is then converted by
+										 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
+										 * to an empty array:
+										 * «A Web API request returns an empty array for a null response»
+										 * https://mage2.pro/t/1569
+										 *
+										 * When there is no need to do a 3D-Secure verification,
+										 * the value of redirectUrl will be an empty array.
+										 * So the correct test to be done is: if (redirectUrl),
+										 * and if (redirectUrl.length)
+										 * In all cases, we want to cope with the possibility of
+										 * Magento core unexpectedly returning null.
+										 */
+										if (redirectUrl && redirectUrl.length) {
+											window.location.replace(redirectUrl);
+										}
+										else if (_this.redirectAfterPlaceOrder) {
+											redirectOnSuccessAction.execute();
+										}
+									}
+								)
+							;
+						}
+					});
+				});
 			}
-			return result;
 		}
 	});
 });
