@@ -10,23 +10,6 @@ define ([
 	 */
 	getCardTypes: function() {return ['VI', 'MC', 'AE'];},
 	/**
-	 * 2016-03-06
-	 * @override
-	 */
-	getData: function() {
-		return {
-			/**
-			 * 2016-05-03
-			 * If «token» is not included in «additional_data»,
-			 * we get the below error:
-			 * «Property "Token" does not have corresponding setter
-			 * in class "Magento\Quote\Api\Data\PaymentInterface»
-			 */
-			additional_data: {token: this.token}
-			,method: this.item.method
-		};
-	},
-	/**
 	 * 2016-07-16
 	 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
 	 * @override
