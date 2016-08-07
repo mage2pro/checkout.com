@@ -1,9 +1,8 @@
 define ([
 	'df'
-	,'Df_Checkout/js/data'
 	,'Df_Payment/js/view/payment/cc-form'
 	,'jquery'
-], function(df, dfCheckout, parent, $) {'use strict'; return parent.extend({
+], function(df, parent, $) {'use strict'; return parent.extend({
 	/**
 	 * 2016-05-18
 	 * @returns {String[]}
@@ -19,7 +18,7 @@ define ([
 	getDebugMessage: function() {
 		if (df.undefined(this._debugMessage)) {
 			/** @type {String} */
-			var amountS = Math.round(100 * dfCheckout.grandTotal()).toString();
+			var amountS = Math.round(100 * this.dfc.grandTotal()).toString();
 			/** @type {String} */
 			var last2 = amountS.substring(amountS.length - 2);
 			/** @type {?String} */
