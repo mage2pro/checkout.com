@@ -30,13 +30,14 @@ define ([
 				,'62': 'Restricted Card'
 				,'63': 'Security Violation'
 			})[last2];
-			this._debugMessage = !reason ? '' :
-				('The transaction will <b><a href="{url}">fail</a></b> by the reason of «<b>{reason}</b>», '
-				 + 'because the payment amount ends with «<b>{last2}</b>».')
-					.replace('{url}', 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes')
-					.replace('{reason}', reason)
-					.replace('{last2}', last2)
-			;
+			this._debugMessage = !reason ? '' : df.t(
+				'The transaction will <b><a href="{url}">fail</a></b> by the reason of «<b>{reason}</b>», because the payment amount ends with «<b>{last2}</b>».'
+				,{
+					last2: last2
+					,reason: reason
+					,url: 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes'
+				}
+			);
 		}
 		return this._debugMessage;
 	},
@@ -168,7 +169,7 @@ define ([
 					 * How to get the current customer's email on the frontend checkout screen?
 					 * https://mage2.pro/t/1295
 					 */
-					,'email-address': dfCheckout.email()
+					,'email-address': _this.dfc.email()
 				}, function(response) {
 					if ('error' === response.type) {
 						/**
