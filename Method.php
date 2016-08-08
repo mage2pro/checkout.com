@@ -677,6 +677,8 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-03-06
+	 * @used-by \Dfe\CheckoutCom\Method::iiaKeys()
+	 * @used-by \Dfe\CheckoutCom\Method::response()
 	 * @var string
 	 */
 	private static $TOKEN = 'token';
