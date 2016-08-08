@@ -15,32 +15,29 @@ define ([
 	 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
 	 * @returns {String}
 	 */
-	getDebugMessage: function() {
-		if (df.undefined(this._debugMessage)) {
-			/** @type {String} */
-			var amountS = Math.round(100 * this.dfc.grandTotal()).toString();
-			/** @type {String} */
-			var last2 = amountS.substring(amountS.length - 2);
-			/** @type {?String} */
-			var reason = ({
-				'05': '	Declined - Do Not Honour'
-				,'12': 'Invalid Transaction'
-				,'14': 'Invalid Card Number'
-				,'51': 'Insufficient Funds'
-				,'62': 'Restricted Card'
-				,'63': 'Security Violation'
-			})[last2];
-			this._debugMessage = !reason ? '' : df.t(
-				'The transaction will <b><a href="{url}">fail</a></b> by the reason of «<b>{reason}</b>», because the payment amount ends with «<b>{last2}</b>».'
-				,{
-					last2: last2
-					,reason: reason
-					,url: 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes'
-				}
-			);
-		}
-		return this._debugMessage;
-	},
+	getDebugMessage: df.c(function() {
+		/** @type {String} */
+		var amountS = Math.round(100 * this.dfc.grandTotal()).toString();
+		/** @type {String} */
+		var last2 = amountS.substring(amountS.length - 2);
+		/** @type {?String} */
+		var reason = ({
+			'05': '	Declined - Do Not Honour'
+			,'12': 'Invalid Transaction'
+			,'14': 'Invalid Card Number'
+			,'51': 'Insufficient Funds'
+			,'62': 'Restricted Card'
+			,'63': 'Security Violation'
+		})[last2];
+		return !reason ? '' : df.t(
+			'The transaction will <b><a href="{url}">fail</a></b> by the reason of «<b>{reason}</b>», because the payment amount ends with «<b>{last2}</b>».'
+			,{
+				last2: last2
+				,reason: reason
+				,url: 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes'
+			}
+		);
+	}),
 	/**
 	 * 2016-03-02
 	 * @return {Object}
@@ -72,40 +69,37 @@ define ([
 	 * 2016-03-08
 	 * @return {Promise}
 	*/
-	initDf: function() {
-		if (df.undefined(this._initDf)) {
-			/** @type {Deferred} */
-			var deferred = $.Deferred();
-			var _this = this;
-			window.CKOConfig = {
-				/**
-				 * 2016-04-20
-				 * This flag only triggers showing debugging messages in the console
-				 *
-				 * «Setting debugMode to true is highly recommended during the integration process;
-				 * the browser’s console will display helpful information
-				 * such as key events including event data and/or any issues found.»
-				 * http://docs.checkout.com/getting-started/checkoutkit-js
-				 *
-				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions
-				 * «The log action will only log messages on the console if debugMode is set to true.»
-				 */
-				debugMode: this.isTest()
-				,publicKey: this.config('publishableKey')
-				,ready: function(event) {deferred.resolve();}
-				,apiError: function(event) {deferred.reject();}
-			};
-			/** @type {String} */
-			var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
-			require.undef(library);
-			delete window.CheckoutKit;
-			// 2016-04-11
-			// CheckoutKit не использует AMD и прикрепляет себя к window.
-			require([library], function() {});
-			this._initDf = deferred.promise();
-		}
-		return this._initDf;
-	},
+	initDf: df.c(function() {
+		/** @type {Deferred} */
+		var deferred = $.Deferred();
+		var _this = this;
+		window.CKOConfig = {
+			/**
+			 * 2016-04-20
+			 * This flag only triggers showing debugging messages in the console
+			 *
+			 * «Setting debugMode to true is highly recommended during the integration process;
+			 * the browser’s console will display helpful information
+			 * such as key events including event data and/or any issues found.»
+			 * http://docs.checkout.com/getting-started/checkoutkit-js
+			 *
+			 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions
+			 * «The log action will only log messages on the console if debugMode is set to true.»
+			 */
+			debugMode: this.isTest()
+			,publicKey: this.config('publishableKey')
+			,ready: function(event) {deferred.resolve();}
+			,apiError: function(event) {deferred.reject();}
+		};
+		/** @type {String} */
+		var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
+		require.undef(library);
+		delete window.CheckoutKit;
+		// 2016-04-11
+		// CheckoutKit не использует AMD и прикрепляет себя к window.
+		require([library], function() {});
+		return deferred.promise();
+	}),
 	/**
 	 * 2016-08-06
 	 * @override
