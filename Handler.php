@@ -67,7 +67,7 @@ abstract class Handler extends \Df\Core\O {
 			 * http://docs.checkout.com/getting-started/webhooks
 			 */
 			/** @var string $suffix */
-			$suffix = df_implode_class('handler', explode('.', $request['eventType']));
+			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType']));
 			$class = df_convention(__CLASS__, $suffix, DefaultT::class);
 			/** @var Handler $i */
 			$i = df_create($class, $request);
