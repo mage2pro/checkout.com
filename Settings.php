@@ -41,50 +41,46 @@ class Settings extends \Df\Payment\Settings {
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Description»
 	 * @return string
 	 */
-	public function description() {return $this->v(__FUNCTION__);}
+	public function description() {return $this->v();}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D-Secure validation for All Customers?»
 	 * @return bool
 	 */
-	public function force3DS_forAll() {return $this->b(__FUNCTION__);}
+	public function force3DS_forAll() {return $this->b();}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
 	 * «Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?»
-	 * @param string $countryIso2
+	 * @param string $iso2
 	 * @return string
 	 */
-	public function force3DS_forIPs($countryIso2) {
-		return $this->nwbn(__FUNCTION__, 'countries', $countryIso2);
-	}
+	public function force3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D-Secure validation for the New Customers?»
 	 * @return bool
 	 */
-	public function force3DS_forNew() {return $this->b(__FUNCTION__);}
+	public function force3DS_forNew() {return $this->b();}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
 	 * «Force 3D-Secure validation for the Particular Shipping Destinations?»
-	 * @param string $countryIso2
+	 * @param string $iso2
 	 * @return string
 	 */
-	public function force3DS_forShippingDestinations($countryIso2) {
-		return $this->nwbn(__FUNCTION__, 'countries', $countryIso2);
-	}
+	public function force3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
 	 * 2016-07-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Failure Message»
 	 * @return string
 	 */
-	public function messageFailure() {return $this->v(__FUNCTION__);}
+	public function messageFailure() {return $this->v();}
 
 	/**
 	 * 2016-03-09
@@ -92,7 +88,7 @@ class Settings extends \Df\Payment\Settings {
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()
 	 * @return array(string => string)|null
 	 */
-	public function prefill() {return Prefill::s()->config($this->v(__FUNCTION__));}
+	public function prefill() {return Prefill::s()->config($this->v());}
 
 	/**
 	 * 2016-03-02
@@ -115,14 +111,14 @@ class Settings extends \Df\Payment\Settings {
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
 	 * @return string[]
 	 */
-	public function statement() {return $this->v(__FUNCTION__);}
+	public function statement() {return $this->v();}
 
 	/**
 	 * 2016-05-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Wait for «Capture» transaction on an order placement if the Payment Action is «Capture»?»
 	 * @return bool
 	 */
-	public function waitForCapture() {return $this->b(__FUNCTION__);}
+	public function waitForCapture() {return $this->b();}
 
 	/**
 	 * @override
@@ -137,42 +133,42 @@ class Settings extends \Df\Payment\Settings {
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
 	 * @return string
 	 */
-	private function actionForNew() {return $this->v(__FUNCTION__);}
+	private function actionForNew() {return $this->v();}
 
 	/**
 	 * 2016-03-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a Returned Customer»
 	 * @return string
 	 */
-	private function actionForReturned() {return $this->v(__FUNCTION__);}
+	private function actionForReturned() {return $this->v();}
 
 	/**
 	 * 2016-03-02
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Publishable Key»
 	 * @return string
 	 */
-	private function livePublishableKey() {return $this->v(__FUNCTION__);}
+	private function livePublishableKey() {return $this->v();}
 
 	/**
 	 * 2016-03-02
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Secret Key»
 	 * @return string
 	 */
-	private function liveSecretKey() {return $this->p(__FUNCTION__);}
+	private function liveSecretKey() {return $this->p();}
 
 	/**
 	 * 2016-03-02
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Publishable Key»
 	 * @return string
 	 */
-	private function testPublishableKey() {return $this->v(__FUNCTION__);}
+	private function testPublishableKey() {return $this->v();}
 
 	/**
 	 * 2016-03-02
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Secret Key»
 	 * @return string
 	 */
-	private function testSecretKey() {return $this->p(__FUNCTION__);}
+	private function testSecretKey() {return $this->p();}
 }
 
 

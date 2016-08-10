@@ -549,10 +549,7 @@ class Method extends \Df\Payment\Method {
 			$label = null;
 		}
 		else {
-			/** @var array(string => string|int) $bt1 */
-			$bt1 = debug_backtrace()[1];
-			$label = $bt1['class'] . '::' . $bt1['function'];
-			$this->log($label . ' BEFORE');
+			$this->log(df_caller_method() . ' BEFORE');
 		}
 		/** @var mixed $result */
 		try {$result = $function();}
