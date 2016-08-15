@@ -87,7 +87,7 @@ abstract class Charge extends Handler {
 				$paymentId = df_fetch_one('sales_payment_transaction', 'payment_id', ['txn_id' => $id]);
 				if ($paymentId) {
 					$result = df_load(Payment::class, $paymentId);
-					$result[Method::WEBHOOK_CASE] = true;
+					df_payment_webhook_case($result);
 					/**
 					 * 2016-05-11
 					 * This ID will have to be used in scenarios involving webhook.
@@ -104,7 +104,7 @@ abstract class Charge extends Handler {
 					 * so we can use it in this method: @see \Dfe\CheckoutCom\Method::capture()
 					 * @used-by \Dfe\CheckoutCom\Method::capture()
 					 */
-					$result[Method::CUSTOM_TRANS_ID] = $this->id();
+					df_payment_trans_id($result, $this->id());
 				}
 			}
 			$this->{__METHOD__}[$id] = df_n_set($result);

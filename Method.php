@@ -43,18 +43,6 @@ class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-07
 	 * @override
-	 * @see \Df\Payment\Method::::authorize()
-	 * @param II|I|OP $payment
-	 * @param float $amount
-	 * @return $this
-	 */
-	public function authorize(II $payment, $amount) {
-		return $this->charge($payment, $amount, $capture = false);
-	}
-
-	/**
-	 * 2016-03-07
-	 * @override
 	 * @see \Df\Payment\Method::canCapture()
 	 * @return bool
 	 */
@@ -110,36 +98,6 @@ class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	public function canVoid() {return true;}
-
-	/**
-	 * 2016-03-06
-	 * @override
-	 * @see \Df\Payment\Method::capture()
-	 *
-	 * @param II|I|OP $payment
-	 *
-	 * $amount is a money value in the shop's base currency.
-	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L37-L37
-	 * https://github.com/magento/magento2/blob/6ce74b2/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L76-L82
-	 * @param float $amount
-	 *
-	 * @return $this
-	 */
-	public function capture(II $payment, $amount) {
-		if (!$payment[self::WEBHOOK_CASE]) {
-			$this->charge($payment, $amount);
-		}
-		else {
-			/**
-			 * 2016-05-11
-			 * A Webhook scenario.
-			 * We set the Checkout.com payment ID the Magento transaction ID
-			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-capture.
-			 */
-			df_payment_apply_custom_transaction_id($payment);
-		}
-		return $this;
-	}
 
 	/**
 	 * 2016-05-09
@@ -219,6 +177,12 @@ class Method extends \Df\Payment\Method {
 	public function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
 
 	/**
+	 * 2016-05-08
+	 * @param ChargeResponse $response
+	 */
+	public function responseSet(ChargeResponse $response) {$this->_response = $response;}
+
+	/**
 	 * 2016-03-15
 	 * 2016-05-11
 	 * Checkout.com refund request supports a description
@@ -226,120 +190,169 @@ class Method extends \Df\Payment\Method {
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/refund-card-charge
 	 * @todo Use this feature.
 	 * @override
-	 * @see \Df\Payment\Method::refund()
-	 * @param II|I|OP|DfPayment $payment
+	 * @see \Df\Payment\Method::_refund()
 	 * @param float $amount
-	 * @return $this
+	 * @return void
 	 */
-	public function refund(II $payment, $amount) {
-		if ($payment[self::WEBHOOK_CASE]) {
+	protected function _refund($amount) {
+		$this->leh(function() use($amount) {
+			/** @var ChargeRefund $refund */
+			$refund = new ChargeRefund;
 			/**
-			 * 2016-05-11
-			 * A Webhook scenario.
-			 * We set the Checkout.com payment ID the Magento transaction ID
-			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-refund.
+			 * 2016-05-09
+			 * The «capture» transaction's ID differs from the previous transaction's ID.
+			 * We should use the «capture» transaction's ID
+			 * as a parameter of the Checkout.com «refund» transaction.
+			 *
+			 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
+			 * return the same value.
+			 *
+			 * «refund_transaction_id» is set here:
+			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 			 */
-			df_payment_apply_custom_transaction_id($payment);
-		}
-		else {
-			$this->leh(function() use($payment, $amount) {
-				/** @var ChargeRefund $refund */
-				$refund = new ChargeRefund;
-				/**
-				 * 2016-05-09
-				 * The «capture» transaction's ID differs from the previous transaction's ID.
-				 * We should use the «capture» transaction's ID
-				 * as a parameter of the Checkout.com «refund» transaction.
-				 *
-				 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
-				 * return the same value.
-				 *
-				 * «refund_transaction_id» is set here:
-				 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
-				 */
-				$refund->setChargeId($payment->getRefundTransactionId());
-				$refund->setValue(self::amount($payment, $amount));
-				$this->disableEvent($payment->getRefundTransactionId(), 'charge.refunded');
-				/** @var ChargeResponse $response */
-				$response = $this->api()->refundCardChargeRequest($refund);
-				/**
-				 * 2016-05-09
-				 * A sample success response:
-					{
-						"id": "charge_test_033B66645E5K7A9812E5",
-						"originalId": "charge_test_427BB6745E5K7A9813C9",
-						"responseMessage": "Approved",
-						"responseAdvancedInfo": "Approved",
-						"responseCode": "10000",
-						"status": "Refunded",
-				 		<...>
-					}
-				 */
-				df_assert_eq('Refunded', $response->getStatus());
-				$payment->setTransactionId($response->getId());
-			});
-		}
-		return $this;
+			$refund->setChargeId($this->ii()->getRefundTransactionId());
+			$refund->setValue(self::amount($this->ii(), $amount));
+			$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
+			/** @var ChargeResponse $response */
+			$response = $this->api()->refundCardChargeRequest($refund);
+			/**
+			 * 2016-05-09
+			 * A sample success response:
+				{
+					"id": "charge_test_033B66645E5K7A9812E5",
+					"originalId": "charge_test_427BB6745E5K7A9813C9",
+					"responseMessage": "Approved",
+					"responseAdvancedInfo": "Approved",
+					"responseCode": "10000",
+					"status": "Refunded",
+			 		<...>
+				}
+			 */
+			df_assert_eq('Refunded', $response->getStatus());
+			$this->ii()->setTransactionId($response->getId());
+		});
 	}
-
-	/**
-	 * 2016-05-08
-	 * @param ChargeResponse $response
-	 */
-	public function responseSet(ChargeResponse $response) {$this->_response = $response;}
 
 	/**
 	 * 2016-05-03
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#void-a-charge
 	 * @override
-	 * @see \Df\Payment\Method::void()
-	 * @param II|I|OP $payment
-	 * @return $this
+	 * @see \Df\Payment\Method::_void()
+	 * @return void
 	 */
-	public function void(II $payment) {
-		if ($payment[self::WEBHOOK_CASE]) {
-			/**
-			 * 2016-05-11
-			 * A Webhook scenario.
-			 * We set the Checkout.com payment ID the Magento transaction ID
-			 * to prevent Magento from generating a transaction ID like <Parent Identifier>-void.
-			 */
-			df_payment_apply_custom_transaction_id($payment);
+	protected function _void() {
+		$this->leh(function() {
+			/** @var Transaction|false|null $auth */
+			$auth = $this->ii()->getAuthorizationTransaction();
+			if ($auth) {
+				/** @var ChargeVoid $void */
+				$void = new ChargeVoid;
+				/**
+				 * 2016-05-03
+				 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
+				 * Although the documentation states that the «track_id» parameter is optional,
+				 * the transaction will fail with empty ChargeVoid object:
+				  {
+					"errorCode": "70000",
+					"message": "Validation error",
+					"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
+					"errorMessageCodes": ["70002"],
+					"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
+				 }
+				 */
+				$void->setTrackId($this->ii()->getOrder()->getIncrementId());
+				$this->disableEvent($auth->getTxnId(), 'charge.voided');
+				/** @var ChargeResponse $response */
+				$response = $this->api()->voidCharge($auth->getTxnId(), $void);
+				/**
+				 * 2016-05-13
+				 * This makes the «void» transaction ID the same in Magento and in Checkout.com
+				 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
+				 */
+				$this->ii()->setTransactionId($response->getId());
+			}
+		});
+	}
+
+	/**
+	 * 2016-03-07
+	 * @override
+	 * @see \Df\Payment\Method::charge()
+	 * @param float $amount
+	 * @param bool|null $capture [optional]
+	 * @return void
+	 * @throws Exception
+	 */
+	protected function charge($amount, $capture = true) {
+		/** @var Transaction|false|null $auth */
+		$auth = !$capture ? null : $this->ii()->getAuthorizationTransaction();
+		if ($auth) {
+			$this->capturePreauthorized($auth, $amount);
 		}
 		else {
-			$this->leh(function() use($payment) {
-				/** @var Transaction|false|null $auth */
-				$auth = $payment->getAuthorizationTransaction();
-				if ($auth) {
-					/** @var ChargeVoid $void */
-					$void = new ChargeVoid;
-					/**
-					 * 2016-05-03
-					 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
-					 * Although the documentation states that the «track_id» parameter is optional,
-					 * the transaction will fail with empty ChargeVoid object:
-					  {
-					 	"errorCode": "70000",
-					 	"message": "Validation error",
-					 	"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
-					 	"errorMessageCodes": ["70002"],
-					 	"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
-					 }
-					 */
-					$void->setTrackId($payment->getOrder()->getIncrementId());
-					$this->disableEvent($auth->getTxnId(), 'charge.voided');
-					/** @var ChargeResponse $response */
-					$response = $this->api()->voidCharge($auth->getTxnId(), $void);
-					/**
-					 * 2016-05-13
-					 * This makes the «void» transaction ID the same in Magento and in Checkout.com
-					 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
-					 */
-					$payment->setTransactionId($response->getId());
-				}
-			});
+			/**
+			 * 2016-04-23
+			 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
+			 */
+			/** @var ChargeResponse $response */
+		    $response = $this->response();
+			if (!$this->r()->valid()) {
+				throw new Exception($this->r());
+			}
+			/**
+			 * 2016-05-02
+			 * Without it, a «void» operation will be unavailable:
+			 * «How is a payment authorization voiding implemented?»
+			 * https://mage2.pro/t/938
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 */
+			$this->ii()->setTransactionId($this->r()->magentoTransactionId());
+			/** @var Card $card */
+			$card = $response->getCard();
+			/**
+			 * 2016-05-02
+			 * https://mage2.pro/t/941
+			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+			 */
+			$this->ii()->setCcLast4($card->getLast4());
+			// 2016-05-02
+			$this->ii()->setCcType($card->getPaymentMethod());
+			/**
+			 * 2016-03-15
+			 * Without it, a «void» operation will be unavailable:
+			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
+			 * The transaction is considered complete unless «false» is explicitly specified.
+			 */
+			$this->ii()->setIsTransactionClosed($capture);
+			if ($this->r()->flagged()) {
+				/**
+				 * 2016-05-06
+				 * Unfortunately, we can set
+				 * the @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state here
+				 * with the code $order->setState(O::STATE_PAYMENT_REVIEW);
+				 * because the state will be owerwritten:
+				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
+				 *
+				 * So, we are acting differently.
+				 * The «IsTransactionPending» flag will be read
+				 * in the same method:
+				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
+				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
+				 * And the @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state will be set.
+				 */
+				$this->ii()->setIsTransactionPending(true);
+				/**
+				 * 2016-05-09
+				 * How is @used-by \Magento\Sales\Model\Order\Payment.::getIsFraudDetected()
+				 * implemented and used?
+				 * https://mage2.pro/t/1574
+				 */
+				$this->ii()->setIsFraudDetected(true);
+			}
 		}
-		return $this;
 	}
 
 	/**
@@ -378,12 +391,11 @@ class Method extends \Df\Payment\Method {
 	 * 2016-05-11
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @param Transaction $auth
-	 * @param II|I|OP $payment
 	 * @param float|null $amount [optional]
 	 * @return void
 	 */
-	private function capturePreauthorized(Transaction $auth, II $payment, $amount = null) {
-		$this->leh(function() use($auth, $payment, $amount) {
+	private function capturePreauthorized(Transaction $auth, $amount = null) {
+		$this->leh(function() use($auth, $amount) {
 			/**
 			 * 2016-05-03
 			 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
@@ -401,7 +413,7 @@ class Method extends \Df\Payment\Method {
 			 * If not specified, the default is authorisation charge amount.»
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
-			$capture->setValue(self::amount($payment, $amount));
+			$capture->setValue(self::amount($this->ii(), $amount));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
@@ -435,91 +447,8 @@ class Method extends \Df\Payment\Method {
 			 * <the previous transaction>-capture,
 			 * so we owerwrite the ID when we set the new one.
 			 */
-			$payment->setTransactionId($response->getId());
+			$this->ii()->setTransactionId($response->getId());
 		});
-	}
-
-	/**
-	 * 2016-03-07
-	 * @override
-	 * @see \Df\Payment\Method::capture()
-	 * @param II|I|OP $payment
-	 * @param float|null $amount [optional]
-	 * @param bool|null $capture [optional]
-	 * @return $this
-	 * @throws Exception
-	 */
-	private function charge(II $payment, $amount = null, $capture = true) {
-		/** @var Transaction|false|null $auth */
-		$auth = !$capture ? null : $payment->getAuthorizationTransaction();
-		if ($auth) {
-			$this->capturePreauthorized($auth, $payment, $amount);
-		}
-		else {
-			/**
-			 * 2016-04-23
-			 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
-			 */
-			/** @var ChargeResponse $response */
-		    $response = $this->response();
-			if (!$this->r()->valid()) {
-				throw new Exception($this->r());
-			}
-			/**
-			 * 2016-05-02
-			 * Without it, a «void» operation will be unavailable:
-			 * «How is a payment authorization voiding implemented?»
-			 * https://mage2.pro/t/938
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 */
-			$payment->setTransactionId($this->r()->magentoTransactionId());
-			/** @var Card $card */
-			$card = $response->getCard();
-			/**
-			 * 2016-05-02
-			 * https://mage2.pro/t/941
-			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-			 */
-			$payment->setCcLast4($card->getLast4());
-			// 2016-05-02
-			$payment->setCcType($card->getPaymentMethod());
-			/**
-			 * 2016-03-15
-			 * Without it, a «void» operation will be unavailable:
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
-			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 * The transaction is considered complete unless «false» is explicitly specified.
-			 */
-			$payment->setIsTransactionClosed($capture);
-			if ($this->r()->flagged()) {
-				/**
-				 * 2016-05-06
-				 * Unfortunately, we can set
-				 * the @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state here
-				 * with the code $order->setState(O::STATE_PAYMENT_REVIEW);
-				 * because the state will be owerwritten:
-				 * @see \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L15-L49
-				 *
-				 * So, we are acting differently.
-				 * The «IsTransactionPending» flag will be read
-				 * in the same method:
-				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
-				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-				 * And the @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state will be set.
-				 */
-				$payment->setIsTransactionPending(true);
-				/**
-				 * 2016-05-09
-				 * How is @used-by \Magento\Sales\Model\Order\Payment.::getIsFraudDetected()
-				 * implemented and used?
-				 * https://mage2.pro/t/1574
-				 */
-				$payment->setIsFraudDetected(true);
-			}
-		}
-		return $this;
 	}
 
 	/**
@@ -645,14 +574,6 @@ class Method extends \Df\Payment\Method {
 	 * @var ChargeResponse
 	 */
 	private $_response;
-
-	/**
-	 * 2016-03-26
-	 * @used-by \Dfe\CheckoutCom\Method::capture()
-	 * @used-by \Dfe\CheckoutCom\Method::refund()
-	 * @used-by \Dfe\CheckoutCom\Handler\Charge::payment()
-	 */
-	const WEBHOOK_CASE = 'dfe_webhook_case';
 
 	/**
 	 * 2016-02-29
