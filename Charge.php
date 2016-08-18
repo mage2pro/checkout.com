@@ -305,8 +305,17 @@ class Charge extends \Df\Payment\Charge\WithToken {
 				 * Please refer to Country ISO and Code section
 				 * in the Other Codes menu option.»
 				 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+				 *
+				 * 2016-08-18
+				 * From now, the country code should be a string,
+				 * https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
+				 * The following data will fail
+					"phone": {
+						"number": "9629197300",
+						"countryCode": 7
+					}
 				 */
-				$result->setCountryCode($parsedPhone->getCountryCode());
+				$result->setCountryCode(strval($parsedPhone->getCountryCode()));
 			} catch (\libphonenumber\NumberParseException $e) {}
 			$this->{__METHOD__} = $result;
 		}
