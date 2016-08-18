@@ -79,7 +79,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 *
 		 * Although the values «y» and «n» are lowercased in the documentation,
 		 * they are uppercased in the documentation's examples:
-		 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#request-example
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-example
 		 *
 		 * 2016-05-09
 		 * It seems that if the payment gateway returns a «Flagged» transaction,
@@ -88,7 +88,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * https://mage2.pro/t/1565
 		 * It is then a good idea to do a Review procedure on such transactions.
 		 */
-		$result->setAutoCapture($this->needCapture() ? 'Y' : 'N');
+		$result->setAutoCapture($this->needCapture() ? 'y' : 'n');
 		/**
 		 * 2016-04-21
 		 * «Delayed capture time in hours between 0 and 168 inclusive
@@ -168,7 +168,11 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Customer/Card holder Ip.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setCustomerIp($this->o()->getRemoteIp());
+		/** @var string $ip */
+		$ip = $this->o()->getRemoteIp();
+		if ('127.0.0.1' !== $ip) {
+			$result->setCustomerIp($ip);
+		}
 		/**
 		 * 2016-04-21
 		 * «A valid card token (with prefix card_tok_)»
@@ -322,15 +326,20 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Name of product. Max of 100 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
+		/** @var OrderItem $parent */
+		$parent = df_order_item_parent($item);
 		// Simple options have name similar to «New Very Prive-36-Almond»,
 		// we'd rather see 'normal' names
 		// like a custom product «New Very Prive»).
-		$result->setName(
-			$item->getParentItem()
-			? $item->getParentItem()->getName()
-			: $item->getName()
-		);
-		$result->setProductId($item->getProductId());
+		$result->setName($parent->getName());
+		/**
+		 * 2016-08-18
+		 * It was the folowing code here:
+		 * $result->setProductId($item->getProductId());
+		 * But the «productId» parameter disappears from the documentation:
+		 * http://docs.checkout.com/reference/merchant-api-reference/complex-request-objects/products
+		 */
+		$result->setTrackingUrl($parent->getProduct()->getProductUrl());
 		/**
 		 * 2016-04-23
 		 * «Description of the product.Max of 500 characters.»
@@ -377,8 +386,17 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
 	 * @return array(string => string)
 	 */
-	private function metaData() {return [
-		'server' => implode(' / ', [dfa($_SERVER, 'SERVER_SOFTWARE'), dfa($_SERVER, 'HTTP_USER_AGENT')])
+	private function metaData() {return df_map('mb_substr', [
+		/**
+		 * 2016-08-18
+		 * It was a «server» key before, but it exceeded the maximum length of a key: 100 characters.
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 * «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
+		 * Max length of key(s) and value(s) is 100 each. A max. of 10 KVP are allowed.»
+		 * So I splitted the «server» key into 2 keys: «server» and «user_agent».
+		 */
+		'server' => dfa($_SERVER, 'SERVER_SOFTWARE')
+		,'user_agent' => dfa($_SERVER, 'HTTP_USER_AGENT')
 		,'quote_id' => $this->o()->getIncrementId()
 		// 2016-06-25
 		// Magento version
@@ -396,7 +414,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		// Merchant\'s server time
 		// Something like "2015-02-11T06:16:47+0100" (ISO 8601)
 		,'time' => df_now('Y-m-d\TH:i:sO', 'Europe/London')
-	];}
+	], [0, 100]);}
 
 	/** @return bool */
 	private function needCapture() {return $this[self::$P__NEED_CAPTURE];}
@@ -467,13 +485,13 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * 2016-05-06
 	 * @param InfoInterface|Info|OrderPayment $payment
 	 * @param string $token
-	 * @param float|null $amount [optional]
+	 * @param float|null $amountBase [optional]
 	 * @param bool $capture [optional]
 	 * @return CardTokenChargeCreate
 	 */
-	public static function build(InfoInterface $payment, $token, $amount = null, $capture = true) {
+	public static function build(InfoInterface $payment, $token, $amountBase = null, $capture = true) {
 		return (new self([
-			self::$P__AMOUNT => $amount
+			self::$P__AMOUNT_BASE => $amountBase
 			, self::$P__NEED_CAPTURE => $capture
 			, self::$P__PAYMENT => $payment
 			, self::$P__TOKEN => $token

@@ -4,7 +4,6 @@ use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler;
-use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order;

@@ -372,7 +372,7 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/AuthorizeOperation.php#L36-L36
 	 * @return float
 	 */
-	private function _amount() {
+	private function _amountBase() {
 		if (!isset($this->{__METHOD__})) {
 			$this->{__METHOD__} = $this->ii()->formatAmount($this->o()->getBaseTotalDue(), true);
 		}
@@ -478,7 +478,8 @@ class Method extends \Df\Payment\Method {
 			$label = null;
 		}
 		else {
-			$this->log(df_caller_method() . ' BEFORE');
+			$label = df_caller_m();
+			$this->log($label . ' BEFORE');
 		}
 		/** @var mixed $result */
 		try {$result = $function();}
@@ -561,7 +562,7 @@ class Method extends \Df\Payment\Method {
 	private function response() {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardToken(Charge::build(
-				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
+				$this->ii(), $this->iia(self::$TOKEN), $this->_amountBase(), $this->isCaptureDesired()
 			));
 		});}
 		return $this->_response;
@@ -633,8 +634,19 @@ class Method extends \Df\Payment\Method {
 	 * @return int
 	 */
 	private static function amountFactor(II $payment) {
-		/** @var string[] $m1000 */
+		/**
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#divide-value-by-1000
+		 * @var string[] $m1000
+		 */
 		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
-		return in_array($payment->getOrder()->getBaseCurrencyCode(), $m1000) ? 1000 : 100;
+		/**
+		 * 2016-08-17
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#full-value
+		 */
+		static $m1 = ['BYR', 'BIF', 'DJF', 'GNF', 'KMF', 'XAF', 'CLF', 'XPF'
+			, 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF'];
+		/** @var string $code */
+		$code = $payment->getOrder()->getOrderCurrencyCode();
+		return in_array($code, $m1000) ? 1000 : (in_array($code, $m1) ? 1 : 100);
 	}
 }

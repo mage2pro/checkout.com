@@ -32,7 +32,6 @@ class CustomerReturn {
 	 * @return bool
 	 */
 	public static function p($token) {
-		df_log(__METHOD__);
 		/**
 		 * 2016-05-08 (дополнение)
 		 * The order placement and the 3D-Secure verification
@@ -104,7 +103,7 @@ class CustomerReturn {
 			df_order_send_email($order);
 			if (
 				M::ACTION_AUTHORIZE === $r->action()
-				&& 'Y' === $charge->getAutoCapture()
+				&& 'y' === strtolower($charge->getAutoCapture())
 				&& !$r->flagged()
 			) {
 				/** @var CCharge $captureCharge */
