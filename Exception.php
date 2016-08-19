@@ -17,7 +17,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see Df\Core\Exception::__construct()
+	 * @see \Df\Payment\Exception::__construct()
 	 * @param Response $response
 	 */
 	public function __construct(Response $response) {
@@ -28,7 +28,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see \Df\Core\Exception::getMessageForCustomer()
+	 * @see \Df\Payment\Exception::getMessageForCustomer()
 	 * @return string
 	 */
 	public function getMessageForCustomer() {return $this->_r->messageForCustomer();}
@@ -36,7 +36,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see \Df\Core\Exception::getMessageRm()
+	 * @see \Df\Payment\Exception::getMessageRm()
 	 * @return string
 	 */
 	public function getMessageRm() {
