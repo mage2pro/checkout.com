@@ -372,9 +372,9 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/AuthorizeOperation.php#L36-L36
 	 * @return float
 	 */
-	private function _amountBase() {
+	private function _amount() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = $this->ii()->formatAmount($this->o()->getBaseTotalDue(), true);
+			$this->{__METHOD__} = $this->ii()->formatAmount($this->o()->getTotalDue(), true);
 		}
 		return $this->{__METHOD__};
 	}
@@ -562,7 +562,7 @@ class Method extends \Df\Payment\Method {
 	private function response() {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardToken(Charge::build(
-				$this->ii(), $this->iia(self::$TOKEN), $this->_amountBase(), $this->isCaptureDesired()
+				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
 			));
 		});}
 		return $this->_response;

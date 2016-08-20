@@ -494,13 +494,13 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * 2016-05-06
 	 * @param InfoInterface|Info|OrderPayment $payment
 	 * @param string $token
-	 * @param float|null $amountBase [optional]
+	 * @param float|null $amount [optional]
 	 * @param bool $capture [optional]
 	 * @return CardTokenChargeCreate
 	 */
-	public static function build(InfoInterface $payment, $token, $amountBase = null, $capture = true) {
+	public static function build(InfoInterface $payment, $token, $amount = null, $capture = true) {
 		return (new self([
-			self::$P__AMOUNT_BASE => $amountBase
+			self::$P__AMOUNT => $amount
 			, self::$P__NEED_CAPTURE => $capture
 			, self::$P__PAYMENT => $payment
 			, self::$P__TOKEN => $token
