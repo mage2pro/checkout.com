@@ -2,6 +2,7 @@
 namespace Dfe\CheckoutCom;
 use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\Patch\CardTokenChargeCreate;
+use Dfe\CheckoutCom\Patch\ChargesMapper;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
 use com\checkout\ApiServices\SharedModels\Product as CProduct;
@@ -496,14 +497,14 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * @param string $token
 	 * @param float|null $amount [optional]
 	 * @param bool $capture [optional]
-	 * @return CardTokenChargeCreate
+	 * @return array(string => mixed)
 	 */
 	public static function build(InfoInterface $payment, $token, $amount = null, $capture = true) {
-		return (new self([
+		return (new ChargesMapper((new self([
 			self::$P__AMOUNT => $amount
 			, self::$P__NEED_CAPTURE => $capture
 			, self::$P__PAYMENT => $payment
 			, self::$P__TOKEN => $token
-		]))->_build();
+		]))->_build()))->requestPayloadConverter();
 	}
 }

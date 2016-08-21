@@ -1,7 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\Cards\ResponseModels\Card;
-use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
@@ -9,7 +8,7 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrder;
-use Df\Sales\Model\Order\Payment as DfPayment;
+use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
@@ -297,7 +296,7 @@ class Method extends \Df\Payment\Method {
 			/** @var ChargeResponse $response */
 		    $response = $this->response();
 			if (!$this->r()->valid()) {
-				throw new Exception($this->r());
+				throw new Exception($this->r(), $this->request());
 			}
 			/**
 			 * 2016-05-02
@@ -555,15 +554,26 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
+	 * 2016-08-21
+	 * @return array(string => mixed)
+	 */
+	private function request() {
+		if (!isset($this->{__METHOD__})) {
+			$this->{__METHOD__} = Charge::build(
+				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
+			);
+		}
+		return $this->{__METHOD__};
+	}
+
+	/**
 	 * 2016-05-07
 	 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
 	 * @return ChargeResponse
 	 */
 	private function response() {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {
-			return $this->api()->chargeWithCardToken(Charge::build(
-				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
-			));
+			return $this->api()->chargeWithCardTokenDf($this->request());
 		});}
 		return $this->_response;
 	}
