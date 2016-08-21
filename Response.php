@@ -169,14 +169,22 @@ class Response extends \Df\Core\O {
 	 */
 	public function messageForCustomer() {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
-				$this->hasId()
-				? df_var(S::s()->messageFailure(), $this->a([
-					'responseMessage', 'responseAdvancedInfo'
-				]))
-				: __('Sorry, this payment method is not working now.'
-				 .'<br/>Please use another payment method.')
-			;
+			/** @var string $result */
+			if (!$this->hasId()) {
+				$result = __(
+					'Sorry, this payment method is not working now.'
+					 .'<br/>Please use another payment method.'
+				);
+			}
+			else {
+				/** @var string $m1 */
+				/** @var string $m2 */
+				list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
+				/** @var string $m */
+				$m = !$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})";
+				$result = df_var(S::s()->messageFailure(), ['message' => $m]);
+			}
+			$this->{__METHOD__} = $result;
 		}
 		return $this->{__METHOD__};
 	}

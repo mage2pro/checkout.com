@@ -32,9 +32,7 @@ http://docs.checkout.com/reference/merchant-api-reference/charges#the-charge-obj
 				-->
 				<description>{order.id}</description>
 				<messageFailure><![CDATA[Sorry, the payment attempt is failed.
-<br/>The payment service's message:
-<br/>«<b>{responseMessage}</b>».
-<br/>«<b>{responseAdvancedInfo}</b>».
+<br/>The payment service's message: «<b>{message}</b>».
 <br/>Please try again, or try another payment method.]]></messageFailure>
 				<title>Bank Card</title>
 				<!-- 2016-03-15 -->
