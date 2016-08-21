@@ -101,7 +101,7 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-08-05
-	 * @used-by \Dfe\CheckoutCom\Exception::getMessageRm()
+	 * @used-by \Dfe\CheckoutCom\Exception::message()
 	 * @used-by \Dfe\CheckoutCom\Response::messageForCustomer()
 	 * @return bool
 	 */
@@ -163,7 +163,7 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-07-17
-	 * @used-by \Dfe\CheckoutCom\Exception::getMessageForCustomer()
+	 * @used-by \Dfe\CheckoutCom\Exception::messageForCustomer()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */

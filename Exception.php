@@ -30,24 +30,24 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see \Df\Payment\Exception::getMessageForCustomer()
+	 * @see \Df\Payment\Exception::message()
 	 * @return string
 	 */
-	public function getMessageForCustomer() {return $this->_r->messageForCustomer();}
-
-	/**
-	 * 2016-07-17
-	 * @override
-	 * @see \Df\Payment\Exception::getMessageRm()
-	 * @return string
-	 */
-	public function getMessageRm() {return df_cc_n(
+	public function message() {return df_cc_n(
 		'The Checkout.com request is failed.'
 		,"Response:", df_json_encode_pretty($this->_r->a(!$this->_r->hasId() ? null : [
 			'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
 		]))
 		,!$this->_request ? null : ['Request:', df_json_encode_pretty($this->_request)]
 	);}
+
+	/**
+	 * 2016-07-17
+	 * @override
+	 * @see \Df\Payment\Exception::messageForCustomer()
+	 * @return string
+	 */
+	public function messageForCustomer() {return $this->_r->messageForCustomer();}
 
 	/**
 	 * 2016-07-17
@@ -58,7 +58,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-08-20
 	 * @used-by \Dfe\CheckoutCom\Exception::__construct()
-	 * @used-by \Dfe\CheckoutCom\Exception::getMessageRm()
+	 * @used-by \Dfe\CheckoutCom\Exception::message()
 	 * @var array(string => mixed)
 	 */
 	private $_request;
