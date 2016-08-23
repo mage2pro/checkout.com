@@ -1,6 +1,6 @@
 define ([
 	'df'
-	,'Df_Payment/js/view/payment/cc-form'
+	,'Df_Payment/card'
 	,'jquery'
 ], function(df, parent, $) {'use strict'; return parent.extend({
 	/**
