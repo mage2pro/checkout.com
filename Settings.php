@@ -5,7 +5,7 @@ use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
 /** @method static Settings s() */
-class Settings extends \Df\Payment\Settings {
+final class Settings extends \Df\Payment\Settings {
 	/**
 	 * 2016-05-15
 	 * @param int $customerId
@@ -121,14 +121,6 @@ class Settings extends \Df\Payment\Settings {
 	public function waitForCapture() {return $this->b();}
 
 	/**
-	 * @override
-	 * @see \Df\Core\Settings::prefix()
-	 * @used-by \Df\Core\Settings::v()
-	 * @return string
-	 */
-	protected function prefix() {return 'df_payment/checkout_com/';}
-
-	/**
 	 * 2016-03-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
 	 * @return string
@@ -170,5 +162,3 @@ class Settings extends \Df\Payment\Settings {
 	 */
 	private function testSecretKey() {return $this->p();}
 }
-
-

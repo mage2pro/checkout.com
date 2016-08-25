@@ -111,8 +111,8 @@ class CustomerReturn {
 				$order->unsetData(Order::PAYMENT);
 				$payment = $order->getPayment();
 				$payment->unsetData('method_instance');
-				df_payment_webhook_case($payment);
-				df_payment_trans_id($payment, $captureCharge->getId());
+				dfp_webhook_case($payment);
+				dfp_trans_id($payment, $captureCharge->getId());
 				/** @var InvoiceService $invoiceService */
 				$invoiceService = df_o(InvoiceService::class);
 				/** @var Invoice|DfInvoice $invoice */
