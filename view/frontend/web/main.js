@@ -4,24 +4,19 @@ define ([
 	,'jquery'
 ], function(df, parent, $) {'use strict'; return parent.extend({
 	/**
-	 * 2016-05-18
-	 * @returns {String[]}
-	 */
-	getCardTypes: function() {return ['VI', 'MC', 'AE'];},
-	/**
 	 * 2016-07-16
 	 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
 	 * @override
 	 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
 	 * @returns {String}
 	 */
-	getDebugMessage: df.c(function() {
+	debugMessage: df.c(function() {
 		/** @type {String} */
 		var amountS = Math.round(100 * this.dfc.grandTotal()).toString();
 		/** @type {String} */
 		var last2 = amountS.substring(amountS.length - 2);
 		/** @type {?String} */
-		var reason = ({
+		var message = ({
 			'05': '	Declined - Do Not Honour'
 			,'12': 'Invalid Transaction'
 			,'14': 'Invalid Card Number'
@@ -29,15 +24,20 @@ define ([
 			,'62': 'Restricted Card'
 			,'63': 'Security Violation'
 		})[last2];
-		return !reason ? '' : df.t(
-			'The transaction will <b><a href="{url}">fail</a></b> by the reason of «<b>{reason}</b>», because the payment amount ends with «<b>{last2}</b>».'
+		return !message ? '' : df.t(
+			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount ends with «<b>{last2}</b>».'
 			,{
 				last2: last2
-				,reason: reason
+				,message: message
 				,url: 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes'
 			}
 		);
 	}),
+	/**
+	 * 2016-05-18
+	 * @returns {String[]}
+	 */
+	getCardTypes: function() {return ['VI', 'MC', 'AE'];},
 	/**
 	 * 2016-03-02
 	 * @return {Object}
