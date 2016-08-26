@@ -94,17 +94,13 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * 2016-03-02
 	 * @return string
 	 */
-	public function publishableKey() {
-		return $this->test() ? $this->testPublishableKey() : $this->livePublishableKey();
-	}
+	public function publishableKey() {return $this->testable();}
 
 	/**
 	 * 2016-03-02
 	 * @return string
 	 */
-	public function secretKey() {
-		return $this->test() ? $this->testSecretKey() : $this->liveSecretKey();
-	}
+	public function secretKey() {return $this->testable();}
 
 	/**
 	 * 2016-03-14
@@ -121,6 +117,34 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	public function waitForCapture() {return $this->b();}
 
 	/**
+	 * 2016-03-02
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Publishable Key»
+	 * @return string
+	 */
+	protected function livePublishableKey() {return $this->v();}
+
+	/**
+	 * 2016-03-02
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Secret Key»
+	 * @return string
+	 */
+	protected function liveSecretKey() {return $this->p();}
+
+	/**
+	 * 2016-03-02
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Publishable Key»
+	 * @return string
+	 */
+	protected function testPublishableKey() {return $this->v();}
+
+	/**
+	 * 2016-03-02
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Secret Key»
+	 * @return string
+	 */
+	protected function testSecretKey() {return $this->p();}
+
+	/**
 	 * 2016-03-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
 	 * @return string
@@ -133,32 +157,4 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * @return string
 	 */
 	private function actionForReturned() {return $this->v();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Publishable Key»
-	 * @return string
-	 */
-	private function livePublishableKey() {return $this->v();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Secret Key»
-	 * @return string
-	 */
-	private function liveSecretKey() {return $this->p();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Publishable Key»
-	 * @return string
-	 */
-	private function testPublishableKey() {return $this->v();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Secret Key»
-	 * @return string
-	 */
-	private function testSecretKey() {return $this->p();}
 }
