@@ -11,10 +11,6 @@ define ([
 	 * @returns {String}
 	 */
 	debugMessage: df.c(function() {
-		/** @type {String} */
-		var amountS = Math.round(100 * this.dfc.grandTotal()).toString();
-		/** @type {String} */
-		var last2 = amountS.substring(amountS.length - 2);
 		/** @type {?String} */
 		var message = ({
 			'05': '	Declined - Do Not Honour'
@@ -23,7 +19,7 @@ define ([
 			,'51': 'Insufficient Funds'
 			,'62': 'Restricted Card'
 			,'63': 'Security Violation'
-		})[last2];
+		})[this.amoutLast2()];
 		return !message ? '' : df.t(
 			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount ends with «<b>{last2}</b>».'
 			,{
