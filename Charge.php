@@ -119,7 +119,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Either email or customerId required.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setEmail($this->o()->getCustomerEmail());
+		$result->setEmail($this->customerEmail());
 		/**
 		 * 2016-04-23
 		 * Email and CustomerId cannot be used simultaneously 
@@ -170,7 +170,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
 		/** @var string $ip */
-		$ip = $this->o()->getRemoteIp();
+		$ip = $this->customerIp();
 		if ('127.0.0.1' !== $ip) {
 			$result->setCustomerIp($ip);
 		}

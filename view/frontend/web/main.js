@@ -19,7 +19,7 @@ define ([
 			,'51': 'Insufficient Funds'
 			,'62': 'Restricted Card'
 			,'63': 'Security Violation'
-		})[this.amoutLast2()];
+		})[this.amountLast2()];
 		return !message ? '' : df.t(
 			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount ends with «<b>{last2}</b>».'
 			,{
