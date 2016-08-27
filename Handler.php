@@ -68,7 +68,7 @@ abstract class Handler extends \Df\Core\O {
 			 */
 			/** @var string $suffix */
 			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType']));
-			$class = df_convention(__CLASS__, $suffix, DefaultT::class);
+			$class = df_con(__CLASS__, $suffix, DefaultT::class);
 			/** @var Handler $i */
 			$i = df_create($class, $request);
 			/** @var string $result */
