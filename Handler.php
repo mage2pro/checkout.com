@@ -68,9 +68,8 @@ abstract class Handler extends \Df\Core\O {
 			 */
 			/** @var string $suffix */
 			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType']));
-			$class = df_con(__CLASS__, $suffix, DefaultT::class);
 			/** @var Handler $i */
-			$i = df_create($class, $request);
+			$i = df_create(df_con(__CLASS__, $suffix, DefaultT::class), $request);
 			/** @var string $result */
 			$result =
 				!$i->eligible() ? 'The event is not for our store.' : (
