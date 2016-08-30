@@ -302,7 +302,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 				 * in the Other Codes menu option.»
 				 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 				 */
-				$result->setCountryCode($parsedPhone->getCountryCode());
+				$result->setCountryCode(strval($parsedPhone->getCountryCode()));
 			} catch (\libphonenumber\NumberParseException $e) {}
 			$this->{__METHOD__} = $result;
 		}

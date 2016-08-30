@@ -307,7 +307,7 @@ class ChargeWithCardId extends \Df\Payment\Charge {
 				 * in the Other Codes menu option.»
 				 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#cardWithTokenTable
 				 */
-				$result->setCountryCode($parsedPhone->getCountryCode());
+				$result->setCountryCode(strval($parsedPhone->getCountryCode()));
 			} catch (\libphonenumber\NumberParseException $e) {}
 			$this->{__METHOD__} = $result;
 		}
