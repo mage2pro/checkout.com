@@ -471,7 +471,7 @@ class Method extends \Df\Payment\Method {
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function leh($function) {
+	private function leh(callable $function) {
 		/** @var string|null $label */
 		if (!$this->needLog()) {
 			$label = null;
@@ -560,7 +560,7 @@ class Method extends \Df\Payment\Method {
 	private function request() {
 		if (!isset($this->{__METHOD__})) {
 			$this->{__METHOD__} = Charge::build(
-				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
+				$this, $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
 			);
 		}
 		return $this->{__METHOD__};

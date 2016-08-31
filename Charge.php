@@ -485,7 +485,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 */
 	protected function _construct() {
 		parent::_construct();
-		$this->_prop(self::$P__NEED_CAPTURE, RM_V_BOOL, false);
+		$this->_prop(self::$P__NEED_CAPTURE, DF_V_BOOL, false);
 	}
 
 	/** @var string */
@@ -493,17 +493,17 @@ class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
-	 * @param InfoInterface|Info|OrderPayment $payment
+	 * @param Method $method
 	 * @param string $token
 	 * @param float|null $amount [optional]
 	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	public static function build(InfoInterface $payment, $token, $amount = null, $capture = true) {
+	public static function build(Method $method, $token, $amount = null, $capture = true) {
 		return (new ChargesMapper((new self([
 			self::$P__AMOUNT => $amount
 			, self::$P__NEED_CAPTURE => $capture
-			, self::$P__PAYMENT => $payment
+			, self::$P__METHOD => $method
 			, self::$P__TOKEN => $token
 		]))->_build()))->requestPayloadConverter();
 	}
