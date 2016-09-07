@@ -1,15 +1,11 @@
 <?php
 namespace Dfe\CheckoutCom\Handler\Charge;
-use com\checkout\ApiServices\Charges\ChargeService;
-use Df\Sales\Model\Order\Payment as DfPayment;
 use Dfe\CheckoutCom\Handler\Charge;
-use Dfe\CheckoutCom\Settings as S;
 use Magento\Sales\Api\CreditmemoManagementInterface as ICreditmemoService;
 use Magento\Sales\Controller\Adminhtml\Order\CreditmemoLoader;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\CreditmemoService;
 /**
  * 2016-05-10
@@ -87,35 +83,28 @@ class Refunded extends Charge {
 	 * 2016-03-27
 	 * @return Creditmemo
 	 */
-	private function cm() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var CreditmemoLoader $cmLoader */
-			$cmLoader = df_o(CreditmemoLoader::class);
-			$cmLoader->setOrderId($this->order()->getId());
-			$cmLoader->setInvoiceId($this->invoice()->getId());
-			/** @varCreditmemo  $result */
-			$result = $cmLoader->load();
-			df_assert($result);
-			/**
-			 * 2016-03-28
-			 * Important! if not done the order will automatically capture the payment instead of us
-			 * and the flag @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE will be lost
-			 */
-			$result->getOrder()->setData(Order::PAYMENT, $this->payment());
-			$this->{__METHOD__} = $result;
-		}
-		return $this->{__METHOD__};
-	}
-
+	private function cm() {return dfc($this, function() {
+		/** @var CreditmemoLoader $cmLoader */
+		$cmLoader = df_o(CreditmemoLoader::class);
+		$cmLoader->setOrderId($this->order()->getId());
+		$cmLoader->setInvoiceId($this->invoice()->getId());
+		/** @varCreditmemo  $result */
+		$result = $cmLoader->load();
+		df_assert($result);
+		/**
+		 * 2016-03-28
+		 * Important! if not done the order will automatically capture the payment instead of us
+		 * and the flag @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE will be lost
+		 */
+		$result->getOrder()->setData(Order::PAYMENT, $this->payment());
+		return $result;
+	});}
+	
 	/**
 	 * 2016-03-27
 	 * @return Invoice
 	 */
-	private function invoice() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_invoice_by_transaction($this->order(), $this->parentId());
-			df_assert($this->{__METHOD__});
-		}
-		return $this->{__METHOD__};
-	}
+	private function invoice() {return dfc($this, function() {return
+		df_invoice_by_transaction($this->order(), $this->parentId())
+	;});}	
 }

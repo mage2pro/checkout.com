@@ -23,15 +23,12 @@ class Index extends \Magento\Framework\App\Action\Action {
 	public function execute() {return df_leh(function(){
 		/** @var string|null $token */
 		$token = df_request('cko-payment-token');
-		return
-			$token
-			? (CustomerReturn::p($token)
-				? $this->_redirect('checkout/onepage/success')
+		return !$token ? $this->webhook() :
+			(CustomerReturn::p($token) ? $this->_redirect('checkout/onepage/success')
 				// 2016-05-06
 				// «How to redirect a customer to the checkout payment step?» https://mage2.pro/t/1523
 				: $this->_redirect('checkout', ['_fragment' => 'payment'])
 			)
-			: $this->webhook()
 		;
 	});}
 
@@ -39,12 +36,9 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * 2016-03-25
 	 * @return string
 	 */
-	private function file() {
-		return df_my_local()
-			? BP . '/_my/test/checkout.com/charge.voided.json'
-			: 'php://input'
-		;
-	}
+	private function file() {return
+		df_my_local() ? BP . '/_my/test/checkout.com/charge.voided.json' : 'php://input'
+	;}
 
 	/**
 	 * 2016-05-11

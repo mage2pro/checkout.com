@@ -9,13 +9,10 @@ use com\checkout\ApiServices\SharedModels\Product as CProduct;
 use Dfe\CheckoutCom\Settings as S;
 use libphonenumber\PhoneNumberUtil as PhoneParser;
 use libphonenumber\PhoneNumber as ParsedPhone;
-use Magento\Payment\Model\Info;
-use Magento\Payment\Model\InfoInterface;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Address as OrderAddress;
-use Magento\Sales\Model\Order\Item as OrderItem;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
-class Charge extends \Df\Payment\Charge\WithToken {
+use Magento\Sales\Model\Order\Address as OA;
+use Magento\Sales\Model\Order\Item as OI;
+/** @method Method m() */
+final class Charge extends \Df\Payment\Charge\WithToken {
 	/**
 	 * 2016-05-06
 	 * @return CardTokenChargeCreate
@@ -23,7 +20,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	private function _build() {
 		/** @var CardTokenChargeCreate $result */
 		$result = new CardTokenChargeCreate;
-		df_assert($this->o()->getIncrementId());
+		df_assert($this->oii());
 		/**
 		 * 2016-05-08
 		 * «How To Use Billing Descriptors to Decrease Chargebacks»
@@ -63,7 +60,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * So we can just call @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
-		$result->setTrackId($this->o()->getIncrementId());
+		$result->setTrackId($this->oii());
 		$result->setCustomerName($this->addressSB()->getName());
 		/**
 		 * 2016-04-21
@@ -148,7 +145,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * that do not support fractional values.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setValue($this->cAmount());
+		$result->setValue($this->amountF());
 		/**
 		 * 2016-04-21
 		 * «Three-letter ISO currency code
@@ -156,7 +153,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * (refer to currency codes and names)»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setCurrency($this->currencyCode());
+		$result->setCurrency($this->currencyC());
 		/**
 		 * 2016-04-21
 		 * «Transaction indicator. 1 for regular, 2 for recurring, 3 for MOTO.
@@ -202,133 +199,118 @@ class Charge extends \Df\Payment\Charge\WithToken {
 	 * 2016-05-06
 	 * @return CAddress
 	 */
-	private function cAddress() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var OrderAddress $a */
-			$a = $this->addressSB();
-			/** @var CAddress $result */
-			$result = new CAddress;
-			/**
-			 * 2016-04-23
-			 * «Address field line 1. Max length of 100 characters.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setAddressLine1($a->getStreetLine(1));
-			/**
-			 * 2016-04-23
-			 * «Address field line 2. Max length of 100 characters.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setAddressLine2($a->getStreetLine(2));
-			/**
-			 * 2016-04-23
-			 * «Address postcode. Max. length of 50 characters.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setPostcode($a->getPostcode());
-			/**
-			 * 2016-04-23
-			 * «The country ISO2 code e.g. US.
-			 * See provided list of supported ISO formatted countries.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setCountry($a->getCountryId());
-			/**
-			 * 2016-04-23
-			 * «Address city. Max length of 100 characters.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setCity($a->getCity());
-			/**
-			 * 2016-04-23
-			 * «Address state. Max length of 100 characters.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setState($a->getRegion());
-			/**
-			 * 2016-04-23
-			 * «Contact phone object for the card holder.
-			 * If provided, it will contain the countryCode and number properties
-			 * e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$result->setPhone($this->cPhone());
-			/**
-			 * 2016-04-23
-			 * «Shipping address details.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
-			$this->{__METHOD__} = $result;
-		}
-		return $this->{__METHOD__};
-	}
-
-	/**
-	 * 2016-05-06
-	 * @param float|null $amount
-	 * @return int
-	 */
-	private function cAmount($amount = null) {
-		return Method::amount($this->payment(), $amount ? $amount : $this->amount());
-	}
+	private function cAddress() {return dfc($this, function() {
+		/** @var OA $a */
+		$a = $this->addressSB();
+		/** @var CAddress $result */
+		$result = new CAddress;
+		/**
+		 * 2016-04-23
+		 * «Address field line 1. Max length of 100 characters.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setAddressLine1($a->getStreetLine(1));
+		/**
+		 * 2016-04-23
+		 * «Address field line 2. Max length of 100 characters.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setAddressLine2($a->getStreetLine(2));
+		/**
+		 * 2016-04-23
+		 * «Address postcode. Max. length of 50 characters.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setPostcode($a->getPostcode());
+		/**
+		 * 2016-04-23
+		 * «The country ISO2 code e.g. US.
+		 * See provided list of supported ISO formatted countries.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setCountry($a->getCountryId());
+		/**
+		 * 2016-04-23
+		 * «Address city. Max length of 100 characters.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setCity($a->getCity());
+		/**
+		 * 2016-04-23
+		 * «Address state. Max length of 100 characters.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setState($a->getRegion());
+		/**
+		 * 2016-04-23
+		 * «Contact phone object for the card holder.
+		 * If provided, it will contain the countryCode and number properties
+		 * e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		$result->setPhone($this->cPhone());
+		/**
+		 * 2016-04-23
+		 * «Shipping address details.»
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
+		return $result;
+	});}
 
 	/**
 	 * 2016-05-06
 	 * @return CPhone
 	 */
-	private function cPhone() {
-		if (!isset($this->{__METHOD__})) {
+	private function cPhone() {return dfc($this, function() {
+		/**
+		 * 2016-05-03
+		 * https://github.com/giggsey/libphonenumber-for-php#quick-examples
+		 * @var PhoneParser $phoneParser
+		 */
+		$phoneParser = PhoneParser::getInstance();
+		/** @var CPhone $result */
+		$result = new CPhone;
+		try {
+			/** @var ParsedPhone $parsedPhone */
+		    $parsedPhone = $phoneParser->parse(
+				$this->addressSB()->getTelephone(), $this->addressSB()->getCountryId()
+			);
 			/**
-			 * 2016-05-03
-			 * https://github.com/giggsey/libphonenumber-for-php#quick-examples
-			 * @var PhoneParser $phoneParser
+			 * 2016-04-23
+			 * «Contact phone number for the card holder.
+			 * Its length should be between 6 and 25 characters.
+			 * Allowed characters are: numbers, +, (,) ,/ and ' '.»
+			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 			 */
-			$phoneParser = PhoneParser::getInstance();
-			/** @var CPhone $result */
-			$result = new CPhone;
-			try {
-				/** @var ParsedPhone $parsedPhone */
-			    $parsedPhone = $phoneParser->parse(
-					$this->addressSB()->getTelephone(), $this->addressSB()->getCountryId()
-				);
-				/**
-				 * 2016-04-23
-				 * «Contact phone number for the card holder.
-				 * Its length should be between 6 and 25 characters.
-				 * Allowed characters are: numbers, +, (,) ,/ and ' '.»
-				 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-				 */
-				$result->setNumber($parsedPhone->getNationalNumber());
-				/**
-				 * 2016-04-23
-				 * «Country code for the phone number of the card holder
-				 * e.g. 44 for United Kingdom.
-				 * Please refer to Country ISO and Code section
-				 * in the Other Codes menu option.»
-				 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-				 *
-				 * 2016-08-18
-				 * From now, the country code should be a string,
-				 * https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
-				 * The following data will fail
-					"phone": {
-						"number": "9629197300",
-						"countryCode": 7
-					}
-				 */
-				$result->setCountryCode(strval($parsedPhone->getCountryCode()));
-			} catch (\libphonenumber\NumberParseException $e) {}
-			$this->{__METHOD__} = $result;
-		}
-		return $this->{__METHOD__};
-	}
+			$result->setNumber($parsedPhone->getNationalNumber());
+			/**
+			 * 2016-04-23
+			 * «Country code for the phone number of the card holder
+			 * e.g. 44 for United Kingdom.
+			 * Please refer to Country ISO and Code section
+			 * in the Other Codes menu option.»
+			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+			 *
+			 * 2016-08-18
+			 * From now, the country code should be a string,
+			 * https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
+			 * The following data will fail
+				"phone": {
+					"number": "9629197300",
+					"countryCode": 7
+				}
+			 */
+			$result->setCountryCode(strval($parsedPhone->getCountryCode()));
+		} catch (\libphonenumber\NumberParseException $e) {}
+		return $result;
+	});}
 
 	/**
 	 * 2016-05-06
-	 * @param OrderItem $item
+	 * @param OI $item
 	 * @return CProduct
 	 */
-	private function cProduct(OrderItem $item) {
+	private function cProduct(OI $item) {
 		/** @var CProduct $result */
 		$result = new CProduct;
 		/**
@@ -336,8 +318,8 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Name of product. Max of 100 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		/** @var OrderItem $parent */
-		$parent = df_order_item_parent($item);
+		/** @var OI $parent */
+		$parent = df_oi_parent($item);
 		// Simple options have name similar to «New Very Prive-36-Almond»,
 		// we'd rather see 'normal' names
 		// like a custom product «New Very Prive»).
@@ -370,12 +352,9 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 *
 		 * 2016-05-03
-		 * Here we do not use @see \Dfe\CheckoutCom\Method::amount(),
-		 * because we're in a situation where we have to 
-		 * send rubles rather than kopeks
-		 * (couldn't find anything about that from the Checkout.com dashboard).
+		 * Использовать @see amountF() здесь не требуется.
 		 */
-		$result->setPrice(df_order_item_price($item));
+		$result->setPrice($this->cFromOrder(df_oi_price($item)));
 		/**
 		 * 2016-04-23
 		 * «Units of the product to be shipped. Max length of 3 digits.»
@@ -407,7 +386,7 @@ class Charge extends \Df\Payment\Charge\WithToken {
 		 */
 		'server' => dfa($_SERVER, 'SERVER_SOFTWARE')
 		,'user_agent' => dfa($_SERVER, 'HTTP_USER_AGENT')
-		,'quote_id' => $this->o()->getIncrementId()
+		,'quote_id' => $this->oii()
 		// 2016-06-25
 		// Magento version
 		,'magento_version' => df_magento_version()
@@ -431,52 +410,34 @@ class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
-	 * @param CardTokenChargeCreate $request
+	 * 2016-04-23
+	 * «An array of Product details»
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * @param CardTokenChargeCreate $c
 	 * @return void
 	 */
-	private function setProducts(CardTokenChargeCreate $request) {
-		foreach ($this->o()->getItems() as $item) {
-			/** @var OrderItem $item */
-			/**
-			 * 2016-03-24
-			 * If the item is customisable then use
-			 * @uses \Magento\Sales\Model\Order::getItems()
-			 * It will include the customised product and its simple version.
-			 */
-			if (!$item->getChildrenItems()) {
-				/**
-				 * 2016-04-23
-				 * «An array of Product details»
-				 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-				 */
-				$request->setProducts($this->cProduct($item));
-			}
-		}
+	private function setProducts(CardTokenChargeCreate $c) {
+		$this->oiLeafsM(function(OI $i) use($c) {$c->setProducts($this->cProduct($i));});
 	}
 
 	/**
 	 * 2016-05-13
 	 * @return bool
 	 */
-	private function use3DS() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
-				S::s()->force3DS_forAll()
-				|| S::s()->force3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
-				|| S::s()->force3DS_forShippingDestinations($this->addressSB()->getCountryId())
-				/**
-				 * 2016-05-31
-				 * Today it seems that the PHP request to freegeoip.net stopped returning any value,
-				 * whereas it still returns results when the request is sent from the browser.
-				 * Apparently, freegeoip.net banned my User-Agent?
-				 * In all cases, we cannot rely on freegeoip.net and risk getting an empty response.
-				 * @uses df_visitor()
-				 */
-				|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
-			;
-		}
-		return $this->{__METHOD__};
-	}
+	private function use3DS() {return dfc($this, function() {return
+		S::s()->force3DS_forAll()
+		|| S::s()->force3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
+		|| S::s()->force3DS_forShippingDestinations($this->addressSB()->getCountryId())
+		/**
+		 * 2016-05-31
+		 * Today it seems that the PHP request to freegeoip.net stopped returning any value,
+		 * whereas it still returns results when the request is sent from the browser.
+		 * Apparently, freegeoip.net banned my User-Agent?
+		 * In all cases, we cannot rely on freegeoip.net and risk getting an empty response.
+		 * @uses df_visitor()
+		 */
+		|| S::s()->force3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
+	;});}
 
 	/**
 	 * 2016-05-06
@@ -493,17 +454,15 @@ class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
-	 * @param Method $method
+	 * @param Method $m
 	 * @param string $token
-	 * @param float|null $amount [optional]
 	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	public static function build(Method $method, $token, $amount = null, $capture = true) {
+	public static function build(Method $m, $token, $capture = true) {
 		return (new ChargesMapper((new self([
-			self::$P__AMOUNT => $amount
+			self::$P__METHOD => $m
 			, self::$P__NEED_CAPTURE => $capture
-			, self::$P__METHOD => $method
 			, self::$P__TOKEN => $token
 		]))->_build()))->requestPayloadConverter();
 	}

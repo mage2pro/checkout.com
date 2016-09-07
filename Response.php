@@ -50,8 +50,14 @@ class Response extends \Df\Core\O {
 	 */
 	public function a($key = null) {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_json_decode($this->charge()->json);
-			df_log($this->charge()->json);
+			/**
+			 * 2016-09-07
+			 * @see https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
+			 * @var string $json
+			 */
+			$json = $this->charge()->{'json'};
+			$this->{__METHOD__} = df_json_decode($json);
+			df_log($json);
 		}
 		return is_null($key) ? $this->{__METHOD__} : (
 			is_array($key)
@@ -71,16 +77,11 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	public function action() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} =
-				$this->flagged() || !$this->waitForCapture()
-				? M::ACTION_AUTHORIZE
-				: S::s()->actionDesired($this->order()->getCustomerId())
-			;
-		}
-		return $this->{__METHOD__};
-	}
+	public function action() {return dfc($this, function() {return
+		$this->flagged() || !$this->waitForCapture()
+		? M::ACTION_AUTHORIZE
+		: S::s()->actionDesired($this->order()->getCustomerId())
+	;});}
 
 	/**
 	 * 2016-05-09
@@ -132,34 +133,27 @@ class Response extends \Df\Core\O {
 	 * to find out the ID of the «capture» transaction:
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/get-charge-history
 	 * «This is a quick way to view a charge status, rather than searching through webhooks»
+	 *
+	 * 2016-05-11
+	 * The previous code was ('Y' !== $response->getAutoCapture()).
+	 * It was wrong, because Checkout.com could mark the payment as «Flagged».
+	 * A «Flagged» transaction requires an additional «capture» transaction,
+	 * so it should be treated as an «authorize» transaction
+	 * despite the «autoCapture» option has the «Y» value.
+	 *
+	 * 2016-05-15
+	 * The previous code was:
+	 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
+	 *
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function magentoTransactionId() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var Response $response */
-		    $response = $this->charge();
-			/**
-			 * 2016-05-11
-			 * The previous code was ('Y' !== $response->getAutoCapture()).
-			 * It was wrong, because Checkout.com could mark the payment as «Flagged».
-			 * A «Flagged» transaction requires an additional «capture» transaction,
-			 * so it should be treated as an «authorize» transaction
-			 * despite the «autoCapture» option has the «Y» value.
-			 *
-			 * 2016-05-15
-			 * The previous code was:
-			 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
-			 */
-			$this->{__METHOD__} =
-				M::ACTION_AUTHORIZE === $this->action()
-				? $response->getId()
-				: self::getCaptureCharge($response->getId())->getId()
-			;
-		}
-		return $this->{__METHOD__};
-	}
+	public function magentoTransactionId() {return dfc($this, function() {return
+		M::ACTION_AUTHORIZE === $this->action() ? $this->charge()->getId() :
+			self::getCaptureCharge($this->charge()->getId())->getId()
+		;
+	});}
 
 	/**
 	 * 2016-07-17
@@ -167,27 +161,24 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	public function messageForCustomer() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var string $result */
-			if (!$this->hasId()) {
-				$result = __(
-					'Sorry, this payment method is not working now.'
-					 .'<br/>Please use another payment method.'
-				);
-			}
-			else {
-				/** @var string $m1 */
-				/** @var string $m2 */
-				list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
-				/** @var string $m */
-				$m = !$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})";
-				$result = df_var(S::s()->messageFailure(), ['message' => $m]);
-			}
-			$this->{__METHOD__} = $result;
+	public function messageForCustomer() {return dfc($this, function() {
+		/** @var string $result */
+		if (!$this->hasId()) {
+			$result = __(
+				'Sorry, this payment method is not working now.'
+				 .'<br/>Please use another payment method.'
+			);
 		}
-		return $this->{__METHOD__};
-	}
+		else {
+			/** @var string $m1 */
+			/** @var string $m2 */
+			list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
+			/** @var string $m */
+			$m = !$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})";
+			$result = df_var(S::s()->messageFailure(), ['message' => $m]);
+		}
+		return $result;
+	});}
 
 	/**
 	 * 2016-05-08
@@ -210,9 +201,9 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @return bool
 	 */
-	public function valid() {
-		return in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);
-	}
+	public function valid() {return
+		in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED])
+	;}
 
 	/** @return CCharge */
 	private function charge() {return $this[self::$P__CHARGE];}
@@ -224,12 +215,9 @@ class Response extends \Df\Core\O {
 	 * 2016-05-15
 	 * @return bool
 	 */
-	private function waitForCapture() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_is_localhost() || S::s()->waitForCapture();
-		}
-		return $this->{__METHOD__};
-	}
+	private function waitForCapture() {return dfc($this, function() {return
+		df_is_localhost() || S::s()->waitForCapture()
+	;});}
 
 	/**
 	 * 2016-05-15
@@ -313,18 +301,13 @@ class Response extends \Df\Core\O {
 	 * 2016-05-15
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @used-by \Dfe\CheckoutCom\Method::r()
-	 * @param CCharge $charge
-	 * @param Order $order
+	 * @param CCharge $c
+	 * @param Order $o
 	 * @return $this
 	 */
-	public static function sp(CCharge $charge, Order $order) {
-		/** @var array(string => $this) */
-		static $cache;
-		if (!isset($cache[$charge->getId()])) {
-			$cache[$charge->getId()] = new self([self::$P__CHARGE => $charge, self::$P__ORDER => $order]);
-		}
-		return $cache[$charge->getId()];
-	}
+	public static function sp(CCharge $c, Order $o) {return dfcf(function(CCharge $c, Order $o) {return
+		new self([self::$P__CHARGE => $c, self::$P__ORDER => $o])
+	;}, func_get_args());}
 
 	/**
 	 * 2016-05-15

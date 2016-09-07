@@ -11,9 +11,9 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * @param int $customerId
 	 * @return string
 	 */
-	public function actionDesired($customerId) {
-		return df_customer_is_new($customerId) ? $this->actionForNew() : $this->actionForReturned();
-	}
+	public function actionDesired($customerId) {return
+		df_customer_is_new($customerId) ? $this->actionForNew() : $this->actionForReturned()
+	;}
 
 	/**
 	 * 2016-05-05
@@ -21,12 +21,9 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return API
 	 */
-	public function api() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = new API($this->secretKey(), $this->test() ? 'sandbox' : 'live');
-		}
-		return $this->{__METHOD__};
-	}
+	public function api() {return dfc($this, function() {return
+		new API($this->secretKey(), $this->test() ? 'sandbox' : 'live')
+	;});}
 
 	/**
 	 * 2016-05-05

@@ -27,10 +27,7 @@ class Prefill extends \Df\Config\SourceT {
 	 * 2016-05-10
 	 * @return array(mixed => mixed)
 	 */
-	private function _config() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = df_http_json_c('https://mage2.pro/ext/checkout.com/test-card-data.json');
-		}
-		return $this->{__METHOD__};
-	}
+	private function _config() {return dfc($this, function() {return
+		df_http_json_c('https://mage2.pro/ext/checkout.com/test-card-data.json')
+	;});}
 }

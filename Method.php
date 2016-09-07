@@ -10,15 +10,12 @@ use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrder;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Settings as S;
-use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
-use Magento\Sales\Model\Order\Creditmemo;
-use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
@@ -146,6 +143,31 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
+	 * 2016-09-07
+	 * Конвертирует денежную величину (в валюте платежа) из обычного числа в формат платёжной системы.
+	 * В частности, некоторые платёжные системы хотят денежные величины в копейках (Checkout.com),
+	 * обязательно целыми (allPay) и т.п.
+	 *
+	 * 2016-04-21
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
+	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
+	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
+	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
+	 * Divide all other currencies into 100 units
+	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
+	 *
+	 * @override
+	 * @see \Df\Payment\Method::formatAmount()
+	 * @used-by \Df\Payment\Operation::formatAmount()
+	 * @used-by _refund()
+	 * @used-by capturePreauthorized()
+	 * @param float $amount
+	 * @return int
+	 */
+	public function formatAmount($amount) {return ceil($amount * $this->amountFactor());}
+
+	/**
 	 * @override
 	 * @see \Df\Payment\Method::getConfigPaymentAction()
 	 * @return string
@@ -193,44 +215,42 @@ class Method extends \Df\Payment\Method {
 	 * @param float $amount
 	 * @return void
 	 */
-	protected function _refund($amount) {
-		$this->leh(function() use($amount) {
-			/** @var ChargeRefund $refund */
-			$refund = new ChargeRefund;
-			/**
-			 * 2016-05-09
-			 * The «capture» transaction's ID differs from the previous transaction's ID.
-			 * We should use the «capture» transaction's ID
-			 * as a parameter of the Checkout.com «refund» transaction.
-			 *
-			 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
-			 * return the same value.
-			 *
-			 * «refund_transaction_id» is set here:
-			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
-			 */
-			$refund->setChargeId($this->ii()->getRefundTransactionId());
-			$refund->setValue(self::amount($this->ii(), $amount));
-			$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
-			/** @var ChargeResponse $response */
-			$response = $this->api()->refundCardChargeRequest($refund);
-			/**
-			 * 2016-05-09
-			 * A sample success response:
-				{
-					"id": "charge_test_033B66645E5K7A9812E5",
-					"originalId": "charge_test_427BB6745E5K7A9813C9",
-					"responseMessage": "Approved",
-					"responseAdvancedInfo": "Approved",
-					"responseCode": "10000",
-					"status": "Refunded",
-			 		<...>
-				}
-			 */
-			df_assert_eq('Refunded', $response->getStatus());
-			$this->ii()->setTransactionId($response->getId());
-		});
-	}
+	protected function _refund($amount) {$this->leh(function() use($amount) {
+		/** @var ChargeRefund $refund */
+		$refund = new ChargeRefund;
+		/**
+		 * 2016-05-09
+		 * The «capture» transaction's ID differs from the previous transaction's ID.
+		 * We should use the «capture» transaction's ID
+		 * as a parameter of the Checkout.com «refund» transaction.
+		 *
+		 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
+		 * return the same value.
+		 *
+		 * «refund_transaction_id» is set here:
+		 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
+		 */
+		$refund->setChargeId($this->ii()->getRefundTransactionId());
+		$refund->setValue($this->formatAmount($amount));
+		$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
+		/** @var ChargeResponse $response */
+		$response = $this->api()->refundCardChargeRequest($refund);
+		/**
+		 * 2016-05-09
+		 * A sample success response:
+			{
+				"id": "charge_test_033B66645E5K7A9812E5",
+				"originalId": "charge_test_427BB6745E5K7A9813C9",
+				"responseMessage": "Approved",
+				"responseAdvancedInfo": "Approved",
+				"responseCode": "10000",
+				"status": "Refunded",
+				<...>
+			}
+		 */
+		df_assert_eq('Refunded', $response->getStatus());
+		$this->ii()->setTransactionId($response->getId());
+	});}
 
 	/**
 	 * 2016-05-03
@@ -239,39 +259,37 @@ class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_void()
 	 * @return void
 	 */
-	protected function _void() {
-		$this->leh(function() {
-			/** @var Transaction|false|null $auth */
-			$auth = $this->ii()->getAuthorizationTransaction();
-			if ($auth) {
-				/** @var ChargeVoid $void */
-				$void = new ChargeVoid;
-				/**
-				 * 2016-05-03
-				 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
-				 * Although the documentation states that the «track_id» parameter is optional,
-				 * the transaction will fail with empty ChargeVoid object:
-				  {
-					"errorCode": "70000",
-					"message": "Validation error",
-					"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
-					"errorMessageCodes": ["70002"],
-					"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
-				 }
-				 */
-				$void->setTrackId($this->ii()->getOrder()->getIncrementId());
-				$this->disableEvent($auth->getTxnId(), 'charge.voided');
-				/** @var ChargeResponse $response */
-				$response = $this->api()->voidCharge($auth->getTxnId(), $void);
-				/**
-				 * 2016-05-13
-				 * This makes the «void» transaction ID the same in Magento and in Checkout.com
-				 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
-				 */
-				$this->ii()->setTransactionId($response->getId());
-			}
-		});
-	}
+	protected function _void() {$this->leh(function() {
+		/** @var Transaction|false|null $auth */
+		$auth = $this->ii()->getAuthorizationTransaction();
+		if ($auth) {
+			/** @var ChargeVoid $void */
+			$void = new ChargeVoid;
+			/**
+			 * 2016-05-03
+			 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
+			 * Although the documentation states that the «track_id» parameter is optional,
+			 * the transaction will fail with empty ChargeVoid object:
+			  {
+				"errorCode": "70000",
+				"message": "Validation error",
+				"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
+				"errorMessageCodes": ["70002"],
+				"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
+			 }
+			 */
+			$void->setTrackId($this->ii()->getOrder()->getIncrementId());
+			$this->disableEvent($auth->getTxnId(), 'charge.voided');
+			/** @var ChargeResponse $response */
+			$response = $this->api()->voidCharge($auth->getTxnId(), $void);
+			/**
+			 * 2016-05-13
+			 * This makes the «void» transaction ID the same in Magento and in Checkout.com
+			 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
+			 */
+			$this->ii()->setTransactionId($response->getId());
+		}
+	});}
 
 	/**
 	 * 2016-03-07
@@ -340,7 +358,7 @@ class Method extends \Df\Payment\Method {
 				 * in the same method:
 				 * @used-by \Magento\Sales\Model\Order\Payment\State\AuthorizeCommand::execute()
 				 * https://github.com/magento/magento2/blob/135f967/app/code/Magento/Sales/Model/Order/Payment/State/AuthorizeCommand.php#L26-L31
-				 * And the @see Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state will be set.
+				 * And the @see \Magento\Sales\Model\Order::STATE_PAYMENT_REVIEW state will be set.
 				 */
 				$this->ii()->setIsTransactionPending(true);
 				/**
@@ -364,21 +382,6 @@ class Method extends \Df\Payment\Method {
 	protected function iiaKeys() {return [self::$TOKEN];}
 
 	/**
-	 * 2016-05-08
-	 * Similarly to @see \Magento\Sales\Model\Order\Payment::processAction()
-	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L414
-	 * and @see \Magento\Sales\Model\Order\Payment\Operations\AuthorizeOperation::authorize()
-	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/AuthorizeOperation.php#L36-L36
-	 * @return float
-	 */
-	private function _amount() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = $this->ii()->formatAmount($this->o()->getTotalDue(), true);
-		}
-		return $this->{__METHOD__};
-	}
-
-	/**
 	 * 2016-04-21
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
@@ -387,18 +390,38 @@ class Method extends \Df\Payment\Method {
 	private function api() {return S::s()->apiCharge();}
 
 	/**
+	 * 2016-05-06
+	 * @return int
+	 */
+	private function amountFactor() {return dfc($this, function() {
+		/**
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#divide-value-by-1000
+		 * @var string[] $m1000
+		 */
+		$m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
+		/**
+		 * 2016-08-17
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#full-value
+		 * @var string[] $m1
+		 */
+		$m1 = ['BYR', 'BIF', 'DJF', 'GNF', 'KMF', 'XAF', 'CLF', 'XPF','JPY', 'PYG'
+			,'RWF', 'KRW', 'VUV', 'VND', 'XOF'];
+		/** @var string $c */
+		$c = $this->cPayment();
+		return in_array($c, $m1000) ? 1000 : (in_array($c, $m1) ? 1 : 100);
+	});}
+
+	/**
 	 * 2016-05-11
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @param Transaction $auth
-	 * @param float|null $amount [optional]
+	 * @param float $amount [optional]
 	 * @return void
 	 */
-	private function capturePreauthorized(Transaction $auth, $amount = null) {
+	private function capturePreauthorized(Transaction $auth, $amount) {
 		$this->leh(function() use($auth, $amount) {
-			/**
-			 * 2016-05-03
-			 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
-			 */
+			// 2016-05-03
+			// https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
 			/** @var ChargeCapture $capture */
 			$capture = new ChargeCapture;
 			$this->disableEvent($auth->getTxnId(), 'charge.captured');
@@ -412,7 +435,7 @@ class Method extends \Df\Payment\Method {
 			 * If not specified, the default is authorisation charge amount.»
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
-			$capture->setValue(self::amount($this->ii(), $amount));
+			$capture->setValue($this->formatAmount($amount));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
@@ -461,9 +484,9 @@ class Method extends \Df\Payment\Method {
 	 * and the «authorize» action will be used instead.
 	 * @return bool
 	 */
-	private function isCaptureDesired() {
-		return M::ACTION_AUTHORIZE_CAPTURE === S::s()->actionDesired($this->o()->getCustomerId());
-	}
+	private function isCaptureDesired() {return
+		M::ACTION_AUTHORIZE_CAPTURE === S::s()->actionDesired($this->o()->getCustomerId())
+	;}
 
 	/**
 	 * 2016-04-23
@@ -507,12 +530,9 @@ class Method extends \Df\Payment\Method {
 	 * 2016-05-15
 	 * @return Response
 	 */
-	private function r() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = Response::sp($this->response(), $this->o());
-		}
-		return $this->{__METHOD__};
-	}
+	private function r() {return dfc($this, function() {return
+		Response::sp($this->response(), $this->o())
+	;});}
 
 	/**
 	 * 2016-05-08
@@ -526,45 +546,37 @@ class Method extends \Df\Payment\Method {
 		}
 	 * @return string|null
 	 */
-	private function redirectUrl() {
-		if (!isset($this->{__METHOD__})) {
-			/** @var string|null $result */
-			$result = $this->r()->a('redirectUrl');
-			if ($result) {
-				/**
-				 * 2016-05-07
-				 * If a 3D-Secure validation is needed,
-				 * then $response->getId() returns a token (see a sample response above),
-				 * not the transaction's ID.
-				 * In this case, we postpone creating a Magento transaction yet,
-				 * so we do not call $payment->setTransactionId($response->getId());
-				 */
-				$this->iiaSet(PlaceOrder::DATA, $result);
-				/**
-				 * 2016-05-06
-				 * Postpone sending an order confirmation email to the customer,
-				 * because the customer should pass 3D-Secure validation first.
-				 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
-				 */
-				$this->o()->setCanSendNewEmailFlag(false);
-			}
-			$this->{__METHOD__} = df_n_set($result);
+	private function redirectUrl() {return dfc($this, function() {
+		/** @var string|null $result */
+		$result = $this->r()->a('redirectUrl');
+		if ($result) {
+			/**
+			 * 2016-05-07
+			 * If a 3D-Secure validation is needed,
+			 * then $response->getId() returns a token (see a sample response above),
+			 * not the transaction's ID.
+			 * In this case, we postpone creating a Magento transaction yet,
+			 * so we do not call $payment->setTransactionId($response->getId());
+			 */
+			$this->iiaSet(PlaceOrder::DATA, $result);
+			/**
+			 * 2016-05-06
+			 * Postpone sending an order confirmation email to the customer,
+			 * because the customer should pass 3D-Secure validation first.
+			 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
+			 */
+			$this->o()->setCanSendNewEmailFlag(false);
 		}
-		return df_n_get($this->{__METHOD__});
-	}
+		return $result;
+	});}
 
 	/**
 	 * 2016-08-21
 	 * @return array(string => mixed)
 	 */
-	private function request() {
-		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = Charge::build(
-				$this, $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
-			);
-		}
-		return $this->{__METHOD__};
-	}
+	private function request() {return dfc($this, function() {return
+		Charge::build($this, $this->iia(self::$TOKEN), $this->isCaptureDesired())
+	;});}
 
 	/**
 	 * 2016-05-07
@@ -611,52 +623,4 @@ class Method extends \Df\Payment\Method {
 	 * @var string
 	 */
 	private static $TOKEN = 'token';
-
-	/**
-	 * 2016-04-21
-	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
-	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
-	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
-	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
-	 * Divide all other currencies into 100 units
-	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
-	 * @param $payment II|I|OP
-	 * @param float $amount
-	 * @return int
-	 */
-	public static function amount(II $payment, $amount) {
-		return ceil($amount * self::amountFactor($payment));
-	}
-
-	/**
-	 * @param $payment II|I|OP
-	 * @param int $amount
-	 * @return float
-	 */
-	public static function amountReverse(II $payment, $amount) {
-		return $amount / self::amountFactor($payment);
-	}
-
-	/**
-	 * 2016-05-06
-	 * @param $payment II|I|OP
-	 * @return int
-	 */
-	private static function amountFactor(II $payment) {
-		/**
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#divide-value-by-1000
-		 * @var string[] $m1000
-		 */
-		static $m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
-		/**
-		 * 2016-08-17
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#full-value
-		 */
-		static $m1 = ['BYR', 'BIF', 'DJF', 'GNF', 'KMF', 'XAF', 'CLF', 'XPF'
-			, 'JPY', 'PYG', 'RWF', 'KRW', 'VUV', 'VND', 'XOF'];
-		/** @var string $code */
-		$code = $payment->getOrder()->getOrderCurrencyCode();
-		return in_array($code, $m1000) ? 1000 : (in_array($code, $m1) ? 1 : 100);
-	}
 }

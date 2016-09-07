@@ -21,9 +21,11 @@ define ([
 			,'63': 'Security Violation'
 		})[this.amountLast2()];
 		return !message ? '' : df.t(
-			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount ends with «<b>{last2}</b>».'
+			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount (<b>{amount}</b>) in the payment currency (<b>{currency}</b>) ends with «<b>{last2}</b>».'
 			,{
-				last2: last2
+				amount: this.amountPF()
+				,currency: this.paymentCurrency().name
+				,last2: this.amountLast2()
 				,message: message
 				,url: 'http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes'
 			}

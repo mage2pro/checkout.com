@@ -24,7 +24,7 @@ abstract class Handler extends \Df\Core\O {
 	 */
 	protected function o($path = null) {
 		// 2016-03-25
-		// A null-value could ne a key of a PHP array: https://3v4l.org/hWmWC
+		// A null-value could be a key of a PHP array: https://3v4l.org/hWmWC
 		if (!isset($this->{__METHOD__}[$path])) {
 			/** @var string|mixed $result */
 			$result = dfa_deep($this->_data, 'message');
@@ -47,9 +47,9 @@ abstract class Handler extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return bool
 	 */
-	private function isInitiatedByMyself() {
-		return in_array($this->type(), df_csv_parse($this->o('metadata/' . Method::DISABLED_EVENTS)));
-	}
+	private function isInitiatedByMyself() {return
+		in_array($this->type(), df_csv_parse($this->o('metadata/' . Method::DISABLED_EVENTS)))
+	;}
 
 	/**
 	 * 2016-03-25

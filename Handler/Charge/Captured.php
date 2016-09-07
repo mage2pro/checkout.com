@@ -3,12 +3,10 @@ namespace Dfe\CheckoutCom\Handler\Charge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Dfe\CheckoutCom\Handler\Charge;
-use Dfe\CheckoutCom\Method;
 use Magento\Framework\DB\Transaction;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
-use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\InvoiceService;
 // 2016-05-10
 // charge.captured
