@@ -37,6 +37,24 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
+	 * 2016-09-07
+	 * @override
+	 * @see \Df\Payment\Method::amountFormat()
+	 * @param float $amount
+	 * @return int
+	 */
+	public function amountFormat($amount) {return ceil($amount * $this->amountFactor());}
+
+	/**
+	 * 2016-09-08
+	 * @override
+	 * @see \Df\Payment\Method::amountParse()
+	 * @param float|int|string $amount
+	 * @return float
+	 */
+	public function amountParse($amount) {return parent::amountParse($amount / $this->amountFactor());}
+
+	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::canCapture()
@@ -143,31 +161,6 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-09-07
-	 * Конвертирует денежную величину (в валюте платежа) из обычного числа в формат платёжной системы.
-	 * В частности, некоторые платёжные системы хотят денежные величины в копейках (Checkout.com),
-	 * обязательно целыми (allPay) и т.п.
-	 *
-	 * 2016-04-21
-	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
-	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
-	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
-	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
-	 * Divide all other currencies into 100 units
-	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
-	 *
-	 * @override
-	 * @see \Df\Payment\Method::formatAmount()
-	 * @used-by \Df\Payment\Operation::formatAmount()
-	 * @used-by _refund()
-	 * @used-by capturePreauthorized()
-	 * @param float $amount
-	 * @return int
-	 */
-	public function formatAmount($amount) {return ceil($amount * $this->amountFactor());}
-
-	/**
 	 * @override
 	 * @see \Df\Payment\Method::getConfigPaymentAction()
 	 * @return string
@@ -231,7 +224,7 @@ class Method extends \Df\Payment\Method {
 		 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 		 */
 		$refund->setChargeId($this->ii()->getRefundTransactionId());
-		$refund->setValue($this->formatAmount($amount));
+		$refund->setValue($this->amountFormat($amount));
 		$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
 		/** @var ChargeResponse $response */
 		$response = $this->api()->refundCardChargeRequest($refund);
@@ -391,6 +384,16 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-06
+	 *
+	 * 2016-04-21
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
+	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
+	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
+	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
+	 * Divide all other currencies into 100 units
+	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
+	 *
 	 * @return int
 	 */
 	private function amountFactor() {return dfc($this, function() {
@@ -435,7 +438,7 @@ class Method extends \Df\Payment\Method {
 			 * If not specified, the default is authorisation charge amount.»
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
-			$capture->setValue($this->formatAmount($amount));
+			$capture->setValue($this->amountFormat($amount));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
