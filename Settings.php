@@ -111,6 +111,22 @@ class Settings extends \Df\Payment\Settings {
 	}
 
 	/**
+	 * 2016-10-06
+	 * @return string
+	 */
+	public function amexPublishableKey() {
+		return $this->test() ? $this->amexTestPublishableKey() : $this->amexLivePublishableKey();
+	}
+
+	/**
+	 * 2016-10-06
+	 * @return string
+	 */
+	public function amexSecretKey() {
+		return $this->test() ? $this->amexTestSecretKey() : $this->amexLiveSecretKey();
+	}
+
+	/**
 	 * 2016-03-14
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
 	 * @return string[]
@@ -172,6 +188,34 @@ class Settings extends \Df\Payment\Settings {
 	 * @return string
 	 */
 	private function testSecretKey() {return $this->p(__FUNCTION__);}
+
+	/**
+	 * 2016-10-06
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Publishable Key»
+	 * @return string
+	 */
+	private function amexLivePublishableKey() {return $this->v(__FUNCTION__);}
+
+	/**
+	 * 2016-10-06
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Secret Key»
+	 * @return string
+	 */
+	private function amexLiveSecretKey() {return $this->p(__FUNCTION__);}
+
+	/**
+	 * 2016-10-06
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Publishable Key»
+	 * @return string
+	 */
+	private function amexTestPublishableKey() {return $this->v(__FUNCTION__);}
+
+	/**
+	 * 2016-10-06
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Secret Key»
+	 * @return string
+	 */
+	private function amexTestSecretKey() {return $this->p(__FUNCTION__);}
 }
 
 
