@@ -1,9 +1,9 @@
 ## How to install
 ```
-composer require mage2pro/checkout.com:*
+composer require mage2pro/checkout.com:dev-dev-savecards
 bin/magento setup:upgrade
-bin/magento setup:static-content:deploy
-bin/magento setup:di:compile
+rm -rf pub/static/* && bin/magento setup:static-content:deploy
+rm -rf var/di && rm -rf var/generation && bin/magento setup:di:compile
 ```
 
 ## Support
