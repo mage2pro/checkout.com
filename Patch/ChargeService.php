@@ -13,25 +13,32 @@ use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as CCar
 use com\checkout\ApiServices\Charges\RequestModels\CardIdChargeCreate as CCardIdChargeCreate;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as Response;
 use com\checkout\helpers\ApiHttpClient;
+use Dfe\CheckoutCom\Settings as S;
 class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
-	/**
-	 * 2016-05-08
-	 * @override
-	 * @see \com\checkout\ApiServices\Charges\ChargeService::chargeWithCardToken()
-	 * @param CCardTokenChargeCreate $requestModel
-	 * @return Response
-	 */
-	public function chargeWithCardToken(CCardTokenChargeCreate $requestModel) {
-		return new Response(ApiHttpClient::postRequest(
-			$this->_apiUrl->getCardTokensApiUri()
-			, $this->_apiSetting->getSecretKey()
-			, [
-				'authorization' => $this->_apiSetting->getSecretKey(),
-				'mode' => $this->_apiSetting->getMode(),
-				'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
-			]
-		));
-	}
+    /**
+     * 2016-05-08
+     * @override
+     * @see \com\checkout\ApiServices\Charges\ChargeService::chargeWithCardToken()
+     * @param CCardTokenChargeCreate $requestModel
+     * @return Response
+     */
+    public function chargeWithCardToken(CCardTokenChargeCreate $requestModel, $isAmex = 0) {
+        if ($isAmex) {
+            $secretKey = S::s()->amexSecretKey();
+        }
+        else {
+            $secretKey = $this->_apiSetting->getSecretKey();
+        }
+        return new Response(ApiHttpClient::postRequest(
+            $this->_apiUrl->getCardTokensApiUri()
+            , $secretKey
+            , [
+                'authorization' => $secretKey,
+                'mode' => $this->_apiSetting->getMode(),
+                'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
+            ]
+        ));
+    }
 
 
     /**
@@ -41,12 +48,18 @@ class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
      * @param CCardIdChargeCreate $requestModel
      * @return Response
      */
-    public function chargeWithCardId(CCardIdChargeCreate $requestModel) {
+    public function chargeWithCardId(CCardIdChargeCreate $requestModel, $isAmex = 0) {
+        if ($isAmex) {
+            $secretKey = S::s()->amexSecretKey();
+        }
+        else {
+            $secretKey = $this->_apiSetting->getSecretKey();
+        }
         return new Response(ApiHttpClient::postRequest(
             $this->_apiUrl->getCardChargesApiUri()
-            , $this->_apiSetting->getSecretKey()
+            , $secretKey
             , [
-                'authorization' => $this->_apiSetting->getSecretKey(),
+                'authorization' => $secretKey,
                 'mode' => $this->_apiSetting->getMode(),
                 'postedParam'   => (new ChargesMapper($requestModel))->requestPayloadConverter()
             ]
@@ -54,5 +67,3 @@ class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
     }
 
 }
-
-

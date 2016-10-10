@@ -392,7 +392,7 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return ChargeService
 	 */
-	private function api() {return S::s()->apiCharge();}
+	private function api() {return S::s()->apiCharge($this->getInfoInstance()->getAdditionalInformation('isCardAmex'));}
 
 	/**
 	 * 2016-05-11
@@ -523,7 +523,7 @@ class Method extends \Df\Payment\Method {
              */
 
 			if ($paymentSource == 'token' && $saveCardForCustomer) {
-                $this->_helper->saveCheckoutComCustomer($response->getEmail(), $card->getCustomerId(), $card->getLast4(), $card->getId());
+                $this->_helper->saveCheckoutComCustomer($response->getEmail(), $card->getCustomerId(), $card->getLast4(), $card->getId(), $card->getPaymentMethod());
 			}
 
 			if ($this->r()->flagged()) {
@@ -680,14 +680,14 @@ class Method extends \Df\Payment\Method {
             $this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardId(ChargeWithCardId::build(
 				$this->ii(), $this->getInfoInstance()->getAdditionalInformation('checkoutComSelectedCardId'), $this->_amount(), $this->isCaptureDesired()
-			));
+			), $this->getInfoInstance()->getAdditionalInformation('isCardAmex'));
 		});
 
 		}
 		elseif (!isset($this->_response)) {$this->_response = self::leh(function() {
 			return $this->api()->chargeWithCardToken(Charge::build(
 				$this->ii(), $this->iia(self::$TOKEN), $this->_amount(), $this->isCaptureDesired()
-			));
+			), $this->getInfoInstance()->getAdditionalInformation('isCardAmex'));
 		});}
 		return $this->_response;
 	}
@@ -796,6 +796,7 @@ class Method extends \Df\Payment\Method {
 
         $infoInstance->setAdditionalInformation('paymentSource', $additionalInfo['paymentSource']);
 		$infoInstance->setAdditionalInformation('saveCardForCustomer', $additionalInfo['saveCardForCustomer']);
+		$infoInstance->setAdditionalInformation('isCardAmex', $additionalInfo['isCardAmex']);
 
 		return $this;
 	}

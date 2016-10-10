@@ -34,6 +34,7 @@ class ConfigProvider implements ConfigProviderInterface {
 			'isActive' => S::s()->enable()
 			,'prefill' => S::s()->prefill()
 			,'publishableKey' => S::s()->publishableKey()
+			,'amexPublishableKey' => S::s()->amexPublishableKey()
 			,'isTest' => S::s()->test()
 			,'saved_cards' => $this->getSavedCards()
 		]]];
@@ -56,6 +57,7 @@ class ConfigProvider implements ConfigProviderInterface {
 					array(
 						'checkoutcom_customer_id' => $card->getData('checkoutcom_customer_id'),
                         'checkoutcom_card_id' => $card->getData('checkoutcom_card_id'),
+                        'checkoutcom_card_type' => $card->getData('checkoutcom_card_type'),
 						'last4' => '****'.$card->getData('last4'),
 					)
 				);

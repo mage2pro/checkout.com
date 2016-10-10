@@ -101,6 +101,12 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     ['nullable' => false],
                     'Checkout.com Card ID'
                 )->addColumn(
+                    'checkoutcom_card_type',
+                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    null,
+                    ['nullable' => false],
+                    'Checkout.com Card Type'
+                )->addColumn(
                     'last4',
                     \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
                     null,

@@ -19,11 +19,18 @@ class Settings extends \Df\Payment\Settings {
 	 * 2016-05-05
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+     * @param bool $isAmex
 	 * @return API
 	 */
-	public function api() {
+	public function api($isAmex = 0) {
 		if (!isset($this->{__METHOD__})) {
-			$this->{__METHOD__} = new API($this->secretKey(), $this->test() ? 'sandbox' : 'live');
+            if ($isAmex) {
+                $secretKey = $this->amexSecretKey();
+            }
+            else {
+                $secretKey = $this->secretKey();
+            }
+			$this->{__METHOD__} = new API($secretKey, $this->test() ? 'sandbox' : 'live');
 		}
 		return $this->{__METHOD__};
 	}
@@ -34,7 +41,7 @@ class Settings extends \Df\Payment\Settings {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return ChargeService
 	 */
-	public function apiCharge() {return $this->api()->chargeService();}
+	public function apiCharge($isAmex = 0) {return $this->api($isAmex)->chargeService();}
 
 	/**
 	 * 2016-03-09

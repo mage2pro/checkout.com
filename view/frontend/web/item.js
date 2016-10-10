@@ -1,6 +1,6 @@
 define (
     [
-        'Magento_Payment/js/view/payment/cc-form',
+        'Df_Payment/js/view/payment/cc-form',
         'ko',
         'jquery',
         'df',
@@ -9,12 +9,12 @@ define (
         'underscore',
         'Df_Checkout/js/action/place-order',
         'Magento_Checkout/js/model/payment/additional-validators',
-        'Magento_Checkout/js/view/payment/default',
+        'Magento_Checkout/js/model/quote',
+        'Df_Checkout/js/action/redirect-on-success',
         'Magento_Checkout/js/action/set-payment-information',
         'Magento_Checkout/js/action/select-payment-method',
         'Magento_Checkout/js/checkout-data',
-        'Magento_Checkout/js/model/full-screen-loader',
-        'Df_Checkout/js/action/redirect-on-success'
+        'Magento_Checkout/js/model/full-screen-loader'
     ],
     function(
         Component,
@@ -26,6 +26,7 @@ define (
         _,
         placeOrderAction,
         additionalValidators,
+        quote,
         redirectOnSuccessAction,
         setPaymentInformationAction,
         selectPaymentMethodAction,
@@ -46,7 +47,9 @@ define (
 			checkoutComSelectedCardId:null,
 			saveCardForCustomer:false,
 			savedCards:null,
-            isNewCardSelected:null
+            isNewCardSelected:null,
+            isCardAmex:false,
+            isSavedCardAmex:false
 		},
 
 		/**
@@ -61,7 +64,9 @@ define (
 					'paymentSource',
 					'checkoutComSelectedCardId',
 					'saveCardForCustomer',
-                    'isNewCardSelected'
+                    'isNewCardSelected',
+                    'isCardAmex',
+                    'isSavedCardAmex'
 				]);
 
 			return this;
@@ -161,7 +166,9 @@ define (
 					// cardNumber:this.cardNumber,
 					'paymentSource':this.paymentSource(),
 					'checkoutComSelectedCardId':this.checkoutComSelectedCardId(),
-					'saveCardForCustomer': this.saveCardForCustomer()
+					'saveCardForCustomer': this.saveCardForCustomer(),
+                    'isCardAmex': this.isCardAmex,
+                    'isSavedCardAmex': this.isSavedCardAmex
 				},
 				'method': this.item.method
 			};
@@ -176,6 +183,12 @@ define (
             $('.add-new-card-module').hide();
             this.isNewCardSelected = false;
 
+            if (element == "Amex") {
+                this.isSavedCardAmex = true;
+            }
+            else {
+                this.isSavedCardAmex = false;
+            }
             this.checkoutComSelectedCardId($('input[name=checkoutcom-card-payment]:checked').val());
 		},
         
@@ -187,8 +200,10 @@ define (
             $("input[name=checkoutcom-card-payment]").prop("checked",false);
             $('.add-new-card-module').show();
 
-            if($('.new-card-selected').is(':checked'))
+            if($('.new-card-selected').is(':checked')) {
                 this.isNewCardSelected = true;
+                this.isSavedCardAmex = false;
+            }
             else
                 this.isNewCardSelected = false;
 
@@ -349,6 +364,18 @@ define (
 			var self = this ,
                 pay ;
 			var _this = this;
+            var $form = $('form.dfe-checkout-com');
+            if (self.isSavedCardAmex) {
+                self.isCardAmex = true;
+            }
+			else if (($('[data="card-number"]', $form).val()).charAt(0) == "3") {
+                CheckoutKit.setPublicKey(this.config('amexPublishableKey'));
+                self.isCardAmex = true;
+            }
+            else {
+                CheckoutKit.setPublicKey(this.config('publishableKey'));
+                self.isCardAmex = false;
+            }
 			if (this.validate()) {
                 if (this.isNewCardSelected) {
                     this.initDf().done(function () {

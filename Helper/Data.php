@@ -114,7 +114,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return string Checkout.com customer id
      */
-    public function saveCheckoutComCustomer($email, $checkoutComCustomerId, $last4, $card_id)
+    public function saveCheckoutComCustomer($email, $checkoutComCustomerId, $last4, $card_id, $card_type)
     {
         if ($this->_customerSession->isLoggedIn()) {
             $savedCards = $this->getSavedCards();
@@ -134,6 +134,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     'website_id' => $this->_storeManager->getStore()->getWebsiteId(),
                     'store_id' => $this->_storeManager->getStore()->getId(),
                     'checkoutcom_card_id' => $card_id,
+                    'checkoutcom_card_type' => $card_type,
                 ];
                 try {
                     $model = $this->_objectManager
