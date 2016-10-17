@@ -1,6 +1,6 @@
 ## How to install
 ```
-composer require mage2pro/checkout.com:*
+composer require magento2/checkout.com:*
 bin/magento setup:upgrade
 rm -rf pub/static/* && bin/magento setup:static-content:deploy
 rm -rf var/di && rm -rf var/generation && bin/magento setup:di:compile
