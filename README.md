@@ -3,7 +3,7 @@
 composer require magento2/checkout.com:*
 bin/magento setup:upgrade
 rm -rf pub/static/* && bin/magento setup:static-content:deploy
-rm -rf var/di && rm -rf var/generation && bin/magento setup:di:compile
+rm -rf var/di var/generation && bin/magento setup:di:compile
 ```
 
 ## Support
