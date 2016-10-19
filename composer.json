@@ -1,19 +1,25 @@
 {
-	"name": "mage2pro/checkout.com"
+	"name": "magento2/checkout.com"
 	,"version": "1.0.33.2"
 	,"description": "The «Checkout.com» payment extension."
 	,"type": "magento2-module"
-	,"homepage": "https://mage2.pro/c/extensions/checkout-com"
+	,"homepage": "https://www.checkout.com/"
 	,"license": "The MIT License (MIT)"
 	,"authors": [{
 		"name": "Dmitry Fedyuk",
 		"email": "admin@mage2.pro",
 		"homepage": "https://mage2.pro/users/dmitry_fedyuk",
 		"role": "Developer"
+	},
+	{
+		"name": "Nicolas Maalouf",
+		"email": "nicolas.maalouf@checkout.com",
+		"homepage": "https://www.checkout.com/",
+		"role": "Developer"
 	}]
 	,"require": {
-		"mage2pro/core": "^1.4.28"
-		, "checkout/checkout-php-api": "^1.2.3"
+		"mage2pro/core": "1.4.28"
+		, "checkout/checkout-php-api": "1.2.4"
 		, "giggsey/libphonenumber-for-php": "7.*"
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
