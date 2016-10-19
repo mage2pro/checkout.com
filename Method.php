@@ -603,8 +603,8 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-02-29
-	 * @used-by mage2pro/checkout.com/etc/di.xml
-	 * @used-by mage2pro/checkout.com/etc/frontend/di.xml
+	 * @used-by magento2/checkout.com/etc/di.xml
+	 * @used-by magento2/checkout.com/etc/frontend/di.xml
 	 * @used-by \Df\Payment\Method::codeS()
 	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */
