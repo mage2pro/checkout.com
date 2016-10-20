@@ -18,7 +18,7 @@
 		"role": "Developer"
 	}]
 	,"require": {
-		"mage2pro/core": "1.7.25"
+		"mage2pro/core": "1.4.29"
 		, "checkout/checkout-php-api": "1.2.4"
 		, "giggsey/libphonenumber-for-php": "7.*"
 	}
