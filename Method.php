@@ -796,8 +796,13 @@ class Method extends \Df\Payment\Method {
 
         $infoInstance->setAdditionalInformation('paymentSource', $additionalInfo['paymentSource']);
 		$infoInstance->setAdditionalInformation('saveCardForCustomer', $additionalInfo['saveCardForCustomer']);
-		$infoInstance->setAdditionalInformation('isCardAmex', $additionalInfo['isCardAmex']);
 
-		return $this;
+        if (isset($additionalInfo['isCardAmex'])) {
+            $infoInstance->setAdditionalInformation('isCardAmex', $additionalInfo['isCardAmex']);
+        } else {
+            $infoInstance->setAdditionalInformation('isCardAmex', false);
+        }
+
+        return $this;
 	}
 }
