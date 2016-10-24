@@ -103,7 +103,7 @@ class Response extends \Df\Core\O {
 	/**
 	 * 2016-08-05
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @used-by \Dfe\CheckoutCom\Response::messageForCustomer()
+	 * @used-by \Dfe\CheckoutCom\Response::messageC()
 	 * @return bool
 	 */
 	public function hasId() {return !!$this->a('id');}
@@ -157,11 +157,11 @@ class Response extends \Df\Core\O {
 
 	/**
 	 * 2016-07-17
-	 * @used-by \Dfe\CheckoutCom\Exception::messageForCustomer()
+	 * @used-by \Dfe\CheckoutCom\Exception::messageC()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	public function messageForCustomer() {return dfc($this, function() {
+	public function messageC() {return dfc($this, function() {
 		/** @var string $result */
 		if (!$this->hasId()) {
 			$result = __(
