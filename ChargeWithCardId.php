@@ -390,7 +390,7 @@ class ChargeWithCardId extends \Df\Payment\Charge {
 		,'magento_version' => df_magento_version()
 		// 2016-06-26
 		// The version of the your Magento/Checkout plugin the merchant is using
-		,'plugin_version' => df_package_version('mage2pro/checkout.com')
+		,'plugin_version' => df_package_version('magento2/checkout.com')
 		// 2016-06-25
 		// The version of our PHP core library (if you are using the our PHP core library)
 		,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION

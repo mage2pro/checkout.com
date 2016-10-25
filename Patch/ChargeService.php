@@ -6,7 +6,7 @@ namespace Dfe\CheckoutCom\Patch;
  * Magento 2 compiler (bin/magento setup:di:compile) failure:
  * «Fatal error: Cannot use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate
  * as CardTokenChargeCreate because the name is already in use
- * in vendor/mage2pro/checkout.com/Patch/ChargeService.php on line 3»
+ * in vendor/magento2/checkout.com/Patch/ChargeService.php on line 3»
  * http://stackoverflow.com/questions/17746481
  */
 use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as CCardTokenChargeCreate;

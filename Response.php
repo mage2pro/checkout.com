@@ -5,7 +5,7 @@ namespace Dfe\CheckoutCom;
  * I renamed it to get rid of the following
  * Magento 2 compiler (bin/magento setup:di:compile) failure:
  * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
- * because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
+ * because the name is already in use in vendor/magento2/checkout.com/Response.php on line 4»
  * http://stackoverflow.com/questions/17746481
  */
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
