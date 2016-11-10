@@ -7,7 +7,7 @@ define ([
 	 * 2016-07-16
 	 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#response-codes
 	 * @override
-	 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
+	 * @see mage2pro/core/Payment/view/frontend/web/mixin.js
 	 * @returns {String}
 	 */
 	debugMessage: df.c(function() {
@@ -51,16 +51,6 @@ define ([
 		// 2016-04-14
 		// http://docs.checkout.com/getting-started/checkoutkit-js
 		this.initDf();
-		// 2016-03-09
-		// «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?
-		/** @type {String|Boolean} */
-		var prefill = this.config('prefill');
-		if ($.isPlainObject(prefill)) {
-			this.creditCardNumber(prefill['number']);
-			this.creditCardExpMonth(prefill['expiration-month']);
-			this.creditCardExpYear(prefill['expiration-year']);
-			this.creditCardVerificationNumber(prefill['cvv']);
-		}
 		return this;
 	},
 	/**
@@ -101,7 +91,7 @@ define ([
 	/**
 	 * 2016-08-06
 	 * @override
-	 * @see mage2pro/core/Payment/view/frontend/web/js/view/payment/mixin.js
+	 * @see mage2pro/core/Payment/view/frontend/web/mixin.js
 	 * @used-by placeOrderInternal()
 	 */
 	onSuccess: function(redirectUrl) {
@@ -183,5 +173,20 @@ define ([
 				});
 			});
 		}
-	}
+	},
+	/**
+	 * 2016-11-10
+	 * @override
+	 * @see mage2pro/core/Payment/view/frontend/web/card.js
+	 * @used-by card.js::initialize()
+	 * @param {*} d 
+	 */
+	prefill: function(d) {
+		if ($.isPlainObject(d)) {
+			this.creditCardNumber(d['number']);
+			this.creditCardExpMonth(d['expiration-month']);
+			this.creditCardExpYear(d['expiration-year']);
+			this.creditCardVerificationNumber(d['cvv']);
+		}
+	},		
 });});

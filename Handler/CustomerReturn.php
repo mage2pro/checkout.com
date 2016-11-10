@@ -147,8 +147,7 @@ class CustomerReturn {
 	 */
 	private static function action(Order $order, Payment $payment, CCharge $charge, $action) {
 		/** @var Method $method */
-		$method = $payment->getMethodInstance();
-		df_assert_is(Method::class, $method);
+		$method = df_ar($payment->getMethodInstance(), Method::class);
 		$method->setStore($order->getStoreId());
 		if (M::ACTION_AUTHORIZE === $action) {
 			/**

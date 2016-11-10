@@ -73,7 +73,10 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	public function force3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
-	 * 2016-03-09
+	 * 2016-03-09  
+	 * @override
+	 * @see \Df\Payment\Settings\BankCard::prefill()
+	 * @used-by \Df\Payment\ConfigProvider\BankCard::config()
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Prefill the Payment Form with Test Data?»
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()
 	 * @return array(string => string)|null
