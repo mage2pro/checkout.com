@@ -1,4 +1,4 @@
-define ([
+define([
 	'df'
 	,'Df_Payment/card'
 	,'jquery'
@@ -38,7 +38,7 @@ define ([
 	getCardTypes: function() {return ['VI', 'MC', 'AE'];},
 	/**
 	 * 2016-03-02
-	 * @return {Object}
+	 * @returns {Object}
 	*/
 	initialize: function() {
 		this._super();
@@ -55,7 +55,7 @@ define ([
 	},
 	/**
 	 * 2016-03-08
-	 * @return {Promise}
+	 * @returns {Promise}
 	*/
 	initDf: df.c(function() {
 		/** @type {Deferred} */
