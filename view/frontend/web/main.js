@@ -137,10 +137,10 @@ define([
 				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
 				 */
 				CheckoutKit.createCardToken({
-					cvv: _this.dfCardVerification()
-					,expiryMonth: _this.dfCardExpirationMonth()
-					,expiryYear: _this.dfCardExpirationYear()
-					,number: _this.dfCardNumber()
+					cvv: _this.creditCardVerificationNumber()
+					,expiryMonth: _this.creditCardExpMonth()
+					,expiryYear: _this.creditCardExpYear()
+					,number: _this.creditCardNumber()
 					/**
 					 * 2016-04-14
 					 * «Charges Required-Field Matrix»
