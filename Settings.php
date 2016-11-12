@@ -5,14 +5,14 @@ use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
 /** @method static Settings s() */
-final class Settings extends \Df\Payment\Settings\BankCard {
+final class Settings extends \Df\Payment\Settings\StripeClone {
 	/**
 	 * 2016-05-15
 	 * @param int $customerId
 	 * @return string
 	 */
 	public function actionDesired($customerId) {return
-		df_customer_is_new($customerId) ? $this->actionForNew() : $this->actionForReturned()
+		$this->v(df_customer_is_new($customerId) ? 'actionForNew' : 'actionForReturned')
 	;}
 
 	/**
@@ -87,13 +87,7 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * 2016-03-02
 	 * @return string
 	 */
-	public function publishableKey() {return $this->testable();}
-
-	/**
-	 * 2016-03-02
-	 * @return string
-	 */
-	public function secretKey() {return $this->testable();}
+	public function secretKey() {return $this->testableP();}
 
 	/**
 	 * 2016-03-14
@@ -108,46 +102,4 @@ final class Settings extends \Df\Payment\Settings\BankCard {
 	 * @return bool
 	 */
 	public function waitForCapture() {return $this->b();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Publishable Key»
-	 * @return string
-	 */
-	protected function livePublishableKey() {return $this->v();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Live Secret Key»
-	 * @return string
-	 */
-	protected function liveSecretKey() {return $this->p();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Publishable Key»
-	 * @return string
-	 */
-	protected function testPublishableKey() {return $this->v();}
-
-	/**
-	 * 2016-03-02
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Test Secret Key»
-	 * @return string
-	 */
-	protected function testSecretKey() {return $this->p();}
-
-	/**
-	 * 2016-03-15
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a New Customer»
-	 * @return string
-	 */
-	private function actionForNew() {return $this->v();}
-
-	/**
-	 * 2016-03-15
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Payment Action for a Returned Customer»
-	 * @return string
-	 */
-	private function actionForReturned() {return $this->v();}
 }

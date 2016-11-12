@@ -75,7 +75,7 @@ define([
 			 * «The log action will only log messages on the console if debugMode is set to true.»
 			 */
 			debugMode: this.isTest()
-			,publicKey: this.config('publishableKey')
+			,publicKey: this.config('publicKey')
 			,ready: function(event) {deferred.resolve();}
 			,apiError: function(event) {deferred.reject();}
 		};
