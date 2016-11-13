@@ -16,7 +16,7 @@ class Captured extends Charge {
 	 * 2016-03-25
 	 * @override
 	 * Similar to: @see \Magento\Sales\Controller\Adminhtml\Order\Invoice\Save::execute()
-	 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Controller/Adminhtml/Order/Invoice/Save.php#L102-L235
+	 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Controller/Adminhtml/Order/Invoice/Save.php#L102-L235
 	 * How does the backend invoicing work? https://mage2.pro/t/933
 	 * @see \Dfe\CheckoutCom\Handler::_process()
 	 * @used-by \Dfe\CheckoutCom\Handler::process()
@@ -84,7 +84,7 @@ class Captured extends Charge {
 			/**
 			 * 2016-03-26
 			 * @used-by \Magento\Sales\Model\Order\Invoice::register()
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Invoice.php#L599-L609
+			 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Invoice.php#L599-L609
 			 * We use \Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE,
 			 * and not \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
 			 * that was created by the transaction capture.

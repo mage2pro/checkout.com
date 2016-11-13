@@ -314,7 +314,7 @@ class Method extends \Df\Payment\Method {
 			 * Without it, a «void» operation will be unavailable:
 			 * «How is a payment authorization voiding implemented?»
 			 * https://mage2.pro/t/938
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 */
 			$this->ii()->setTransactionId($this->r()->magentoTransactionId());
@@ -331,7 +331,7 @@ class Method extends \Df\Payment\Method {
 			/**
 			 * 2016-03-15
 			 * Without it, a «void» operation will be unavailable:
-			 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
+			 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 * The transaction is considered complete unless «false» is explicitly specified.
 			 */

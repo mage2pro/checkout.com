@@ -99,7 +99,7 @@ define([
 		 * 2016-05-04
 		 * Redirect to do a 3D-Secure verification.
 		 * Similar to: redirectOnSuccessAction.execute()
-		 * https://github.com/magento/magento2/blob/8fd3e8/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
+		 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
 		 *
 		 * 2016-05-09
 		 * If 3D-Secure is not necessary,
