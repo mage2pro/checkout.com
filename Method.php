@@ -37,24 +37,6 @@ class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * 2016-09-07
-	 * @override
-	 * @see \Df\Payment\Method::amountFormat()
-	 * @param float $amount
-	 * @return int
-	 */
-	public function amountFormat($amount) {return ceil($amount * $this->amountFactor());}
-
-	/**
-	 * 2016-09-08
-	 * @override
-	 * @see \Df\Payment\Method::amountParse()
-	 * @param float|int|string $amount
-	 * @return float
-	 */
-	public function amountParse($amount) {return parent::amountParse($amount / $this->amountFactor());}
-
-	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::canCapture()
@@ -285,6 +267,19 @@ class Method extends \Df\Payment\Method {
 	});}
 
 	/**
+	 * 2016-11-13
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount
+	 * @override
+	 * @see \Df\Payment\Method::amountFactorTable()
+	 * @used-by \Df\Payment\Method::amountFactor()
+	 * @return int
+	 */
+	protected function amountFactorTable() {return [
+		1000 => 'BHD,KWD,OMR,JOD', 1 => 'BYR,BIF,DJF,GNF,KMF,XAF,CLF,XPF,JPY,PYG,RWF,KRW,VUV,VND,XOF'
+	];}
+
+	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::charge()
@@ -381,38 +376,6 @@ class Method extends \Df\Payment\Method {
 	 * @return ChargeService
 	 */
 	private function api() {return S::s()->apiCharge();}
-
-	/**
-	 * 2016-05-06
-	 *
-	 * 2016-04-21
-	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-	 * Expressed as a non-zero positive integer (i.e. decimal figures not allowed).
-	 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
-	 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
-	 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
-	 * Divide all other currencies into 100 units
-	 * (e.g. "value = 100" is equivalent to 1 US Dollar).
-	 *
-	 * @return int
-	 */
-	private function amountFactor() {return dfc($this, function() {
-		/**
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#divide-value-by-1000
-		 * @var string[] $m1000
-		 */
-		$m1000 = ['BHD', 'KWD', 'OMR', 'JOD'];
-		/**
-		 * 2016-08-17
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/calculating-charge-amount#full-value
-		 * @var string[] $m1
-		 */
-		$m1 = ['BYR', 'BIF', 'DJF', 'GNF', 'KMF', 'XAF', 'CLF', 'XPF','JPY', 'PYG'
-			,'RWF', 'KRW', 'VUV', 'VND', 'XOF'];
-		/** @var string $c */
-		$c = $this->cPayment();
-		return in_array($c, $m1000) ? 1000 : (in_array($c, $m1) ? 1 : 100);
-	});}
 
 	/**
 	 * 2016-05-11
