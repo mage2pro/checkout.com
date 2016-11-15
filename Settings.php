@@ -34,13 +34,6 @@ final class Settings extends \Df\Payment\Settings\StripeClone {
 	public function apiCharge() {return $this->api()->chargeService();}
 
 	/**
-	 * 2016-03-09
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Description»
-	 * @return string
-	 */
-	public function description() {return $this->v();}
-
-	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D-Secure validation for All Customers?»
 	 * @return bool
