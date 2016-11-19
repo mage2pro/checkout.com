@@ -187,6 +187,7 @@ class Method extends \Df\Payment\Method {
 	 * @todo Use this feature.
 	 * @override
 	 * @see \Df\Payment\Method::_refund()
+	 * @used-by \Df\Payment\Method::refund()
 	 * @param float $amount
 	 * @return void
 	 */
