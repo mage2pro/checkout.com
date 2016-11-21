@@ -80,12 +80,12 @@ define([
 			,apiError: function(event) {deferred.reject();}
 		};
 		/** @type {String} */
-		var library = 'Dfe_CheckoutCom/API/' + (this.isTest() ? 'Sandbox' : 'Production');
-		require.undef(library);
+		var lib = 'https://cdn.checkout.com/' + (this.isTest() ? 'sandbox/' : '') + 'js/checkoutkit.js';
+		require.undef(lib);
 		delete window.CheckoutKit;
 		// 2016-04-11
 		// CheckoutKit не использует AMD и прикрепляет себя к window.
-		require([library], function() {});
+		require([lib], function() {});
 		return deferred.promise();
 	}),
 	/**
