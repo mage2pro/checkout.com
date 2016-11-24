@@ -277,10 +277,10 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 					<label>Failure Message</label>
 					<comment><![CDATA[The failure message will be displayed to the customer on an unsuccessful payment attempt.
 <br/>You can use HTML tags and the following variables in the template: <table class='df-note'><tbody>
-		<tr>
-			<td>{message}</td>
-			<td>A message from Checkout.com.</td>
-		</tr>
+	<tr>
+		<td>{message}</td>
+		<td>A message from Checkout.com.</td>
+	</tr>
 </tbody></table>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
