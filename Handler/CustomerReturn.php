@@ -64,7 +64,7 @@ class CustomerReturn {
 		 * How to get an order programmatically? https://mage2.pro/t/1562
 		 */
 		/** @var ChargeService $api */
-		$api = S::s()->apiCharge($order->getStore());
+		$api = S::s()->apiCharge($payment->getMethodInstance()->getInfoInstance()->getAdditionalInformation('isCardAmex'));
 		/**
 		 * 2016-05-15
 		 * Even in the case of a request with autoCapture = true,
@@ -92,6 +92,9 @@ class CustomerReturn {
 			 * df_checkout_session()->getLastRealOrder()->cancel()->save();
 			 */
 			$order->cancel();
+			$order->addStatusHistoryComment('Order failed after 3DS Redirection: '.df_dump($r->a([
+					'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
+				])) );
 			$order->save();
 			df_checkout_session()->restoreQuote();
 			// 2016-07-14
