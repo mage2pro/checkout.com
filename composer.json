@@ -1,6 +1,6 @@
 {
 	"name": "magento2/checkout.com"
-	,"version": "1.0.33.3"
+	,"version": "1.0.33.4"
 	,"description": "The «Checkout.com» payment extension."
 	,"type": "magento2-module"
 	,"homepage": "https://www.checkout.com/"
