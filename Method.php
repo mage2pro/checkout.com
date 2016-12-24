@@ -154,7 +154,7 @@ class Method extends \Df\Payment\Method {
 	 * 2016-05-08
 	 * Returns null, if 3D-Secure validation is needed.
 	 * @used-by \Magento\Sales\Model\Order\Payment::place()
-	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
+	 * https://github.com/magento/magento2/blob/2.1.3/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
 	 *
 	 * 2016-05-09
 	 * If Checkout.com marks a payment as «Flagged»,
