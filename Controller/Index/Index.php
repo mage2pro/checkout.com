@@ -6,15 +6,21 @@ use Dfe\CheckoutCom\Handler\CustomerReturn;
 class Index extends \Magento\Framework\App\Action\Action {
 	/**
 	 * 2016-05-05
-	 * There are 2 cases:
-	 * 1) The buyer returns to the store after the 3D-Secure checks.
-	 * 2) Notifications (Webhooks).
+	 * We get here in 2 cases:
+	 * 1) On a customer's return from the 3D Secure verification.
+	 * 2) On a Checkout.com's webhook notification.
 	 * In the first case, a GET request is used and contains the parameter «cko-payment-token».
 	 *
 	 * 2016-05-30
 	 * Checkout.com does not encrypt or sign the webhooks' data.
 	 * Also, it does not require HTTPS protocol for webhooks.
 	 * @todo I think, we need to validate the data using http://developers.checkout.com/docs/server/api-reference/charges/verify-charge
+	 *
+	 * 2016-12-25
+	 * We use the same URL for the both cases (3D Secure and Webhooks),
+	 * because these URLs are need to be set up manually by humans
+	 * (Webhooks — by a store's owner, 3D Secure — by Checkout.com support),
+	 * so we want to make these URLs simplier, shorter, and unified.
 	 *
 	 * @override
 	 * @see \Magento\Framework\App\Action\Action::execute()
