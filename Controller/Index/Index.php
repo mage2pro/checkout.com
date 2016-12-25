@@ -20,7 +20,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * We use the same URL for the both cases (3D Secure and Webhooks),
 	 * because these URLs are need to be set up manually by humans
 	 * (Webhooks — by a store's owner, 3D Secure — by Checkout.com support),
-	 * so we want to make these URLs simplier, shorter, and unified.
+	 * so we want to make these URLs simpler, shorter, and unified.
 	 *
 	 * @override
 	 * @see \Magento\Framework\App\Action\Action::execute()
