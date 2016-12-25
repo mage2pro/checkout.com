@@ -5,7 +5,7 @@ use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
 /** @method static Settings s() */
-final class Settings extends \Df\Payment\Settings\StripeClone {
+final class Settings extends \Df\StripeClone\Settings {
 	/**
 	 * 2016-05-15
 	 * @param int $customerId
