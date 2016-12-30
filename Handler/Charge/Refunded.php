@@ -61,50 +61,10 @@ class Refunded extends Charge {
 	 * @used-by \Dfe\CheckoutCom\Handler::process()
 	 * @return mixed
 	 */
-	protected function process() {
-		/**
-		 * 2016-05-11
-		 * @todo Надо ещё устанавливать присланное в запросе примечание к возврату.
-		 */
-		/** @var CreditmemoService|ICreditmemoService $cmi */
-		$cmi = df_om()->create(ICreditmemoService::class);
-		$cmi->refund($this->cm(), false);
-		/**
-		 * 2016-03-28
-		 * @todo We should send the customer an email notification when refunds are made.
-		 * 2016-05-15
-		 * To note: when refunding from the admin patnel of Magento 2,
-		 * customer doesn't receive an email notification
-		 */
-		return $this->cm()->getId();
-	}
-
-	/**
-	 * 2016-03-27
-	 * @return Creditmemo
-	 */
-	private function cm() {return dfc($this, function() {
-		/** @var CreditmemoLoader $cmLoader */
-		$cmLoader = df_o(CreditmemoLoader::class);
-		$cmLoader->setOrderId($this->order()->getId());
-		$cmLoader->setInvoiceId($this->invoice()->getId());
-		/** @varCreditmemo  $result */
-		$result = $cmLoader->load();
-		df_assert($result);
-		/**
-		 * 2016-03-28
-		 * Important! if not done the order will automatically capture the payment instead of us
-		 * and the flag @see \Dfe\CheckoutCom\Method::WEBHOOK_CASE will be lost
-		 */
-		$result->getOrder()->setData(Order::PAYMENT, $this->payment());
-		return $result;
-	});}
-	
-	/**
-	 * 2016-03-27
-	 * @return Invoice
-	 */
-	private function invoice() {return dfc($this, function() {return
-		df_invoice_by_transaction($this->order(), $this->parentId())
-	;});}	
+	final protected function process() {return
+		dfp_refund(
+			$this->payment()
+			,df_invoice_by_transaction($this->order(), $this->parentId())
+		) ?: 'skipped'
+	;}
 }
