@@ -57,8 +57,8 @@ class Refunded extends Charge {
 	 * @todo While this scenario handles full refunds
 	 * We have to handle partial refunds and not forget about the fractionless currencies.
 	 *
-	 * @see \Dfe\CheckoutCom\Handler::_process()
-	 * @used-by \Dfe\CheckoutCom\Handler::process()
+	 * @see \Dfe\CheckoutCom\Handler::process()
+	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
 	final protected function process() {return

@@ -18,12 +18,14 @@ class Captured extends Charge {
 	 * Similar to: @see \Magento\Sales\Controller\Adminhtml\Order\Invoice\Save::execute()
 	 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Controller/Adminhtml/Order/Invoice/Save.php#L102-L235
 	 * How does the backend invoicing work? https://mage2.pro/t/933
-	 * @see \Dfe\CheckoutCom\Handler::_process()
-	 * @used-by \Dfe\CheckoutCom\Handler::process()
-	 * @return void
+	 * @see \Dfe\CheckoutCom\Handler::process()
+	 * @used-by \Dfe\CheckoutCom\Handler::p()
+	 * @return string|null
 	 * @throws LE
 	 */
 	protected function process() {
+		/** @var string|null $result */
+		$result = null;
 		/**
 		 * 2016-05-11
 		 * The transaction is «Flagged».
@@ -47,20 +49,33 @@ class Captured extends Charge {
 		 * Транзакция находится в состоянии «Authorized».
 		 */
 		else {
+			/**
+			 * 2016-12-30
+			 * Мы не должны считать исключительной ситуацией повторное получение
+			 * ранее уже полученного оповещения.
+			 * В документации к Stripe, например, явно сказано:
+			 * «Webhook endpoints may occasionally receive the same event more than once.
+			 * We advise you to guard against duplicated event receipts
+			 * by making your event processing idempotent.»
+			 * https://stripe.com/docs/webhooks#best-practices
+			 */
 			if (!$this->order()->canInvoice()) {
-				throw new LE(__('The order does not allow an invoice to be created.'));
+				$result = __('The order does not allow an invoice to be created.');
 			}
-			$this->order()->setIsInProcess(true);
-			$this->order()->setCustomerNoteNotify(true);
-			/** @var Transaction $t */
-			$t = df_db_transaction();
-			$t->addObject($this->invoice());
-			$t->addObject($this->order());
-			$t->save();
-			/** @var InvoiceSender $sender */
-			$sender = df_o(InvoiceSender::class);
-			$sender->send($this->invoice());
+			else {
+				$this->order()->setIsInProcess(true);
+				$this->order()->setCustomerNoteNotify(true);
+				/** @var Transaction $t */
+				$t = df_db_transaction();
+				$t->addObject($this->invoice());
+				$t->addObject($this->order());
+				$t->save();
+				/** @var InvoiceSender $sender */
+				$sender = df_o(InvoiceSender::class);
+				$sender->send($this->invoice());
+			}
 		}
+		return $result;
 	}
 
 	/**

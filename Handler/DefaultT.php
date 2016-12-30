@@ -15,8 +15,8 @@ class DefaultT extends Handler {
 	/**
 	 * 2016-03-25
 	 * @override
-	 * @see \Dfe\CheckoutCom\Handler::_process()
-	 * @used-by \Dfe\CheckoutCom\Handler::process()
+	 * @see \Dfe\CheckoutCom\Handler::process()
+	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
 	protected function process() {return "«{$this->type()}» event handling is not implemented.";}
