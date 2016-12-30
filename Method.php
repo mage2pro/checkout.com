@@ -20,23 +20,6 @@ use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
 class Method extends \Df\Payment\Method {
 	/**
-	 * 2016-05-09
-	 * A «Flagged» payment can be handled the same way as an «Authorised» payment:
-	 * we can «capture» or «void» it.
-	 * @override
-	 * @see \Df\Payment\Method::acceptPayment()
-	 * @param II|I|OP $payment
-	 * @return bool
-	 */
-	public function acceptPayment(II $payment) {
-		// 2016-03-15
-		// The obvious $this->charge($payment) is not quite correct,
-		// because an invoice will not be created in this case.
-		$payment->capture();
-		return true;
-	}
-
-	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::canCapture()
