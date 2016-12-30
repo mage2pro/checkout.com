@@ -19,18 +19,15 @@ abstract class Handler extends \Df\Core\O {
 
 	/**
 	 * 2016-05-10
-	 * @param string|null $path
+	 * @param string|null $path [optional]
 	 * @return string|array(string => mixed)
 	 */
 	protected function o($path = null) {
-		// 2016-03-25
-		// A null-value could be a key of a PHP array: https://3v4l.org/hWmWC
-		if (!isset($this->{__METHOD__}[$path])) {
-			/** @var string|mixed $result */
-			$result = dfa_deep($this->_data, 'message');
-			$this->{__METHOD__}[$path] = df_n_set(is_null($path) ? $result : dfa_deep($result, $path));
-		}
-		return df_n_get($this->{__METHOD__}[$path]);
+		/** @var array(string => mixed) $o */
+		$o = dfa($this->_data, 'message');
+		return !$path ? $o : dfc($this, function($path) use($o) {return
+			dfa_deep($o, $path)
+		;}, [$path]);
 	}
 
 	/**
