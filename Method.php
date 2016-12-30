@@ -445,20 +445,14 @@ class Method extends \Df\Payment\Method {
 	 * @throws \Exception
 	 */
 	private function leh(callable $function) {
-		/** @var string|null $label */
-		if (!$this->needLog()) {
-			$label = null;
-		}
-		else {
-			$label = df_caller_m();
-			$this->log($label . ' BEFORE');
-		}
 		/** @var mixed $result */
 		try {$result = $function();}
-		catch (CE $e) {throw new LE(__($e->getErrorMessage()), $e);}
-		catch (\Exception $e) {throw $e;}
-		if ($label) {
-			$this->log($label . ' AFTER');
+		catch (\Exception $e) {
+			if ($e instanceof CE) {
+				$e = new LE(__($e->getErrorMessage()), $e);
+			}
+			df_sentry($e);
+			throw df_le($e);
 		}
 		return $result;
 	}
