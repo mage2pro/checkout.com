@@ -459,19 +459,6 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-15
-	 * @param string $message
-	 * @return void
-	 */
-	private function log($message) {df_log($message);}
-
-	/**
-	 * 2016-05-15
-	 * @return bool
-	 */
-	private function needLog() {return true;}
-
-	/**
-	 * 2016-05-15
 	 * @return Response
 	 */
 	private function r() {return dfc($this, function() {return

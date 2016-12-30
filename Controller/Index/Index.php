@@ -47,26 +47,17 @@ class Index extends \Magento\Framework\App\Action\Action {
 	;}
 
 	/**
-	 * 2016-05-11
-	 * @param mixed $message
-	 * @return void
-	 */
-	private function log($message) {if (!df_my_local()) {df_log($message);}}
-
-	/**
 	 * 2016-05-05
 	 * Processing notifications (Webhooks).
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
 	 * @return Json
 	 */
 	private function webhook() {
-		$this->log(__METHOD__);
-		/** @var string $request */
-		$request = @file_get_contents($this->file());
-		$this->log($request);
-		/** @var string $response */
-		$response = Handler::p(df_json_decode($request));
-		$this->log($response);
-		return Json::i($response);
+		// 2016-12-30
+		// Checkout.com does not pass the «User-Agent» HTTP Header.
+		df_sentry_m()->user_context([
+			'id' => df_is_localhost() ? 'Checkout.com webhook on localhost' : 'Checkout.com'
+		]);
+		return Json::i(Handler::p(df_json_decode(@file_get_contents($this->file()))));
 	}
 }

@@ -49,20 +49,17 @@ class Response extends \Df\Core\O {
 	 * @return array(string => string)
 	 */
 	public function a($key = null) {
-		if (!isset($this->{__METHOD__})) {
-			/**
-			 * 2016-09-07
-			 * @see https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
-			 * @var string $json
-			 */
-			$json = $this->charge()->{'json'};
-			$this->{__METHOD__} = df_json_decode($json);
-			df_log($json);
-		}
-		return is_null($key) ? $this->{__METHOD__} : (
-			is_array($key)
-			? df_clean(dfa_select_ordered($this->{__METHOD__}, $key))
-			: dfa($this->{__METHOD__}, $key)
+		/** @var array(string => string) $result */
+		$result = dfc($this, function() {
+			// 2016-09-07
+			// https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
+			/** @var array(string => string) $result */
+			$result = df_json_decode($this->charge()->{'json'});
+			dfp_report($this, $result, 'response');
+			return $result;
+		});
+		return is_null($key) ? $result : (
+			is_array($key) ? df_clean(dfa_select_ordered($result, $key)) : dfa($result, $key)
 		);
 	}
 

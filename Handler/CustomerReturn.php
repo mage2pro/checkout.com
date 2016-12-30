@@ -78,7 +78,7 @@ class CustomerReturn {
 		 * 2016-09-07
 		 * @see https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 		 */
-		df_log($charge->{'json'});
+		dfp_report(__CLASS__, json_decode($charge->{'json'}), 'customerReturn');
 		/** @var Response $r */
 		$r = Response::sp($charge, $order);
 		/** @var bool $result */

@@ -60,6 +60,7 @@ abstract class Handler extends \Df\Core\O {
 	public static function p(array $request) {
 		/** @var mixed $result */
 		try {
+			dfp_report(__CLASS__, $request, $request['eventType']);
 			/**
 			 * 2016-05-13
 			 * Unlike Stripe, Checkout.com does not use the underline character («_»)
