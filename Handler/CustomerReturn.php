@@ -116,7 +116,47 @@ class CustomerReturn {
 				$payment = $order->getPayment();
 				$payment->unsetData('method_instance');
 				dfp_webhook_case($payment);
-				dfp_trans_id($payment, $captureCharge->getId());
+				/**
+				 * 2017-01-05
+				 * Прежде я думал, что здесь нам ешё нельзя устанавливать свой нестандартный
+				 * идентификатор транзакции, потому что метод
+				 * @see \Magento\Sales\Model\Order\Payment\Operations\CaptureOperation::capture()
+				 * перетрёт наш идентификатор кодом:
+						$payment->setTransactionId(
+							$this->transactionManager->generateTransactionId(
+								$payment,
+								Transaction::TYPE_CAPTURE,
+								$payment->getAuthorizationTransaction()
+							)
+						);
+				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
+				 * Однако мне следовало посмотреть глубже, в реализацию метода
+				 * @see \Magento\Sales\Model\Order\Payment\Transaction\Manager::generateTransactionId()
+				 * чтобы понять, что когда нестандартный идентификатор транзакции уже установлен,
+				 * то метод его не перетирает:
+					if (!$payment->getParentTransactionId()
+						&& !$payment->getTransactionId() && $transactionBasedOn
+					) {
+						$payment->setParentTransactionId($transactionBasedOn->getTxnId());
+					}
+					// generate transaction id for an offline action or payment method that didn't set it
+					if (
+				 		($parentTxnId = $payment->getParentTransactionId())
+				 		&& !$payment->getTransactionId()
+				 	) {
+						return "{$parentTxnId}-{$type}";
+					}
+					return $payment->getTransactionId();
+				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Transaction/Manager.php#L73-L80
+				 * Поэтому никакие обходные манёвры нам не нужны,
+				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
+				 */
+				$payment->setTransactionId($captureCharge->getId());
+				// 2017-01-05
+				// Раньше я этого вообще не делал.
+				// Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
+				// для Magento 2, и я был ещё недостаточно опытен.
+				$payment->setParentTransactionId($charge->getId());
 				/** @var InvoiceService $invoiceService */
 				$invoiceService = df_o(InvoiceService::class);
 				/** @var Invoice|DfInvoice $invoice */
