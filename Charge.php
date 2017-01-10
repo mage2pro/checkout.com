@@ -39,7 +39,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * 2016-05-08
 		 * Since now, the «Track ID» is vital for us,
 		 * because it is used for the payment identification
-		 * when the customer is returned to the store after 3D-Secure verification.
+		 * when the customer is returned to the store after 3D Secure verification.
 		 *
 		 * My previous attempt was $result->setUdf1($this->payment()->getId());
 		 * but it is wrong, because the order does not have ID on its placement,
@@ -53,10 +53,10 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * 2016-05-08 (addition)
 		 * After thinking more deeply I understand,
 		 * that the linking a Checkout.com Charge to Magento Order is not required,
-		 * because an order placement and 3D-Secure verification is done
+		 * because an order placement and 3D Secure verification is done
 		 * in the context of the current customer session,
 		 * and we can get the order information from the session
-		 * on the customer return from 3D-Secure verification.
+		 * on the customer return from 3D Secure verification.
 		 * So we can just call @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
@@ -103,7 +103,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 *
 		 * 2016-05-03
 		 * In the risk settings dashboard
-		 * 3D-Secure is forced for transactions above 150 USD.
+		 * 3D Secure is forced for transactions above 150 USD.
 		 */
 		$result->setChargeMode($this->use3DS() ? 2 : 1);
 		/**
@@ -392,7 +392,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		,'magento_version' => df_magento_version()
 		// 2016-06-26
 		// The version of the your Magento/Checkout plugin the merchant is using
-		,'plugin_version' => df_package_version('magento2/checkout.com')
+		,'plugin_version' => df_package_version($this)
 		// 2016-06-25
 		// The version of our PHP core library (if you are using the our PHP core library)
 		,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION

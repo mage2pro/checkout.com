@@ -53,9 +53,9 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * I have disabled the Review mode, because if Checkout.com wants 3D-Secure,
+	 * I have disabled the Review mode, because if Checkout.com wants 3D Secure,
 	 * the shop can not prevent it, and it will break the Review mode,
-	 * because a shop's administrator is unable to pass 3D-Secure validation
+	 * because a shop's administrator is unable to pass 3D Secure validation
 	 * for a customer's bank card.
 	 *
 	 * 2016-05-09
@@ -135,7 +135,7 @@ class Method extends \Df\Payment\Method {
 	 * but from 2 different code points.
 	 *
 	 * 2016-05-08
-	 * Returns null, if 3D-Secure validation is needed.
+	 * Returns null, if 3D Secure validation is needed.
 	 * @used-by \Magento\Sales\Model\Order\Payment::place()
 	 * https://github.com/magento/magento2/blob/2.1.3/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
 	 *
@@ -467,7 +467,7 @@ class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * A sample response when a 3D-Secure validation is needed:
+	 * A sample response when a 3D Secure validation is needed:
 		{
 			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
 			"liveMode": false,
@@ -483,7 +483,7 @@ class Method extends \Df\Payment\Method {
 		if ($result) {
 			/**
 			 * 2016-05-07
-			 * If a 3D-Secure validation is needed,
+			 * If a 3D Secure validation is needed,
 			 * then $response->getId() returns a token (see a sample response above),
 			 * not the transaction's ID.
 			 * In this case, we postpone creating a Magento transaction yet,
@@ -493,7 +493,7 @@ class Method extends \Df\Payment\Method {
 			/**
 			 * 2016-05-06
 			 * Postpone sending an order confirmation email to the customer,
-			 * because the customer should pass 3D-Secure validation first.
+			 * because the customer should pass 3D Secure validation first.
 			 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
 			 */
 			$this->o()->setCanSendNewEmailFlag(false);

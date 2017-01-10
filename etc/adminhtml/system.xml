@@ -357,10 +357,10 @@ https://mage2.pro/t/329
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for All Customers?</label>
+					<label>Force 3D Secure validation for All Customers?</label>
 					<backend_model>Df\Config\Backend\Checkbox</backend_model>
-					<comment><![CDATA[<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D-Secure validation will be used based on the <a href="https://mage2.pro/t/1611" target='_blank'>risk rules</a> from your Checkout.com account.</li>
-<li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the payments.</li></ul>]]></comment>
+					<comment><![CDATA[<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D Secure validation will be used based on the <a href="https://mage2.pro/t/1611" target='_blank'>risk rules</a> from your Checkout.com account.</li>
+<li>If the option is <b>enabled</b>, then 3D Secure validation will be used for all the payments.</li></ul>]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field
@@ -372,11 +372,11 @@ https://mage2.pro/t/329
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for the New Customers?</label>
+					<label>Force 3D Secure validation for the New Customers?</label>
 					<backend_model>Df\Config\Backend\Checkbox</backend_model>
 					<comment><![CDATA[A customer is regarded as <b>new</b>, if he does not have any order in the «Completed» or «Processing» state.
-<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D-Secure validation will be used based on the <a href="https://mage2.pro/t/1611" target='_blank'>risk rules</a> from your Checkout.com account.</li>
-<li>If the option is <b>enabled</b>, then 3D-Secure validation will be used for all the new customers.</li></ul>]]></comment>
+<ul class='df-note'><li>If the option is <b>disabled</b>, then the 3D Secure validation will be used based on the <a href="https://mage2.pro/t/1611" target='_blank'>risk rules</a> from your Checkout.com account.</li>
+<li>If the option is <b>enabled</b>, then 3D Secure validation will be used for all the new customers.</li></ul>]]></comment>
 					<depends>
 						<field id='enable'>1</field>
 						<field id='force3DS_forAll'>0</field>
@@ -391,7 +391,7 @@ https://mage2.pro/t/329
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for the Particular Shipping Destinations?</label>
+					<label>Force 3D Secure validation for the Particular Shipping Destinations?</label>
 					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
 					<depends>
 						<field id='enable'>1</field>
@@ -430,7 +430,7 @@ https://mage2.pro/t/329
 					showInWebsite='1'
 					showInStore='1'
 				>
-					<label>Force 3D-Secure validation for the Particular Customer Locations (detected by IP Address)?</label>
+					<label>Force 3D Secure validation for the Particular Customer Locations (detected by IP Address)?</label>
 					<source_model>Df\Config\Source\NoWhiteBlack\Specified</source_model>
 					<depends><field id='enable'>1</field></depends>
 				</field>

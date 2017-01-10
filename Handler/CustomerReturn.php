@@ -26,7 +26,7 @@ use Magento\Sales\Model\Service\InvoiceService;
 class CustomerReturn {
 	/**
 	 * 2016-05-05
-	 * Handles a customer return to the store after a 3D-Secure verification
+	 * Handles a customer return to the store after a 3D Secure verification
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
 	 * @param string $token
 	 * @return bool
@@ -34,7 +34,7 @@ class CustomerReturn {
 	public static function p($token) {
 		/**
 		 * 2016-05-08 (дополнение)
-		 * The order placement and the 3D-Secure verification
+		 * The order placement and the 3D Secure verification
 		 * both occur in the user's sessions.
 		 * So we can get the user's last order
 		 * by calling @see \Magento\Checkout\Model\Session::getLastRealOrder()
@@ -53,7 +53,7 @@ class CustomerReturn {
 		 * and @uses \Magento\Sales\Model\Order::getPayment()
 		 * returns the payment from : https://mage2.pro/t/1559
 		 * However in this case, immediately after placing the order 
-		 * and doing the 3D-Secure verification, the payment is only guaranteed
+		 * and doing the 3D Secure verification, the payment is only guaranteed
 		 * after retrieving it 
 		 */
 		/** @var Payment|DfPayment $payment */
@@ -69,7 +69,7 @@ class CustomerReturn {
 		 * Even in the case of a request with autoCapture = true,
 		 * at this point the token still has an Authorize status, and not a Capture status.
 		 * Also, a charge.captured event may be triggered when the user is redirected to the store
-		 * after the 3D-Secure verification.
+		 * after the 3D Secure verification.
 		 * (both cases were observed)
 		 */
 		/** @var CCharge $charge */

@@ -3,7 +3,7 @@ namespace Dfe\CheckoutCom\Source;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 /**
  * 2016-05-08
- * The Review mode is removed, because we are unable to bypass 3D-Secure validation if the payment gateway wants it, and an administration is unable to bypass such validation.
+ * The Review mode is removed, because we are unable to bypass 3D Secure validation if the payment gateway wants it, and an administration is unable to bypass such validation.
  */
 class Action extends \Df\Config\SourceT {
 	/**

@@ -97,12 +97,12 @@ define([
 	onSuccess: function(redirectUrl) {
 		/**
 		 * 2016-05-04
-		 * Redirect to do a 3D-Secure verification.
+		 * Redirect to do a 3D Secure verification.
 		 * Similar to: redirectOnSuccessAction.execute()
 		 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
 		 *
 		 * 2016-05-09
-		 * If 3D-Secure is not necessary,
+		 * If 3D Secure is not necessary,
 		 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
 		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
 		 * which is then converted by
@@ -111,7 +111,7 @@ define([
 		 * «A Web API request returns an empty array for a null response»
 		 * https://mage2.pro/t/1569
 		 *
-		 * When there is no need to do a 3D-Secure verification,
+		 * When there is no need to do a 3D Secure verification,
 		 * the value of redirectUrl will be an empty array.
 		 * So the correct test to be done is: if (redirectUrl),
 		 * and if (redirectUrl.length)
