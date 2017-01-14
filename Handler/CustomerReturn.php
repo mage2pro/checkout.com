@@ -190,10 +190,8 @@ class CustomerReturn {
 		$method = df_ar($payment->getMethodInstance(), Method::class);
 		$method->setStore($order->getStoreId());
 		if (M::ACTION_AUTHORIZE === $action) {
-			/**
-			 * 2016-05-15
-			 * Disable this event because we will trigger Capture manually.
-			 */
+			// 2016-05-15
+			// Disable this event because we will trigger Capture manually.
 			$method->disableEvent($charge->getId(), 'charge.captured');
 		}
 		$method->responseSet($charge);
