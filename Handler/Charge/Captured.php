@@ -26,11 +26,9 @@ class Captured extends Charge {
 	protected function process() {
 		/** @var string|null $result */
 		$result = null;
-		/**
-		 * 2016-05-11
-		 * The transaction is «Flagged».
-		 * Accept Payment operation should be performed.
-		 */
+		// 2016-05-11
+		// The payment is «Flagged».
+		// The «Accept» operation should be performed.
 		if ($this->order()->isPaymentReview()) {
 			/**
 			 * 2016-05-11
@@ -44,10 +42,8 @@ class Captured extends Charge {
 			$this->payment()->accept();
 			$this->order()->save();
 		}
-		/**
-		 * 2016-05-11
-		 * Транзакция находится в состоянии «Authorized».
-		 */
+		// 2016-05-11
+		// The payment is in the «Authorized» state.
 		else {
 			/**
 			 * 2016-12-30
