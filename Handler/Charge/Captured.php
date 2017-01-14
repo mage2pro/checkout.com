@@ -23,7 +23,7 @@ class Captured extends Charge {
 	 * @return string|null
 	 * @throws LE
 	 */
-	protected function process() {
+	final protected function process() {
 		/** @var string|null $result */
 		$result = null;
 		// 2016-05-11

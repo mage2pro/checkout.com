@@ -17,13 +17,13 @@ abstract class Charge extends Handler {
 	 * @see \Dfe\CheckoutCom\Handler::eligible()
 	 * @return bool
 	 */
-	protected function eligible() {return !!$this->payment();}
+	final protected function eligible() {return !!$this->payment();}
 
 	/**
 	 * 2016-05-10
 	 * @return string|null
 	 */
-	protected function grandParentId() {return dfc($this, function() {return
+	final protected function grandParentId() {return dfc($this, function() {return
 		!$this->parentId() ? null : $this->parentCharge()->getOriginalId()
 	;});}
 
@@ -31,14 +31,14 @@ abstract class Charge extends Handler {
 	 * 2016-03-27
 	 * @return string
 	 */
-	protected function id() {return $this->o('id');}
+	final protected function id() {return $this->o('id');}
 
 	/**
 	 * 2016-03-26
 	 * @return Order|DfOrder
 	 * @throws LE
 	 */
-	protected function order() {return dfc($this, function() {
+	final protected function order() {return dfc($this, function() {
 		/** @var Order $result */
 		$result = $this->payment()->getOrder();
 		if (!$result->getId()) {
@@ -57,7 +57,7 @@ abstract class Charge extends Handler {
 	 * 2016-03-26
 	 * @return Payment|DfPayment|null
 	 */
-	protected function payment() {return dfc($this, function() {return
+	final protected function payment() {return dfc($this, function() {return
 		$this->paymentByTxnId($this->parentId())
 	;});}
 
@@ -66,7 +66,7 @@ abstract class Charge extends Handler {
 	 * @param string|null $id
 	 * @return Payment|DfPayment|null
 	 */
-	protected function paymentByTxnId($id) {return dfc($this, function($id) {
+	final protected function paymentByTxnId($id) {return dfc($this, function($id) {
 		/** @var Payment|null $result */
 		$result = null;
 		if ($id) {
@@ -143,13 +143,13 @@ abstract class Charge extends Handler {
 	 * originalId is absent only for the primary transaction (charge.succeeded)
 	 * @return string|null
 	 */
-	protected function parentId() {return $this->o('originalId');}
+	final protected function parentId() {return $this->o('originalId');}
 
 	/**
 	 * 2016-05-10
 	 * @return ChargeResponse|null
 	 */
-	protected function parentCharge() {return dfc($this, function() {return
+	final protected function parentCharge() {return dfc($this, function() {return
 		!$this->parentId() ? null : S::s()->apiCharge()->getCharge($this->parentId())
 	;});}
 }

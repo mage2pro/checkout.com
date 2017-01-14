@@ -10,7 +10,7 @@ class DefaultT extends Handler {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return bool
 	 */
-	protected function eligible() {return true;}
+	final protected function eligible() {return true;}
 
 	/**
 	 * 2016-03-25
@@ -19,7 +19,7 @@ class DefaultT extends Handler {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
-	protected function process() {return "«{$this->type()}» event handling is not implemented.";}
+	final protected function process() {return "«{$this->type()}» event handling is not implemented.";}
 }
 
 

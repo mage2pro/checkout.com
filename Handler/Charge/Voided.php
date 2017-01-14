@@ -16,7 +16,7 @@ class Voided extends Charge {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return void
 	 */
-	protected function process() {
+	final protected function process() {
 		// 2016-05-11
 		// isPaymentReview() means that the transaction is «Flagged».
 		// We need to void it.
