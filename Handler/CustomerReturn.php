@@ -57,10 +57,8 @@ class CustomerReturn {
 		 */
 		/** @var Payment|DfPayment $payment */
 		$payment = $order->getPayment();
-		/**
-		 * How to get the last order programmatically? https://mage2.pro/t/1528
-		 * How to get an order programmatically? https://mage2.pro/t/1562
-		 */
+		// How to get the last order programmatically? https://mage2.pro/t/1528
+		// How to get an order programmatically? https://mage2.pro/t/1562
 		/** @var ChargeService $api */
 		$api = S::s()->apiCharge($order->getStore());
 		/**
@@ -75,7 +73,9 @@ class CustomerReturn {
 		$charge = $api->verifyCharge($token);
 		/**
 		 * 2016-09-07
-		 * @see https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
+		 * @see \com\checkout\ApiServices\Charges\ResponseModels\Charge::__construct():
+		 * 		$this->json = $response->getRawOutput();
+		 * https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 		 */
 		dfp_report(__CLASS__, json_decode($charge->{'json'}), 'customerReturn');
 		/** @var Response $r */
