@@ -83,16 +83,10 @@ class CustomerReturn {
 		/** @var bool $result */
 		$result = $r->valid();
 		if (!$result) {
-			/**
-			 * 2016-05-06
-			 * «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
-			 * https://mage2.pro/t/1525
-			 */
-			/**
-			 * 2016-05-06
-			 * Similarly:
-			 * df_checkout_session()->getLastRealOrder()->cancel()->save();
-			 */
+			// 2016-05-06
+			// «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
+			// https://mage2.pro/t/1525
+			// Another way: df_checkout_session()->getLastRealOrder()->cancel()->save();
 			$order->cancel();
 			$order->save();
 			df_checkout_session()->restoreQuote();
