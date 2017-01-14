@@ -30,15 +30,6 @@ class Captured extends Charge {
 		// The payment is «Flagged».
 		// The «Accept» operation should be performed.
 		if ($this->order()->isPaymentReview()) {
-			/**
-			 * 2016-05-11
-			 * The magento backend tries to store an automatic identifier for transaction capture:
-			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-			 * It will then be used here:
-			 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
-			 * In order to bypass the magento backend, we store the correct transaction ID
-			 * so we can use it in this method @see \Dfe\CheckoutCom\Method::capture()
-			 */
 			$this->payment()->accept();
 			$this->order()->save();
 		}
