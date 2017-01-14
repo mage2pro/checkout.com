@@ -33,28 +33,27 @@ class CustomerReturn {
 	 */
 	public static function p($token) {
 		/**
-		 * 2016-05-08 (дополнение)
-		 * The order placement and the 3D Secure verification
-		 * both occur in the user's sessions.
-		 * So we can get the user's last order
-		 * by calling @see \Magento\Checkout\Model\Session::getLastRealOrder()
+		 * 2016-05-08 (addition)
+		 * The order placement and the 3D Secure verification both occur in the user's sessions.
+		 * So we can get the user's last order using
+		 * @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 *
-		 * We can also get the increment_id through the last order call $charge->getTrackId(),
-		 * and then fetch the order by increment_id:
+		 * We can also get the «increment_id» using $charge->getTrackId(),
+		 * and then fetch the order by this «increment_id»:
 		 * How to get an order by its increment id programmatically?
-		 * https://mage2.pro/t/topic/1561
+		 * https://mage2.pro/t/1561
 		 */
 		/** @var Order|DfOrder $order */
 		$order = df_checkout_session()->getLastRealOrder();
 		/**
 		 * 2016-05-08
-		 * Generally speaking an order can be made out of many payments,
-		 * and @uses \Magento\Sales\Model\Order::getPayment()
-		 * returns the payment from : https://mage2.pro/t/1559
-		 * However in this case, immediately after placing the order 
-		 * and doing the 3D Secure verification, the payment is only guaranteed
-		 * after retrieving it 
+		 * Generally, there could be multiple payment attemts for a single order
+		 * and @uses \Magento\Sales\Model\Order::getPayment() return a random payment
+		 * (the first payment due to the current MySQL implementation):
+		 * https://mage2.pro/t/1559
+		 * In our case (immediately after placing the order and the 3D Secure verification),
+		 * the payment is unique for the current order.
 		 */
 		/** @var Payment|DfPayment $payment */
 		$payment = $order->getPayment();
