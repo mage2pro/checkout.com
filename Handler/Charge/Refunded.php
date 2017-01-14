@@ -1,12 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Handler\Charge;
 use Dfe\CheckoutCom\Handler\Charge;
-use Magento\Sales\Api\CreditmemoManagementInterface as ICreditmemoService;
-use Magento\Sales\Controller\Adminhtml\Order\CreditmemoLoader;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\Order\Creditmemo;
-use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Service\CreditmemoService;
 /**
  * 2016-05-10
  * charge.refunded
