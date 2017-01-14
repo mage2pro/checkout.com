@@ -34,8 +34,9 @@ class CustomerReturn {
 	public static function p($token) {
 		/**
 		 * 2016-05-08 (addition)
-		 * The order placement and the 3D Secure verification both occur in the user's sessions.
-		 * So we can get the user's last order using
+		 * The order placement and the 3D Secure verification
+		 * both occur in the context of the customer's session.
+		 * So we can get the customer's last order using
 		 * @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 *
