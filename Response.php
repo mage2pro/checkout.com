@@ -290,8 +290,7 @@ class Response extends \Df\Core\O {
 			df_log($e);
 			throw $e;
 		}
-		df_assert($result);
-		return $result;
+		return df_assert($result);
 	}
 
 	/**
