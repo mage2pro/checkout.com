@@ -309,10 +309,31 @@ class Method extends \Df\Payment\Method {
 			$this->ii()->setCcType($card->getPaymentMethod());
 			/**
 			 * 2016-03-15
-			 * Without it, a «void» operation will be unavailable:
+			 * Если оставить открытой транзакцию «capture»,
+			 * то операция «void» (отмена авторизации платежа) будет недоступна:
 			 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Payment.php#L540-L555
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
-			 * The transaction is considered complete unless «false» is explicitly specified.
+			 * Транзакция считается закрытой, если явно не указать «false».
+			 *
+			 * 2017-01-16
+			 * Наоборот: если закрыть транзакцию типа «authorize»,
+			 * то операция «Capture Online» из административного интерфейса будет недоступна:
+			 * @see \Magento\Sales\Model\Order\Payment::canCapture()
+					if ($authTransaction && $authTransaction->getIsClosed()) {
+						$orderTransaction = $this->transactionRepository->getByTransactionType(
+							Transaction::TYPE_ORDER,
+							$this->getId(),
+							$this->getOrder()->getId()
+						);
+						if (!$orderTransaction) {
+							return false;
+						}
+					}
+			 * https://github.com/magento/magento2/blob/2.1.3/app/code/Magento/Sales/Model/Order/Payment.php#L263-L281
+			 * «How is \Magento\Sales\Model\Order\Payment::canCapture() implemented and used?»
+			 * https://mage2.pro/t/650
+			 * «How does Magento 2 decide whether to show the «Capture Online» dropdown
+			 * on a backend's invoice screen?»: https://mage2.pro/t/2475
 			 */
 			$this->ii()->setIsTransactionClosed($capture);
 			if ($this->r()->flagged()) {
