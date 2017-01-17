@@ -218,7 +218,7 @@ class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_void()
 	 * @return void
 	 */
-	protected function _void() {$this->leh(function() {
+	final protected function _void() {$this->leh(function() {
 		/** @var Transaction|false|null $auth */
 		$auth = $this->ii()->getAuthorizationTransaction();
 		if ($auth) {
