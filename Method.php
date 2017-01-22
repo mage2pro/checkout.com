@@ -380,7 +380,7 @@ class Method extends \Df\Payment\Method {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return ChargeService
 	 */
-	private function api() {return S::s()->apiCharge();}
+	private function api() {return $this->s()->apiCharge();}
 
 	/**
 	 * 2016-05-11
@@ -456,7 +456,7 @@ class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	private function isCaptureDesired() {return
-		M::ACTION_AUTHORIZE_CAPTURE === S::s()->actionDesired($this->o()->getCustomerId())
+		M::ACTION_AUTHORIZE_CAPTURE === $this->s()->actionDesired($this->o()->getCustomerId())
 	;}
 
 	/**
