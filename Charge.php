@@ -386,7 +386,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * Max length of key(s) and value(s) is 100 each. A max. of 10 KVP are allowed.»
 		 * So I splitted the «server» key into 2 keys: «server» and «user_agent».
 		 */
-		'server' => dfa($_SERVER, 'SERVER_SOFTWARE')
+		'server' => df_webserver()
 		,'user_agent' => dfa($_SERVER, 'HTTP_USER_AGENT')
 		,'quote_id' => $this->oii()
 		// 2016-06-25
