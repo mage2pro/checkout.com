@@ -13,7 +13,7 @@ namespace Dfe\CheckoutCom;
 		...
 	}
  */
-class Exception extends \Df\Payment\Exception {
+final class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
