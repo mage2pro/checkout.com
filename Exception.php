@@ -17,7 +17,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see \Df\Payment\Exception::__construct()
+	 * @see \Df\Core\Exception::__construct()
 	 * @param Response $response
 	 * @param array(string => mixed) $request [optional]
 	 */
@@ -44,7 +44,7 @@ class Exception extends \Df\Payment\Exception {
 	/**
 	 * 2016-07-17
 	 * @override
-	 * @see \Df\Payment\Exception::messageC()
+	 * @see \Df\Core\Exception::messageC()
 	 * @return string
 	 */
 	public function messageC() {return $this->_r->messageC();}
