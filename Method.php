@@ -472,7 +472,7 @@ class Method extends \Df\Payment\Method {
 			if ($e instanceof CE) {
 				$e = new LE(__($e->getErrorMessage()), $e);
 			}
-			df_sentry($e);
+			df_sentry($this, $e);
 			throw df_le($e);
 		}
 		return $result;

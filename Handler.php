@@ -84,7 +84,7 @@ abstract class Handler extends \Df\Core\O {
 			 * https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
 			 */
 			df_response()->setStatusCode(500);
-			df_sentry($e, ['extra' => ['request' => $request]]);
+			df_sentry(__CLASS__, $e, ['extra' => ['request' => $request]]);
 			if (df_my_local()) {
 				// 2016-03-27
 				// Show the stack trace on the screen
