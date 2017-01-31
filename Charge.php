@@ -310,10 +310,10 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 	/**
 	 * 2016-05-06
 	 * @used-by setProducts()
-	 * @param OI $item
+	 * @param OI $i
 	 * @return CProduct
 	 */
-	private function cProduct(OI $item) {
+	private function cProduct(OI $i) {
 		/** @var CProduct $result */
 		$result = new CProduct;
 		/**
@@ -322,7 +322,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
 		/** @var OI $parent */
-		$parent = df_oi_parent($item);
+		$parent = df_oi_parent($i);
 		// Simple options have name similar to «New Very Prive-36-Almond»,
 		// we'd rather see 'normal' names
 		// like a custom product «New Very Prive»).
@@ -340,7 +340,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * «Description of the product.Max of 500 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setDescription($item->getDescription());
+		$result->setDescription($i->getDescription());
 		/**
 		 * 2016-04-23
 		 * «Stock Unit Identifier.
@@ -348,7 +348,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * Max length of 100 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setSku($item->getSku());
+		$result->setSku($i->getSku());
 		/**
 		 * 2016-04-23
 		 * «Product price per unit. Max. of 6 digits.»
@@ -365,19 +365,19 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * что сумма стоимостей позиций заказа у нас не будет равна сумме заказа
 		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
-		$result->setPrice($this->cFromOrder(df_oi_price($item)));
+		$result->setPrice($this->cFromOrder(df_oi_price($i)));
 		/**
 		 * 2016-04-23
 		 * «Units of the product to be shipped. Max length of 3 digits.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setQuantity($item->getQtyOrdered());
+		$result->setQuantity($i->getQtyOrdered());
 		/**
 		 * 2016-04-23
 		 * «image link to product on merchant website.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setImage(df_product_image_url($item->getProduct()));
+		$result->setImage(df_oi_image($i));
 		return $result;
 	}
 
