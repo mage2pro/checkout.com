@@ -420,7 +420,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 	 * @return void
 	 */
 	private function setProducts(CardTokenChargeCreate $c) {
-		$this->oiLeafsM(function(OI $i) use($c) {$c->setProducts($this->cProduct($i));});
+		$this->oiLeafs(function(OI $i) use($c) {$c->setProducts($this->cProduct($i));});
 	}
 
 	/**
