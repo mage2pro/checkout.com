@@ -323,10 +323,19 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 */
 		/** @var OI $parent */
 		$parent = df_oi_parent($i);
-		// Simple options have name similar to «New Very Prive-36-Almond»,
-		// we'd rather see 'normal' names
-		// like a custom product «New Very Prive»).
-		$result->setName($parent->getName());
+		/**
+		 * Simple options have name similar to «New Very Prive-36-Almond»,
+		 * we'd rather see 'normal' names
+		 * like a custom product «New Very Prive»).
+		 *
+		 * 2017-02-01
+		 * Да вот я не уверен теперь, что $parent->getName() — это правильно.
+		 * Всё-таки, «New Very Prive-37-Almond» информативнее, чем «New Very Prive»,
+		 * а «Victoria's Secret Angel Gold Eau de Parfum-3.4 fl oz» информативнее, чем
+		 * «Victoria's Secret Angel Gold Eau de Parfum».
+		 * Поэтому заменил $parent->getName() на $i->getName().
+		 */
+		$result->setName($i->getName());
 		/**
 		 * 2016-08-18
 		 * It was the folowing code here:
