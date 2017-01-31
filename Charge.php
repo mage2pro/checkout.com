@@ -356,6 +356,14 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 *
 		 * 2016-05-03
 		 * Использовать @see amountF() здесь не требуется.
+		 * 2017-02-01
+		 * df_oi_price() использует @see \Magento\Sales\Model\Order\Item::getPrice(),
+		 * а не @see \Magento\Sales\Model\Order\Item::getPriceInclTax().
+		 * Это нормально для модуля 2Checkout: @see \Dfe\TwoCheckout\LineItem\Product::price(),
+		 * потому что там мы передаём налоги платёжной системе отдельной строкой.
+		 * Здесь же мы не передаём налоги системе, и поэтому получается,
+		 * что сумма стоимостей позиций заказа у нас не будет равна сумме заказа
+		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
 		$result->setPrice($this->cFromOrder(df_oi_price($item)));
 		/**
@@ -416,6 +424,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 	 * 2016-04-23
 	 * «An array of Product details»
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * @used-by _build()
 	 * @param CardTokenChargeCreate $c
 	 * @return void
 	 */
