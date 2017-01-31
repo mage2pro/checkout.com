@@ -309,6 +309,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
+	 * @used-by setProducts()
 	 * @param OI $item
 	 * @return CProduct
 	 */
