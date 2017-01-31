@@ -334,6 +334,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * а «Victoria's Secret Angel Gold Eau de Parfum-3.4 fl oz» информативнее, чем
 		 * «Victoria's Secret Angel Gold Eau de Parfum».
 		 * Поэтому заменил $parent->getName() на $i->getName().
+		 * @see \Dfe\TwoCheckout\LineItem\Product::nameRaw()
 		 */
 		$result->setName($i->getName());
 		/**
