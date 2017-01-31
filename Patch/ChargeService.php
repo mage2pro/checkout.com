@@ -1,7 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom\Patch;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as Response;
-class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
+final class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
 	/**
 	 * 2016-05-08
 	 * @see \com\checkout\ApiServices\Charges\ChargeService::chargeWithCardToken()

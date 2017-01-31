@@ -1,6 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Patch;
-class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMapper {
+final class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMapper {
 	/**
 	 * 2016-05-08
 	 * @override
