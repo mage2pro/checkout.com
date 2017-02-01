@@ -320,10 +320,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * 2016-04-23
 		 * «Name of product. Max of 100 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
-		/** @var OI $parent */
-		$parent = df_oi_parent($i);
-		/**
+		 *
 		 * Simple options have name similar to «New Very Prive-36-Almond»,
 		 * we'd rather see 'normal' names
 		 * like a custom product «New Very Prive»).
@@ -344,7 +341,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * But the «productId» parameter disappears from the documentation:
 		 * http://docs.checkout.com/reference/merchant-api-reference/complex-request-objects/products
 		 */
-		$result->setTrackingUrl($parent->getProduct()->getProductUrl());
+		$result->setTrackingUrl(df_oi_url($i));
 		/**
 		 * 2016-04-23
 		 * «Description of the product.Max of 500 characters.»
