@@ -1,3 +1,3 @@
 <?php
 namespace Dfe\CheckoutCom;
-class ConfigProvider extends \Df\StripeClone\ConfigProvider {}
+final class ConfigProvider extends \Df\StripeClone\ConfigProvider {}
