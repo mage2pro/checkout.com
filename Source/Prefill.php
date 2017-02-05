@@ -1,7 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom\Source;
 /** @method static Prefill s() */
-class Prefill extends \Df\Config\SourceT {
+final class Prefill extends \Df\Config\SourceT {
 	/**
 	 * 2016-05-10
 	 * @param string $key
@@ -17,11 +17,7 @@ class Prefill extends \Df\Config\SourceT {
 	 * @used-by \Df\Config\Source::toOptionArray()
 	 * @return array(string => string)
 	 */
-	protected function map() {
-		/** @var array(string => string) $map */
-		$keys = array_keys($this->_config());
-		return [0 => 'No'] + array_combine($keys, $keys);
-	}
+	protected function map() {return [0 => 'No'] + dfa_combine_self(array_keys($this->_config()));}
 
 	/**
 	 * 2016-05-10
