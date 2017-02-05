@@ -24,13 +24,17 @@
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
 	,"keywords": [
-		"api"
+		"3d secure"
+		,"api"
 		,"bank card"
+		,"credit card"
 		,"ecommerce"
 		,"magento"
 		,"magento 2"
 		,"magento extension"
 		,"payment"
+		,"payment gateway"
+		,"payment integration"
 		,"refund"
 		,"checkout.com"
 	]
