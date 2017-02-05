@@ -23,4 +23,15 @@
 		, "giggsey/libphonenumber-for-php": "7.*"
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
+	,"keywords": [
+		"api"
+		,"bank card"
+		,"ecommerce"
+		,"magento"
+		,"magento 2"
+		,"magento extension"
+		,"payment"
+		,"refund"
+		,"checkout.com"
+	]
 }
