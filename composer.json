@@ -24,18 +24,19 @@
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
 	,"keywords": [
-		"3d secure"
-		,"api"
-		,"bank card"
-		,"credit card"
-		,"ecommerce"
-		,"magento"
-		,"magento 2"
-		,"magento extension"
-		,"payment"
-		,"payment gateway"
-		,"payment integration"
-		,"refund"
-		,"checkout.com"
+		"3D Secure"
+		,"API"
+		,"Bank card"
+		,"Credit card"
+		,"eCommerce"
+		,"Magento"
+		,"Magento 2"
+		,"Magento extension"
+		,"Payment"
+		,"Payment authorization"
+		,"Payment integration"
+		,"Payment gateway"
+		,"Refund"
+		,"Checkout.com"
 	]
 }
