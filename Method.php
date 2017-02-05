@@ -18,7 +18,7 @@ use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
-class Method extends \Df\Payment\Method {
+final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-07
 	 * @override
@@ -218,7 +218,7 @@ class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_void()
 	 * @return void
 	 */
-	final protected function _void() {$this->leh(function() {
+	protected function _void() {$this->leh(function() {
 		/** @var Transaction|false|null $auth */
 		$auth = $this->ii()->getAuthorizationTransaction();
 		if ($auth) {
