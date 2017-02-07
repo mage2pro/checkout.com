@@ -23,7 +23,7 @@ define([
 		return !message ? '' : df.t(
 			'The transaction will <b><a href="{url}" target="_blank">fail</a></b> with the message «<b>{message}</b>», because the payment amount (<b>{amount}</b>) in the payment currency (<b>{currency}</b>) ends with «<b>{last2}</b>».'
 			,{
-				amount: this.amountPF()
+				amount: this.amountPD()
 				,currency: this.paymentCurrency().name
 				,last2: this.amountLast2()
 				,message: message
