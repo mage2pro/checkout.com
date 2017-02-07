@@ -1,7 +1,5 @@
 define([
-	'df'
-	,'Df_Payment/card'
-	,'jquery'
+	'df', 'Df_Payment/stripeClone', 'jquery'
 ], function(df, parent, $) {'use strict'; return parent.extend({
 	/**
 	 * 2016-07-16
@@ -77,7 +75,7 @@ define([
 			 * «The log action will only log messages on the console if debugMode is set to true.»
 			 */
 			debugMode: this.isTest()
-			,publicKey: this.config('publicKey')
+			,publicKey: this.publicKey()
 			,ready: function(event) {deferred.resolve();}
 			,apiError: function(event) {deferred.reject();}
 		};
