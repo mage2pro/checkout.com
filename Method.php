@@ -264,6 +264,19 @@ final class Method extends \Df\Payment\Method {
 	];}
 
 	/**
+	 * 2017-02-08
+	 * @override
+	 * Результат — в рублях, не в копейках.
+	 * I did not find such information on the Checkout.com website.
+	 * «Does Checkout.com have minimum and maximum amount limitations on a single payment?»
+	 * https://mage2.pro/t/2687
+	 * @see \Df\Payment\Method::amountLimits()
+	 * @used-by \Df\Payment\Method::isAvailable()
+	 * @return null
+	 */
+	protected function amountLimits() {return null;}
+
+	/**
 	 * 2016-03-07
 	 * @override
 	 * @see \Df\Payment\Method::charge()
