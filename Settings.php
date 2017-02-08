@@ -22,7 +22,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @return API
 	 */
 	public function api() {return dfc($this, function() {return
-		new API($this->secretKey(), $this->test() ? 'sandbox' : 'live')
+		new API($this->privateKey(), $this->test() ? 'sandbox' : 'live')
 	;});}
 
 	/**
@@ -75,12 +75,6 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @return array(string => string)|null
 	 */
 	public function prefill() {return Prefill::s()->config($this->v());}
-
-	/**
-	 * 2016-03-02
-	 * @return string
-	 */
-	public function secretKey() {return $this->testableP();}
 
 	/**
 	 * 2016-03-14
