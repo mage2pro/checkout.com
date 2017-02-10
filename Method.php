@@ -258,6 +258,8 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::amountFactorTable()
 	 * @used-by \Df\Payment\Method::amountFactor()
 	 * @return int
+	 * 2017-02-10
+	 * @see minimumAmount()
 	 */
 	protected function amountFactorTable() {return [
 		1000 => 'BHD,KWD,OMR,JOD', 1 => 'BYR,BIF,DJF,GNF,KMF,XAF,CLF,XPF,JPY,PYG,RWF,KRW,VUV,VND,XOF'
@@ -266,15 +268,19 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2017-02-08
 	 * @override
-	 * Результат — в рублях, не в копейках.
+	 * The result should be in the basic monetary unit (like dollars), not in fractions (like cents).
 	 * I did not find such information on the Checkout.com website.
 	 * «Does Checkout.com have minimum and maximum amount limitations on a single payment?»
 	 * https://mage2.pro/t/2687
+	 *
+	 * 2017-02-10
+	 * I have got an answer from the Checkout.com support: https://mage2.pro/t/2687/3
+	 *
 	 * @see \Df\Payment\Method::amountLimits()
 	 * @used-by \Df\Payment\Method::isAvailable()
 	 * @return null
 	 */
-	protected function amountLimits() {return null;}
+	protected function amountLimits() {return function($c) {return [$this->minimumAmount($c), null];};}
 
 	/**
 	 * 2016-03-07
@@ -490,6 +496,60 @@ final class Method extends \Df\Payment\Method {
 		}
 		return $result;
 	}
+
+	/**
+	 * 2017-02-10
+	 * The result should be in the basic monetary unit (like dollars), not in fractions (like cents).
+	 * https://mage2.pro/t/2687/3
+	 * @used-by amountLimits()
+	 * @param string $c
+	 * @return float
+	 */
+	private function minimumAmount($c) {return dfa([
+		'AED' => 5
+		,'ARS' => 20
+		,'AUD' => 1.5
+		,'BHD' => .5
+		,'BIF' => 2000
+		,'BYR' => 20000
+		,'BZD' => 3
+		,'CAD' => 1.5
+		,'CHF' => 1
+		,'CLF' => .05
+		,'CLP' => 700
+		,'COP' => 3000
+		,'DJF' => 200
+		,'DKK' => 7
+		,'GBP' => 1
+		,'GNF' => 9300
+		,'EUR' => 1
+		,'HKD' => 8
+		,'IDR' => 13500
+		,'INR' => 70
+		,'ISK' => 120
+		,'JPY' => 120
+		,'JOD' => 1
+		,'KMF' => 500
+		,'KRW' => 1200
+		,'KWD' => .5
+		,'NGN' => 350
+		,'NZD' => 1.5
+		,'MXN' => 20
+		,'MYR' => 4.5
+		,'OMR' => .5
+		,'PEN' => 5
+		,'PHP' => 50
+		,'PYG' => 6000
+		,'RWF' => 850
+		,'SGD' => 1.5
+		,'VND' => 22800
+		,'USD' => 1
+		,'VUV' => 120
+		,'XAF' => 650
+		,'XOF' => 650
+		,'XPF' => 120
+		,'ZAR' => 15
+	], $c, 1);}
 
 	/**
 	 * 2016-05-15
