@@ -26,7 +26,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @see \Magento\Framework\App\Action\Action::execute()
 	 * @return \Magento\Framework\Controller\Result\Redirect
 	 */
-	public function execute() {return df_leh(function(){
+	function execute() {return df_leh(function(){
 		/** @var string|null $token */
 		$token = df_request('cko-payment-token');
 		return !$token ? $this->webhook() :

@@ -11,7 +11,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @param int $customerId
 	 * @return string
 	 */
-	public function actionDesired($customerId) {return
+	function actionDesired($customerId) {return
 		$this->v(df_customer_is_new($customerId) ? 'actionForNew' : 'actionForReturned')
 	;}
 
@@ -21,7 +21,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return API
 	 */
-	public function api() {return dfc($this, function() {return
+	function api() {return dfc($this, function() {return
 		new API($this->privateKey(), $this->test() ? 'sandbox' : 'live')
 	;});}
 
@@ -31,14 +31,14 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @return ChargeService
 	 */
-	public function apiCharge() {return $this->api()->chargeService();}
+	function apiCharge() {return $this->api()->chargeService();}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D Secure validation for All Customers?»
 	 * @return bool
 	 */
-	public function force3DS_forAll() {return $this->b();}
+	function force3DS_forAll() {return $this->b();}
 
 	/**
 	 * 2016-05-13
@@ -47,14 +47,14 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @param string $iso2
 	 * @return string
 	 */
-	public function force3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
+	function force3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D Secure validation for the New Customers?»
 	 * @return bool
 	 */
-	public function force3DS_forNew() {return $this->b();}
+	function force3DS_forNew() {return $this->b();}
 
 	/**
 	 * 2016-05-13
@@ -63,7 +63,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @param string $iso2
 	 * @return string
 	 */
-	public function force3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
+	function force3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
 	 * 2016-03-09  
@@ -74,19 +74,19 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()
 	 * @return array(string => string)|null
 	 */
-	public function prefill() {return Prefill::s()->config($this->v());}
+	function prefill() {return Prefill::s()->config($this->v());}
 
 	/**
 	 * 2016-03-14
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
 	 * @return string[]
 	 */
-	public function statement() {return $this->v();}
+	function statement() {return $this->v();}
 
 	/**
 	 * 2016-05-15
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Wait for «Capture» transaction on an order placement if the Payment Action is «Capture»?»
 	 * @return bool
 	 */
-	public function waitForCapture() {return $this->b();}
+	function waitForCapture() {return $this->b();}
 }

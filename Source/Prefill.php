@@ -7,7 +7,7 @@ final class Prefill extends \Df\Config\SourceT {
 	 * @param string $key
 	 * @return array(string => string)|null
 	 */
-	public function config($key) {return dfa($this->_config(), $key);}
+	function config($key) {return dfa($this->_config(), $key);}
 
 	/**
 	 * 2016-04-13

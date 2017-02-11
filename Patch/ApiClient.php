@@ -8,7 +8,7 @@ class ApiClient extends \com\checkout\ApiClient {
 	 * @see \com\checkout\ApiClient::chargeService()
 	 * @return ChargeService
 	 */
-	public function chargeService() {return $this->_chargeService;}
+	function chargeService() {return $this->_chargeService;}
 
 	/**
 	 * 2016-05-08
@@ -20,7 +20,7 @@ class ApiClient extends \com\checkout\ApiClient {
 	 * @param int $connectTimeout
 	 * @param int $readTimeout
 	 */
-	public function __construct(
+	function __construct(
 		$secretKey, $env = 'sandbox' ,$debugMode = false, $connectTimeout = 60, $readTimeout = 60
 	) {
 		parent::__construct($secretKey, $env ,$debugMode, $connectTimeout, $readTimeout);

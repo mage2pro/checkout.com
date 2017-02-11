@@ -25,7 +25,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canCapture()
 	 * @return bool
 	 */
-	public function canCapture() {return true;}
+	function canCapture() {return true;}
 
 	/**
 	 * 2016-03-08
@@ -33,7 +33,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canCapturePartial()
 	 * @return bool
 	 */
-	public function canCapturePartial() {return true;}
+	function canCapturePartial() {return true;}
 
 	/**
 	 * 2016-03-08
@@ -41,7 +41,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canRefund()
 	 * @return bool
 	 */
-	public function canRefund() {return true;}
+	function canRefund() {return true;}
 
 	/**
 	 * 2016-03-08
@@ -49,7 +49,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canRefundPartialPerInvoice()
 	 * @return bool
 	 */
-	public function canRefundPartialPerInvoice() {return true;}
+	function canRefundPartialPerInvoice() {return true;}
 
 	/**
 	 * 2016-05-08
@@ -68,7 +68,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canReviewPayment()
 	 * @return bool
 	 */
-	public function canReviewPayment() {return true;}
+	function canReviewPayment() {return true;}
 
 	/**
 	 * 2016-03-15
@@ -76,7 +76,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::canVoid()
 	 * @return bool
 	 */
-	public function canVoid() {return true;}
+	function canVoid() {return true;}
 
 	/**
 	 * 2016-05-09
@@ -87,7 +87,7 @@ final class Method extends \Df\Payment\Method {
 	 * @param II|I|OP  $payment
 	 * @return bool
 	 */
-	public function denyPayment(II $payment) {
+	function denyPayment(II $payment) {
 		/**
 		 * 2016-05-09
 		 * Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
@@ -105,7 +105,7 @@ final class Method extends \Df\Payment\Method {
 	 * @param string $eventId
 	 * @return void
 	 */
-	public function disableEvent($transactionId, $eventId) {
+	function disableEvent($transactionId, $eventId) {
 		/** @var ChargeResponse $charge */
 		$charge = $this->api()->getCharge($transactionId);
 		/** @var array(string => string) $metadata */
@@ -145,7 +145,7 @@ final class Method extends \Df\Payment\Method {
 	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
 	 * So we can employ the Review mode for such payments.
 	 */
-	public function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->r()->action();}
+	function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
@@ -153,13 +153,13 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::getInfoBlockType()
 	 * @return string
 	 */
-	public function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
+	function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
 
 	/**
 	 * 2016-05-08
 	 * @param ChargeResponse $response
 	 */
-	public function responseSet(ChargeResponse $response) {$this->_response = $response;}
+	function responseSet(ChargeResponse $response) {$this->_response = $response;}
 
 	/**
 	 * 2016-03-15

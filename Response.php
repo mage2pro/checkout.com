@@ -48,7 +48,7 @@ class Response extends \Df\Core\O {
 	 * @param string|string[]|null $key [optional]
 	 * @return array(string => string)
 	 */
-	public function a($key = null) {
+	function a($key = null) {
 		/** @var array(string => string) $result */
 		$result = dfc($this, function() {
 			// 2016-09-07
@@ -74,7 +74,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	public function action() {return dfc($this, function() {return
+	function action() {return dfc($this, function() {return
 		$this->flagged() || !$this->waitForCapture()
 		? M::ACTION_AUTHORIZE
 		: S::s()->actionDesired($this->order()->getCustomerId())
@@ -95,7 +95,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Response::action()
 	 * @return bool
 	 */
-	public function flagged() {return self::$S__FLAGGED === $this->charge()->getStatus();}
+	function flagged() {return self::$S__FLAGGED === $this->charge()->getStatus();}
 
 	/**
 	 * 2016-08-05
@@ -103,7 +103,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Response::messageC()
 	 * @return bool
 	 */
-	public function hasId() {return !!$this->a('id');}
+	function hasId() {return !!$this->a('id');}
 
 	/**
 	 * 2016-05-11
@@ -146,7 +146,7 @@ class Response extends \Df\Core\O {
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function magentoTransactionId() {return dfc($this, function() {return
+	function magentoTransactionId() {return dfc($this, function() {return
 		M::ACTION_AUTHORIZE === $this->action() ? $this->charge()->getId() :
 			self::getCaptureCharge($this->charge()->getId())->getId()
 		;
@@ -158,7 +158,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	public function messageC() {return dfc($this, function() {
+	function messageC() {return dfc($this, function() {
 		/** @var string $result */
 		if (!$this->hasId()) {
 			$result = __(
@@ -198,7 +198,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @return bool
 	 */
-	public function valid() {return
+	function valid() {return
 		in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED])
 	;}
 
