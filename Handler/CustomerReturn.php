@@ -31,7 +31,7 @@ class CustomerReturn {
 	 * @param string $token
 	 * @return bool
 	 */
-	public static function p($token) {
+	static function p($token) {
 		/**
 		 * 2016-05-08 (addition)
 		 * The order placement and the 3D Secure verification

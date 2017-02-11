@@ -8,7 +8,7 @@ class ApiHttpClient {
 	 * @param array(string => string) $payload [optional]
 	 * @return \CheckoutApi_Lib_RespondObj
 	 */
-	public static function postRequest($uri, array $payload = []) {
+	static function postRequest($uri, array $payload = []) {
 		return self::api()->request($uri, ['method' => 'POST'] + $payload, true);
 	}
 

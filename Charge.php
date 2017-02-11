@@ -475,7 +475,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	public static function build(Method $m, $token, $capture = true) {
+	static function build(Method $m, $token, $capture = true) {
 		return (new ChargesMapper((new self([
 			self::$P__METHOD => $m
 			, self::$P__NEED_CAPTURE => $capture

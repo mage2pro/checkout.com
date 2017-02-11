@@ -235,7 +235,7 @@ class Response extends \Df\Core\O {
 	 * @return CCharge
 	 * @throws \Exception
 	 */
-	public static function getCaptureCharge($authId) {
+	static function getCaptureCharge($authId) {
 		/** @bar CCharge $result */
 		$result = null;
 		try {
@@ -301,7 +301,7 @@ class Response extends \Df\Core\O {
 	 * @param Order $o
 	 * @return $this
 	 */
-	public static function sp(CCharge $c, Order $o) {return dfcf(function(CCharge $c, Order $o) {return
+	static function sp(CCharge $c, Order $o) {return dfcf(function(CCharge $c, Order $o) {return
 		new self([self::$P__CHARGE => $c, self::$P__ORDER => $o])
 	;}, func_get_args());}
 

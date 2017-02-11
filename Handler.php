@@ -54,7 +54,7 @@ abstract class Handler extends \Df\Core\O {
 	 * @return mixed
 	 * @throws E
 	 */
-	public static function p(array $request) {
+	static function p(array $request) {
 		/** @var mixed $result */
 		try {
 			dfp_report(__CLASS__, $request, $request['eventType']);
