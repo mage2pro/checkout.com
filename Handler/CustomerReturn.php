@@ -7,7 +7,7 @@ use com\checkout\ApiServices\Charges\ChargeService;
  * Magento 2 compiler (bin/magento setup:di:compile) failure:
  * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
  * because the name is already in use
- * in vendor/magento2/checkout.com/Handler/CustomerReturn.php on line 4»
+ * in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
  * http://stackoverflow.com/questions/17746481
  */
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
