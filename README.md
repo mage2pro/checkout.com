@@ -1,6 +1,6 @@
 ## How to install
 ```
-composer require magento2/checkout.com:*
+composer require mage2pro/checkout.com:*
 bin/magento setup:upgrade
 rm -rf pub/static/* && bin/magento setup:static-content:deploy
 rm -rf var/di var/generation && bin/magento setup:di:compile
@@ -9,7 +9,7 @@ rm -rf var/di var/generation && bin/magento setup:di:compile
 ## Support
 - [Documentation](https://mage2.pro/c/extensions/checkout-com)
 - [Ask a question](https://mage2.pro/c/extensions/checkout-com)
-- [Report an issue](https://github.com/CKOTech/checkout-magento2-plugin/issues/new)
+- [Report an issue](https://github.com/mage2pro/checkout.com/issues)
 
 ## Demo videos
 
