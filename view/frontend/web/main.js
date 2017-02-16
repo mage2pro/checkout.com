@@ -55,6 +55,8 @@ define([
 	},
 	/**
 	 * 2016-03-08
+	 * @used-by initialize()
+	 * @used-by placeOrder()
 	 * @returns {Promise}
 	*/
 	initDf: df.c(function() {
