@@ -1,5 +1,5 @@
 define([
-	'df', 'Df_Payment/stripeClone', 'jquery'
+	'df', 'Df_StripeClone/main', 'jquery'
 ], function(df, parent, $) {'use strict'; return parent.extend({
 	/**
 	 * 2016-07-16
