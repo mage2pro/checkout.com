@@ -148,29 +148,21 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
 		$result->setValue($this->amountF());
-		/**
-		 * 2016-04-21
-		 * «Three-letter ISO currency code
-		 * representing the currency in which the charge was made.
-		 * (refer to currency codes and names)»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-21
+		// «Three-letter ISO currency code representing the currency in which the charge was made.
+		// (refer to currency codes and names)»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setCurrency($this->currencyC());
-		/**
-		 * 2016-04-21
-		 * «Transaction indicator. 1 for regular, 2 for recurring, 3 for MOTO.
-		 * Defaults to 1 if not specified.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-21
+		// «Transaction indicator. 1 for regular, 2 for recurring, 3 for MOTO.
+		// Defaults to 1 if not specified.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setTransactionIndicator(1);
-		/**
-		 * 2016-04-21
-		 * «Customer/Card holder Ip.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-21
+		// «Customer/Card holder Ip.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		/** @var string $ip */
-		$ip = $this->customerIp();
-		if ('127.0.0.1' !== $ip) {
+		if ('127.0.0.1' !== ($ip = $this->customerIp())) {
 			$result->setCustomerIp($ip);
 		}
 		/**
@@ -180,19 +172,15 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 */
 		$result->setCardToken($this->token());
 		$this->setProducts($result);
-		/**
-		 * 2016-04-23
-		 * «Shipping address details.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Shipping address details.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setShippingDetails($this->cAddress());
-		/**
-		 * 2016-04-23
-		 * «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
-		 * Max length of key(s) and value(s) is 100 each.
-		 * A max. of 10 KVP are allowed.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
+		// Max length of key(s) and value(s) is 100 each.
+		// A max. of 10 KVP are allowed.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setMetadata($this->metaData());
 		return $result;
 	}
