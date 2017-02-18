@@ -391,7 +391,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * So I splitted the «server» key into 2 keys: «server» and «user_agent».
 		 */
 		'server' => df_webserver()
-		,'user_agent' => dfa($_SERVER, 'HTTP_USER_AGENT')
+		,'user_agent' => df_request_ua()
 		,'quote_id' => $this->oii()
 		// 2016-06-25
 		// Magento version
