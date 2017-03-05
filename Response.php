@@ -45,10 +45,10 @@ class Response extends \Df\Core\O {
 	 * 2016-05-08
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @used-by \Dfe\CheckoutCom\Method::redirectUrl()
-	 * @param string|string[]|null $key [optional]
+	 * @param string|string[]|null $k [optional]
 	 * @return array(string => string)
 	 */
-	function a($key = null) {
+	function a($k = null) {
 		/** @var array(string => string) $result */
 		$result = dfc($this, function() {
 			// 2016-09-07
@@ -58,8 +58,8 @@ class Response extends \Df\Core\O {
 			dfp_report($this, $result, 'response');
 			return $result;
 		});
-		return is_null($key) ? $result : (
-			is_array($key) ? df_clean(dfa_select_ordered($result, $key)) : dfa($result, $key)
+		return is_null($k) ? $result : (
+			is_array($k) ? df_clean(dfa_select_ordered($result, $k)) : dfa($result, $k)
 		);
 	}
 
