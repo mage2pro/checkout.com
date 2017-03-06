@@ -181,7 +181,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		// Max length of key(s) and value(s) is 100 each.
 		// A max. of 10 KVP are allowed.»
 		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setMetadata($this->metaData());
+		$result->setMetadata($this->pMetadata());
 		return $result;
 	}
 
@@ -378,10 +378,11 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-06-25
+	 * @used-by _build()
 	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
 	 * @return array(string => string)
 	 */
-	private function metaData() {return df_map('mb_substr', [
+	private function pMetadata() {return df_map('mb_substr', [
 		/**
 		 * 2016-08-18
 		 * It was a «server» key before, but it exceeded the maximum length of a key: 100 characters.
