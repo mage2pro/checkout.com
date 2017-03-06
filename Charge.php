@@ -361,12 +361,10 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
 		$result->setPrice($this->cFromOrder(df_oi_price($i)));
-		/**
-		 * 2016-04-23
-		 * «Units of the product to be shipped. Max length of 3 digits.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
-		$result->setQuantity($i->getQtyOrdered());
+		// 2016-04-23
+		// «Units of the product to be shipped. Max length of 3 digits.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		$result->setQuantity(df_oi_qty($i));
 		/**
 		 * 2016-04-23
 		 * «image link to product on merchant website.»
