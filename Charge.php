@@ -133,7 +133,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * «A description that can be added to this object.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setDescription($this->text($this->ss()->description()));
+		$result->setDescription($this->description());
 		/**
 		 * 2016-04-21
 		 * «Expressed as a non-zero positive integer
