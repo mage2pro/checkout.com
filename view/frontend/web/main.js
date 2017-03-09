@@ -106,7 +106,7 @@ define([
 		 * 2016-05-09
 		 * If 3D Secure is not necessary,
 		 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
-		 * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
+		 * https://github.com/mage2pro/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
 		 * which is then converted by
 		 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
 		 * to an empty array:

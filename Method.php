@@ -628,7 +628,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by mage2pro/checkout.com/etc/di.xml
 	 * @used-by mage2pro/checkout.com/etc/frontend/di.xml
 	 * @used-by \Df\Payment\Method::codeS()
-	 * @used-by https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/fa6d87f/etc/di.xml#L9
+	 * @used-by https://github.com/mage2pro/checkout.com/blob/fa6d87f/etc/di.xml#L9
 	 */
 	const CODE = 'dfe_checkout_com';
 

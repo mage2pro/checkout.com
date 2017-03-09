@@ -30,7 +30,7 @@ use Dfe\CheckoutCom\Handler\Charge;
  * Problem was solved.
  * autoCapture mode now is saved in the Magento Capture transaction ID
  * as it should be.
- * https://code.dmitry-fedyuk.com/m2e/checkout.com/blob/3a1d36/Method.php#L593
+ * https://github.com/mage2pro/checkout.com/blob/3a1d36/Method.php#L593
  */
 class Refunded extends Charge {
 	/**
