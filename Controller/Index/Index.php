@@ -28,8 +28,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 */
 	function execute() {return df_leh(function(){
 		/** @var string|null $token */
-		$token = df_request('cko-payment-token');
-		return !$token ? $this->webhook() :
+		return !($token = df_request('cko-payment-token')) ? $this->webhook() :
 			(CustomerReturn::p($token) ? $this->_redirect('checkout/onepage/success')
 				// 2016-05-06
 				// «How to redirect a customer to the checkout payment step?» https://mage2.pro/t/1523

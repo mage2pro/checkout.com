@@ -1,15 +1,13 @@
 <?php
 namespace Dfe\CheckoutCom\Handler;
 use com\checkout\ApiServices\Charges\ChargeService;
-/**
- * 2016-06-08
- * I renamed it to get rid of the following
- * Magento 2 compiler (bin/magento setup:di:compile) failure:
- * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
- * because the name is already in use
- * in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
- * http://stackoverflow.com/questions/17746481
- */
+// 2016-06-08
+// I renamed it to get rid of the following
+// Magento 2 compiler (bin/magento setup:di:compile) failure:
+// «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+// because the name is already in use
+// in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
+// http://stackoverflow.com/questions/17746481
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
@@ -23,7 +21,7 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\InvoiceService;
-class CustomerReturn {
+final class CustomerReturn {
 	/**
 	 * 2016-05-05
 	 * Handles a customer return to the store after a 3D Secure verification
@@ -173,30 +171,29 @@ class CustomerReturn {
 
 	/**
 	 * 2016-05-16
-	 * @param Order $order
-	 * @param Payment $payment
-	 * @param CCharge $charge
+	 * @param Order $o
+	 * @param Payment $p
+	 * @param CCharge $c
 	 * @param string $action
 	 * @return void
 	 */
-	private static function action(Order $order, Payment $payment, CCharge $charge, $action) {
+	private static function action(Order $o, Payment $p, CCharge $c, $action) {
 		/** @var Method $method */
-		$method = df_ar($payment->getMethodInstance(), Method::class);
-		$method->setStore($order->getStoreId());
+		$method = dfp_method_by_p($p);
 		if (M::ACTION_AUTHORIZE === $action) {
 			// 2016-05-15
 			// Disable this event because we will trigger Capture manually.
-			$method->disableEvent($charge->getId(), 'charge.captured');
+			$method->disableEvent($c->getId(), 'charge.captured');
 		}
-		$method->responseSet($charge);
-		DfPayment::processActionS($payment, $action, $order);
+		$method->responseSet($c);
+		DfPayment::processActionS($p, $action, $o);
 		DfPayment::updateOrderS(
-			$payment
-			, $order
-			, Order::STATE_PROCESSING
-			, $order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
-			, $isCustomerNotified = true
+			$p
+			,$o
+			,Order::STATE_PROCESSING
+			,$o->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
+			,$isCustomerNotified = true
 		);
-		$order->save();
+		$o->save();
 	}
 }

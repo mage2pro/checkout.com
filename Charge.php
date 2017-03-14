@@ -1,7 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Df\Config\Source\NoWhiteBlack as NWB;
-use Dfe\CheckoutCom\Patch\CardTokenChargeCreate;
+use Dfe\CheckoutCom\Patch\CardTokenChargeCreate as lCharge;
 use Dfe\CheckoutCom\Patch\ChargesMapper;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
@@ -11,17 +11,20 @@ use libphonenumber\PhoneNumber as ParsedPhone;
 use Magento\Sales\Model\Order\Address as OA;
 use Magento\Sales\Model\Order\Item as OI;
 /**
+ * 2016-05-06
  * @method Method m()
  * @method Settings ss()
  */
 final class Charge extends \Df\Payment\Charge\WithToken {
 	/**
 	 * 2016-05-06
-	 * @return CardTokenChargeCreate
+	 * @used-by build()
+	 * @param bool $capture
+	 * @return lCharge
 	 */
-	private function _build() {
-		/** @var CardTokenChargeCreate $result */
-		$result = new CardTokenChargeCreate;
+	private function _build($capture) {
+		/** @var lCharge $result */
+		$result = new lCharge;
 		df_assert($this->oii());
 		/**
 		 * 2016-05-08
@@ -88,7 +91,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * https://mage2.pro/t/1565
 		 * It is then a good idea to do a Review procedure on such transactions.
 		 */
-		$result->setAutoCapture($this->needCapture() ? 'y' : 'n');
+		$result->setAutoCapture($capture ? 'y' : 'n');
 		/**
 		 * 2016-04-21
 		 * «Delayed capture time in hours between 0 and 168 inclusive
@@ -190,60 +193,44 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 	 * @return CAddress
 	 */
 	private function cAddress() {return dfc($this, function() {
-		/** @var OA $a */
-		$a = $this->addressSB();
 		/** @var CAddress $result */
 		$result = new CAddress;
-		/**
-		 * 2016-04-23
-		 * «Address field line 1. Max length of 100 characters.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		/** @var OA $a */
+		$a = $this->addressSB();		
+		// 2016-04-23
+		// «Address field line 1. Max length of 100 characters.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setAddressLine1($a->getStreetLine(1));
-		/**
-		 * 2016-04-23
-		 * «Address field line 2. Max length of 100 characters.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Address field line 2. Max length of 100 characters.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setAddressLine2($a->getStreetLine(2));
-		/**
-		 * 2016-04-23
-		 * «Address postcode. Max. length of 50 characters.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Address postcode. Max. length of 50 characters.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setPostcode($a->getPostcode());
-		/**
-		 * 2016-04-23
-		 * «The country ISO2 code e.g. US.
-		 * See provided list of supported ISO formatted countries.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «The country ISO2 code e.g. US.
+		// See provided list of supported ISO formatted countries.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setCountry($a->getCountryId());
-		/**
-		 * 2016-04-23
-		 * «Address city. Max length of 100 characters.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Address city. Max length of 100 characters.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setCity($a->getCity());
-		/**
-		 * 2016-04-23
-		 * «Address state. Max length of 100 characters.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Address state. Max length of 100 characters.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setState($a->getRegion());
-		/**
-		 * 2016-04-23
-		 * «Contact phone object for the card holder.
-		 * If provided, it will contain the countryCode and number properties
-		 * e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Contact phone object for the card holder.
+		// If provided, it will contain the countryCode and number properties
+		// e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setPhone($this->cPhone());
-		/**
-		 * 2016-04-23
-		 * «Shipping address details.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-23
+		// «Shipping address details.»
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		return $result;
 	});}
 
@@ -285,10 +272,10 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 			 * From now, the country code should be a string,
 			 * https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
 			 * The following data will fail
-				"phone": {
-					"number": "9629197300",
-					"countryCode": 7
-				}
+			 *	"phone": {
+			 *		"number": "9629197300",
+			 *		"countryCode": 7
+			 *	}
 			 */
 			$result->setCountryCode(strval($parsedPhone->getCountryCode()));
 		} catch (\libphonenumber\NumberParseException $e) {}
@@ -410,21 +397,18 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		,'time' => df_now('Y-m-d\TH:i:sO', 'Europe/London')
 	], [0, 100]);}
 
-	/** @return bool */
-	private function needCapture() {return $this[self::$P__NEED_CAPTURE];}
-
 	/**
 	 * 2016-05-06
 	 * 2016-04-23
 	 * «An array of Product details»
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 	 * @used-by _build()
-	 * @param CardTokenChargeCreate $c
+	 * @param lCharge $c
 	 * @return void
 	 */
-	private function setProducts(CardTokenChargeCreate $c) {
-		$this->oiLeafs(function(OI $i) use($c) {$c->setProducts($this->cProduct($i));});
-	}
+	private function setProducts(lCharge $c) {$this->oiLeafs(function(OI $i) use($c) {
+		$c->setProducts($this->cProduct($i))
+	;});}
 
 	/**
 	 * 2016-05-13
@@ -444,29 +428,12 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
-	 * @override
-	 * @return void
-	 */
-	protected function _construct() {
-		parent::_construct();
-		$this->_prop(self::$P__NEED_CAPTURE, DF_V_BOOL, false);
-	}
-
-	/** @var string */
-	private static $P__NEED_CAPTURE = 'need_capture';
-
-	/**
-	 * 2016-05-06
 	 * @param Method $m
 	 * @param string $token
 	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	static function build(Method $m, $token, $capture = true) {
-		return (new ChargesMapper((new self([
-			self::$P__METHOD => $m
-			, self::$P__NEED_CAPTURE => $capture
-			, self::$P__TOKEN => $token
-		]))->_build()))->requestPayloadConverter();
-	}
+	static function build(Method $m, $token, $capture = true) {return
+		(new ChargesMapper((new self($m, $token))->_build($capture)))->requestPayloadConverter()
+	;}
 }
