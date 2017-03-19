@@ -73,8 +73,7 @@ abstract class Charge extends Handler {
 			/** @var int|null $paymentId */
 			$paymentId = df_fetch_one('sales_payment_transaction', 'payment_id', ['txn_id' => $id]);
 			if ($paymentId) {
-				$result = df_load(Payment::class, $paymentId);
-				dfp_webhook_case($result);
+				$result = dfp_webhook_case(df_load(Payment::class, $paymentId));
 				/**
 				 * 2016-05-11
 				 * This ID will have to be used in scenarios involving webhook.

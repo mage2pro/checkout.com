@@ -52,14 +52,8 @@ class Captured extends Charge {
 			else {
 				$this->order()->setIsInProcess(true);
 				$this->order()->setCustomerNoteNotify(true);
-				/** @var Transaction $t */
-				$t = df_db_transaction();
-				$t->addObject($this->invoice());
-				$t->addObject($this->order());
-				$t->save();
-				/** @var InvoiceSender $sender */
-				$sender = df_o(InvoiceSender::class);
-				$sender->send($this->invoice());
+				df_db_transaction()->addObject($this->invoice())->addObject($this->order())->save();
+				df_invoice_send_email($this->invoice());
 			}
 		}
 		return $result;

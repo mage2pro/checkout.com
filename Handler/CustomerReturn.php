@@ -11,13 +11,13 @@ use com\checkout\ApiServices\Charges\ChargeService;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
-use Df\Sales\Model\Order\Payment as DfPayment;
+use Df\Sales\Model\Order\Payment as DFP;
 use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Response;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\DB\Transaction;
 use Magento\Payment\Model\Method\AbstractMethod as M;
-use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\InvoiceService;
@@ -43,7 +43,7 @@ final class CustomerReturn {
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/1561
 		 */
-		/** @var Order|DfOrder $order */
+		/** @var O|DfOrder $order */
 		$order = df_checkout_session()->getLastRealOrder();
 		/**
 		 * 2016-05-08
@@ -54,7 +54,7 @@ final class CustomerReturn {
 		 * In our case (immediately after placing the order and the 3D Secure verification),
 		 * the payment is unique for the current order.
 		 */
-		/** @var Payment|DfPayment $payment */
+		/** @var Payment|DFP $payment */
 		$payment = $order->getPayment();
 		// How to get the last order programmatically? https://mage2.pro/t/1528
 		// How to get an order programmatically? https://mage2.pro/t/1562
@@ -104,10 +104,8 @@ final class CustomerReturn {
 			) {
 				/** @var CCharge $captureCharge */
 				$captureCharge = Response::getCaptureCharge($charge->getId());
-				$order->unsetData(Order::PAYMENT);
-				$payment = $order->getPayment();
-				$payment->unsetData('method_instance');
-				dfp_webhook_case($payment);
+				$order->unsetData(O::PAYMENT);
+				$payment = dfp_webhook_case($order->getPayment())->unsetData('method_instance');
 				/**
 				 * 2017-01-05
 				 * Прежде я думал, что здесь нам ешё нельзя устанавливать свой нестандартный
@@ -171,29 +169,23 @@ final class CustomerReturn {
 
 	/**
 	 * 2016-05-16
-	 * @param Order $o
+	 * @param O $o
 	 * @param Payment $p
 	 * @param CCharge $c
 	 * @param string $action
 	 * @return void
 	 */
-	private static function action(Order $o, Payment $p, CCharge $c, $action) {
-		/** @var Method $method */
-		$method = dfp_method_by_p($p);
+	private static function action(O $o, Payment $p, CCharge $c, $action) {
+		/** @var Method $m */
+		$m = dfpm($p);
 		if (M::ACTION_AUTHORIZE === $action) {
 			// 2016-05-15
 			// Disable this event because we will trigger Capture manually.
-			$method->disableEvent($c->getId(), 'charge.captured');
+			$m->disableEvent($c->getId(), 'charge.captured');
 		}
-		$method->responseSet($c);
-		DfPayment::processActionS($p, $action, $o);
-		DfPayment::updateOrderS(
-			$p
-			,$o
-			,Order::STATE_PROCESSING
-			,$o->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING)
-			,$isCustomerNotified = true
-		);
+		$m->responseSet($c);
+		DFP::processActionS($p, $action, $o);
+		DFP::updateOrderS($p, $o, O::STATE_PROCESSING, df_order_ds(O::STATE_PROCESSING), true);
 		$o->save();
 	}
 }
