@@ -7,7 +7,7 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
-use Df\Payment\PlaceOrder;
+use Df\Payment\PlaceOrderInternal as PO;
 use Df\Payment\Source\AC;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Magento\Framework\Exception\LocalizedException as LE;
@@ -484,7 +484,7 @@ final class Method extends \Df\Payment\Method {
 			// not the transaction's ID.
 			// In this case, we postpone creating a Magento transaction yet,
 			// so we do not call $payment->setTransactionId($response->getId());
-			$this->iiaSet(PlaceOrder::DATA, $result);
+			PO::setData($this, $result);
 			// 2016-05-06
 			// Postpone sending an order confirmation email to the customer,
 			// because the customer should pass 3D Secure validation first.

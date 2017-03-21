@@ -91,41 +91,6 @@ define([
 		return deferred.promise();
 	}),
 	/**
-	 * 2016-08-06
-	 * @override
-	 * @see mage2pro/core/Payment/view/frontend/web/mixin.js
-	 * @used-by placeOrderInternal()
-	 */
-	onSuccess: function(redirectUrl) {
-		/**
-		 * 2016-05-04
-		 * Redirect to do a 3D Secure verification.
-		 * Similar to: redirectOnSuccessAction.execute()
-		 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Checkout/view/frontend/web/js/action/redirect-on-success.js#L19-L19
-		 *
-		 * 2016-05-09
-		 * If 3D Secure is not necessary,
-		 * Method @see \Dfe\CheckoutCom\PlaceOrder::response() returns null:
-		 * https://github.com/mage2pro/checkout.com/blob/f4acf4a3/PlaceOrder.php#L58
-		 * which is then converted by
-		 * @see \Magento\Framework\Webapi\ServiceOutputProcessor::process()
-		 * to an empty array:
-		 * «A Web API request returns an empty array for a null response»
-		 * https://mage2.pro/t/1569
-		 *
-		 * When there is no need to do a 3D Secure verification,
-		 * the value of redirectUrl will be an empty array.
-		 * So the correct test to be done is: if (redirectUrl),
-		 * and if (redirectUrl.length)
-		 * In all cases, we want to cope with the possibility of
-		 * Magento core unexpectedly returning null.
-		 */
-		redirectUrl && redirectUrl.length
-			? window.location.replace(redirectUrl)
-			: this._super()
-		;
-	},
-	/**
 	 * @override
 	 * @see https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Checkout/view/frontend/web/js/view/payment/default.js#L127-L159
 	 * @used-by https://github.com/magento/magento2/blob/2.1.0/lib/web/knockoutjs/knockout.js#L3863
@@ -156,14 +121,12 @@ define([
 					,'email-address': _this.dfc.email()
 				}, function(response) {
 					if ('error' === response.type) {
-						/**
-						 * 2016-08-05
-						 * We can get error messages from the response:
-						 * response.title and response.description
-						 * But they are not informative and contain a text like
-						 * «Server Operation Failed»
-						 * «The last server operation failed.»
-						 */
+						// 2016-08-05
+						// We can get error messages from the response:
+						// response.title and response.description
+						// But they are not informative and contain a text like
+						// «Server Operation Failed»
+						// «The last server operation failed.»
 						_this.showErrorMessage(
 							'It looks like you have entered incorrect bank card data.'
 						);
