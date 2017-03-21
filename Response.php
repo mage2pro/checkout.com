@@ -44,7 +44,7 @@ class Response extends \Df\Core\O {
 	/**
 	 * 2016-05-08
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
-	 * @used-by \Dfe\CheckoutCom\Method::redirectUrl()
+	 * @used-by \Dfe\CheckoutCom\Method::ckoRedirectUrl()
 	 * @param string|string[]|null $k [optional]
 	 * @return array(string => string)
 	 */

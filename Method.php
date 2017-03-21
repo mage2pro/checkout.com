@@ -145,7 +145,7 @@ final class Method extends \Df\Payment\Method {
 	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
 	 * So we can employ the Review mode for such payments.
 	 */
-	function getConfigPaymentAction() {return $this->redirectUrl() ? null : $this->r()->action();}
+	function getConfigPaymentAction() {return $this->ckoRedirectUrl() ? null : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
@@ -571,7 +571,7 @@ final class Method extends \Df\Payment\Method {
 		}
 	 * @return string|null
 	 */
-	private function redirectUrl() {return dfc($this, function() {
+	private function ckoRedirectUrl() {return dfc($this, function() {
 		/** @var string|null $result */
 		$result = $this->r()->a('redirectUrl');
 		if ($result) {
