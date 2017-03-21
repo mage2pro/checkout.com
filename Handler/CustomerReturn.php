@@ -55,8 +55,6 @@ final class CustomerReturn {
 		 * In our case (immediately after placing the order and the 3D Secure verification),
 		 * the payment is unique for the current order.
 		 */
-		/** @var Payment|DFP $payment */
-		$payment = $order->getPayment();
 		// How to get the last order programmatically? https://mage2.pro/t/1528
 		// How to get an order programmatically? https://mage2.pro/t/1562
 		/** @var ChargeService $api */
@@ -96,7 +94,8 @@ final class CustomerReturn {
 			df_checkout_error($r->messageC());
 		}
 		else {
-			self::action($order, $payment, $charge, $r->action());
+			/** @var Payment|DFP $payment */
+			self::action($order, $payment = $order->getPayment(), $charge, $r->action());
 			df_order_send_email($order);
 			if (AC::A === $r->action()
 				&& 'y' === strtolower($charge->getAutoCapture())
@@ -105,7 +104,8 @@ final class CustomerReturn {
 				/** @var CCharge $captureCharge */
 				$captureCharge = Response::getCaptureCharge($charge->getId());
 				$order->unsetData(O::PAYMENT);
-				$payment = dfp_webhook_case($order->getPayment())->unsetData('method_instance');
+				dfp_webhook_case($payment);
+				$payment->unsetData('method_instance');
 				/**
 				 * 2017-01-05
 				 * Прежде я думал, что здесь нам ешё нельзя устанавливать свой нестандартный
