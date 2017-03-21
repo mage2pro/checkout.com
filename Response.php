@@ -39,7 +39,6 @@ use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\ApiServices\SharedModels\Charge as SCharge;
 use Df\Payment\Source\AC;
 use Dfe\CheckoutCom\Settings as S;
-use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
 class Response extends \Df\Core\O {
 	/**
@@ -76,7 +75,7 @@ class Response extends \Df\Core\O {
 	 * @return string
 	 */
 	function action() {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
-		? AC::A : S::s()->actionDesired($this->order()->getCustomerId())
+		? AC::A : S::s()->actionDesired($this->order())
 	;});}
 
 	/**

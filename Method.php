@@ -17,6 +17,7 @@ use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Payment as OP;
 use Magento\Sales\Model\Order\Payment\Transaction;
+/** @method Settings s() */
 final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-03-07
@@ -464,18 +465,14 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * We use @uses \Dfe\CheckoutCom\Method::actionDesired()
-	 * instead of @see \Dfe\CheckoutCom\Method::action()
-	 * to avoid a infinite recursion.
-	 *
+	 * We use actionDesired() instead of @see \Dfe\CheckoutCom\Method::action()
+	 * to avoid an infinite recursion.
 	 * If Checkout.com marks a payment as «flagged»,
 	 * then the @see \Dfe\CheckoutCom\Method::isCaptureDesired() method's result will be ignored,
 	 * and the «authorize» action will be used instead.
 	 * @return bool
 	 */
-	private function isCaptureDesired() {return
-		AC::C === $this->s()->actionDesired($this->o()->getCustomerId())
-	;}
+	private function isCaptureDesired() {return AC::c($this->s()->actionDesired($this->o()));}
 
 	/**
 	 * 2016-04-23

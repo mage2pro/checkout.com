@@ -4,16 +4,19 @@ use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\Patch\ApiClient as API;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
+use Magento\Sales\Model\Order as O;
 /** @method static Settings s() */
 final class Settings extends \Df\StripeClone\Settings {
 	/**
 	 * 2016-05-15
-	 * @param int $customerId
+	 * @used-by \Dfe\CheckoutCom\Method::isCaptureDesired()
+	 * @used-by \Dfe\CheckoutCom\Response::action()
+	 * @param O $o
 	 * @return string
 	 */
-	function actionDesired($customerId) {return
-		$this->v(df_customer_is_new($customerId) ? 'actionForNew' : 'actionForReturned')
-	;}
+	function actionDesired(O $o) {return $this->v(
+		df_customer_is_new($o->getCustomerId()) ? 'actionForNew' : 'actionForReturned'
+	);}
 
 	/**
 	 * 2016-05-05
