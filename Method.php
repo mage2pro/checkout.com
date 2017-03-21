@@ -465,6 +465,37 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
+	 * A sample response when a 3D Secure validation is needed:
+		{
+			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
+			"liveMode": false,
+			"chargeMode": 2,
+			"responseCode": "10000",
+			"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
+		}
+	 * @return string|null
+	 */
+	private function ckoRedirectUrl() {return dfc($this, function() {
+		/** @var string|null $result */
+		if ($result = $this->r()->a('redirectUrl')) {
+			// 2016-05-07
+			// If a 3D Secure validation is needed,
+			// then $response->getId() returns a token (see a sample response above),
+			// not the transaction's ID.
+			// In this case, we postpone creating a Magento transaction yet,
+			// so we do not call $payment->setTransactionId($response->getId());
+			$this->iiaSet(PlaceOrder::DATA, $result);
+			// 2016-05-06
+			// Postpone sending an order confirmation email to the customer,
+			// because the customer should pass 3D Secure validation first.
+			// «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
+			$this->o()->setCanSendNewEmailFlag(false);
+		}
+		return $result;
+	});}
+
+	/**
+	 * 2016-05-08
 	 * We use actionDesired() instead of @see \Dfe\CheckoutCom\Method::action()
 	 * to avoid an infinite recursion.
 	 * If Checkout.com marks a payment as «flagged»,
@@ -554,42 +585,6 @@ final class Method extends \Df\Payment\Method {
 	private function r() {return dfc($this, function() {return
 		Response::sp($this->response(), $this->o())
 	;});}
-
-	/**
-	 * 2016-05-08
-	 * A sample response when a 3D Secure validation is needed:
-		{
-			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
-			"liveMode": false,
-			"chargeMode": 2,
-			"responseCode": "10000",
-			"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
-		}
-	 * @return string|null
-	 */
-	private function ckoRedirectUrl() {return dfc($this, function() {
-		/** @var string|null $result */
-		$result = $this->r()->a('redirectUrl');
-		if ($result) {
-			/**
-			 * 2016-05-07
-			 * If a 3D Secure validation is needed,
-			 * then $response->getId() returns a token (see a sample response above),
-			 * not the transaction's ID.
-			 * In this case, we postpone creating a Magento transaction yet,
-			 * so we do not call $payment->setTransactionId($response->getId());
-			 */
-			$this->iiaSet(PlaceOrder::DATA, $result);
-			/**
-			 * 2016-05-06
-			 * Postpone sending an order confirmation email to the customer,
-			 * because the customer should pass 3D Secure validation first.
-			 * «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
-			 */
-			$this->o()->setCanSendNewEmailFlag(false);
-		}
-		return $result;
-	});}
 
 	/**
 	 * 2016-08-21
