@@ -8,12 +8,11 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrder;
+use Df\Payment\Source\AC;
 use Dfe\CheckoutCom\Patch\ChargeService;
-use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
-use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Payment as OP;
@@ -475,7 +474,7 @@ final class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	private function isCaptureDesired() {return
-		M::ACTION_AUTHORIZE_CAPTURE === $this->s()->actionDesired($this->o()->getCustomerId())
+		AC::C === $this->s()->actionDesired($this->o()->getCustomerId())
 	;}
 
 	/**

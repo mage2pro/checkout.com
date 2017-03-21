@@ -9,6 +9,7 @@ use com\checkout\ApiServices\Charges\ChargeService;
 // in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
 // http://stackoverflow.com/questions/17746481
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
+use Df\Payment\Source\AC;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Df\Sales\Model\Order\Payment as DFP;
@@ -97,8 +98,7 @@ final class CustomerReturn {
 		else {
 			self::action($order, $payment, $charge, $r->action());
 			df_order_send_email($order);
-			if (
-				M::ACTION_AUTHORIZE === $r->action()
+			if (AC::A === $r->action()
 				&& 'y' === strtolower($charge->getAutoCapture())
 				&& !$r->flagged()
 			) {
@@ -112,31 +112,31 @@ final class CustomerReturn {
 				 * идентификатор транзакции, потому что метод
 				 * @see \Magento\Sales\Model\Order\Payment\Operations\CaptureOperation::capture()
 				 * перетрёт наш идентификатор кодом:
-						$payment->setTransactionId(
-							$this->transactionManager->generateTransactionId(
-								$payment,
-								Transaction::TYPE_CAPTURE,
-								$payment->getAuthorizationTransaction()
-							)
-						);
+				 *		$payment->setTransactionId(
+				 *			$this->transactionManager->generateTransactionId(
+				 *				$payment,
+				 *				Transaction::TYPE_CAPTURE,
+				 *				$payment->getAuthorizationTransaction()
+				 *			)
+				 *		);
 				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
 				 * Однако мне следовало посмотреть глубже, в реализацию метода
 				 * @see \Magento\Sales\Model\Order\Payment\Transaction\Manager::generateTransactionId()
 				 * чтобы понять, что когда нестандартный идентификатор транзакции уже установлен,
 				 * то метод его не перетирает:
-					if (!$payment->getParentTransactionId()
-						&& !$payment->getTransactionId() && $transactionBasedOn
-					) {
-						$payment->setParentTransactionId($transactionBasedOn->getTxnId());
-					}
-					// generate transaction id for an offline action or payment method that didn't set it
-					if (
-				 		($parentTxnId = $payment->getParentTransactionId())
-				 		&& !$payment->getTransactionId()
-				 	) {
-						return "{$parentTxnId}-{$type}";
-					}
-					return $payment->getTransactionId();
+				 *	if (!$payment->getParentTransactionId()
+				 *		&& !$payment->getTransactionId() && $transactionBasedOn
+				 *	) {
+				 *		$payment->setParentTransactionId($transactionBasedOn->getTxnId());
+				 *	}
+				 *	// generate transaction id for an offline action or payment method that didn't set it
+				 *	if (
+				 * 		($parentTxnId = $payment->getParentTransactionId())
+				 * 		&& !$payment->getTransactionId()
+				 *	) {
+				 *		return "{$parentTxnId}-{$type}";
+				 *	}
+				 *	return $payment->getTransactionId();
 				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Transaction/Manager.php#L73-L80
 				 * Поэтому никакие обходные манёвры нам не нужны,
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
@@ -161,7 +161,6 @@ final class CustomerReturn {
 				$t->addObject($invoice);
 				$t->addObject($order);
 				$t->save();
-				//self::action($order, $payment, $captureCharge, M::ACTION_AUTHORIZE_CAPTURE);
 			}
 		}
 		return $result;
@@ -178,7 +177,7 @@ final class CustomerReturn {
 	private static function action(O $o, Payment $p, CCharge $c, $action) {
 		/** @var Method $m */
 		$m = dfpm($p);
-		if (M::ACTION_AUTHORIZE === $action) {
+		if (AC::A === $action) {
 			// 2016-05-15
 			// Disable this event because we will trigger Capture manually.
 			$m->disableEvent($c->getId(), 'charge.captured');

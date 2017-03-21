@@ -195,7 +195,7 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 					showInStore='1'
 				>
 					<label>Payment Action for a New Customer</label>
-					<source_model>Dfe\CheckoutCom\Source\Action</source_model>
+					<source_model>Df\Payment\Source\AC</source_model>
 					<comment><![CDATA[A customer is regarded as <b>new</b>, if he does not have any order in the «Completed» or «Processing» state.]]></comment>
 					<depends><field id='enable'>1</field></depends>
 				</field>
@@ -209,7 +209,7 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 					showInStore='1'
 				>
 					<label>Payment Action for a Returned Customer</label>
-					<source_model>Dfe\CheckoutCom\Source\Action</source_model>
+					<source_model>Df\Payment\Source\AC</source_model>
 					<depends><field id='enable'>1</field></depends>
 				</field>
 				<field

@@ -37,6 +37,7 @@ namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\ApiServices\SharedModels\Charge as SCharge;
+use Df\Payment\Source\AC;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order;
@@ -74,10 +75,8 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @return string
 	 */
-	function action() {return dfc($this, function() {return
-		$this->flagged() || !$this->waitForCapture()
-		? M::ACTION_AUTHORIZE
-		: S::s()->actionDesired($this->order()->getCustomerId())
+	function action() {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
+		? AC::A : S::s()->actionDesired($this->order()->getCustomerId())
 	;});}
 
 	/**
@@ -146,11 +145,9 @@ class Response extends \Df\Core\O {
 	 * @return string
 	 * @throws \Exception
 	 */
-	function magentoTransactionId() {return dfc($this, function() {return
-		M::ACTION_AUTHORIZE === $this->action() ? $this->charge()->getId() :
-			self::getCaptureCharge($this->charge()->getId())->getId()
-		;
-	});}
+	function magentoTransactionId() {return dfc($this, function() {return AC::A === $this->action()
+		? $this->charge()->getId() : self::getCaptureCharge($this->charge()->getId())->getId()
+	;});}
 
 	/**
 	 * 2016-07-17
