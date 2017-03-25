@@ -20,7 +20,7 @@ class Voided extends Charge {
 		// 2016-05-11
 		// isPaymentReview() means that the transaction is «Flagged».
 		// We need to void it.
-		$this->order()->isPaymentReview() ? $this->payment()->deny() : $this->payment()->void(new O);
-		$this->order()->save();
+		$this->o()->isPaymentReview() ? $this->payment()->deny() : $this->payment()->void(new O);
+		$this->o()->save();
 	}
 }

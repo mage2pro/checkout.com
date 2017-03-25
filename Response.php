@@ -75,7 +75,7 @@ class Response extends \Df\Core\O {
 	 * @return string
 	 */
 	function action() {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
-		? AC::A : S::s()->actionDesired($this->order())
+		? AC::A : S::s()->actionDesired($this[self::$P__ORDER])
 	;});}
 
 	/**
@@ -200,9 +200,6 @@ class Response extends \Df\Core\O {
 
 	/** @return CCharge */
 	private function charge() {return $this[self::$P__CHARGE];}
-
-	/** @return Order */
-	private function order() {return $this[self::$P__ORDER];}
 
 	/**
 	 * 2016-05-15

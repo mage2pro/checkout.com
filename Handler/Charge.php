@@ -35,10 +35,14 @@ abstract class Charge extends Handler {
 
 	/**
 	 * 2016-03-26
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::invoice()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::process()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Refunded::process()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Voided::process()
 	 * @return Order|DfOrder
 	 * @throws LE
 	 */
-	final protected function order() {return dfc($this, function() {
+	final protected function o() {return dfc($this, function() {
 		/** @var Order $result */
 		$result = $this->payment()->getOrder();
 		if (!$result->getId()) {

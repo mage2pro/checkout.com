@@ -3,10 +3,9 @@ namespace Dfe\CheckoutCom\Handler\Charge;
 use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Dfe\CheckoutCom\Handler\Charge;
-use Magento\Framework\DB\Transaction;
 use Magento\Framework\Exception\LocalizedException as LE;
+use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Service\InvoiceService;
 // 2016-05-10
 // charge.captured
@@ -26,33 +25,33 @@ class Captured extends Charge {
 	final protected function process() {
 		/** @var string|null $result */
 		$result = null;
+		/** @var O|DfOrder $o */
+		$o = $this->o();
 		// 2016-05-11
 		// The payment is «Flagged».
 		// The «Accept» operation should be performed.
-		if ($this->order()->isPaymentReview()) {
+		if ($o->isPaymentReview()) {
 			$this->payment()->accept();
-			$this->order()->save();
+			$o->save();
 		}
 		// 2016-05-11
 		// The payment is in the «Authorized» state.
 		else {
-			/**
-			 * 2016-12-30
-			 * Мы не должны считать исключительной ситуацией повторное получение
-			 * ранее уже полученного оповещения.
-			 * В документации к Stripe, например, явно сказано:
-			 * «Webhook endpoints may occasionally receive the same event more than once.
-			 * We advise you to guard against duplicated event receipts
-			 * by making your event processing idempotent.»
-			 * https://stripe.com/docs/webhooks#best-practices
-			 */
-			if (!$this->order()->canInvoice()) {
+			// 2016-12-30
+			// Мы не должны считать исключительной ситуацией повторное получение
+			// ранее уже полученного оповещения.
+			// В документации к Stripe, например, явно сказано:
+			// «Webhook endpoints may occasionally receive the same event more than once.
+			// We advise you to guard against duplicated event receipts
+			// by making your event processing idempotent.»
+			// https://stripe.com/docs/webhooks#best-practices
+			if (!$o->canInvoice()) {
 				$result = __('The order does not allow an invoice to be created.');
 			}
 			else {
-				$this->order()->setIsInProcess(true);
-				$this->order()->setCustomerNoteNotify(true);
-				df_db_transaction()->addObject($this->invoice())->addObject($this->order())->save();
+				$o->setIsInProcess(true);
+				$o->setCustomerNoteNotify(true);
+				df_db_transaction()->addObject($this->invoice())->addObject($o)->save();
 				df_invoice_send_email($this->invoice());
 			}
 		}
@@ -69,7 +68,7 @@ class Captured extends Charge {
 			/** @var InvoiceService $invoiceService */
 			$invoiceService = df_o(InvoiceService::class);
 			/** @var Invoice|DfInvoice $result */
-			$result = $invoiceService->prepareInvoice($this->order());
+			$result = $invoiceService->prepareInvoice($this->o());
 			if (!$result) {
 				throw new LE(__('We can\'t save the invoice right now.'));
 			}

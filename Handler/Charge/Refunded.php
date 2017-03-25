@@ -56,6 +56,6 @@ class Refunded extends Charge {
 	 * @return mixed
 	 */
 	final protected function process() {return dfp_refund(
-		$this->payment(), df_invoice_by_trans($this->order(), $this->parentId())
+		$this->payment(), df_invoice_by_trans($this->o(), $this->parentId())
 	) ?: 'skipped';}
 }
