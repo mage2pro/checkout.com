@@ -8,7 +8,7 @@ use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
-use Magento\Sales\Api\Data\OrderInterface;
+// 2016-05-10
 abstract class Charge extends Handler {
 	/**
 	 * 2016-03-28
@@ -42,20 +42,7 @@ abstract class Charge extends Handler {
 	 * @return Order|DfOrder
 	 * @throws LE
 	 */
-	final protected function o() {return dfc($this, function() {
-		/** @var Order $result */
-		$result = $this->payment()->getOrder();
-		if (!$result->getId()) {
-			throw new LE(__('The order no longer exists.'));
-		}
-		/**
-		 * 2016-03-26
-		 * Very Important! If not done the order will create a duplicate payment
-		 * @used-by \Magento\Sales\Model\Order::getPayment()
-		 */
-		$result[OrderInterface::PAYMENT] = $this->payment();
-		return $result;
-	});}
+	final protected function o() {return df_order_by_payment($this->payment());}
 
 	/**
 	 * 2016-03-26
