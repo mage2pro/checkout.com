@@ -42,7 +42,7 @@ abstract class Charge extends Handler {
 	 * @return Order|DfOrder
 	 * @throws LE
 	 */
-	final protected function o() {return df_order_by_payment($this->payment());}
+	final protected function o() {return df_order($this->payment());}
 
 	/**
 	 * 2016-03-26
