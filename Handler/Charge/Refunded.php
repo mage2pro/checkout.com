@@ -55,7 +55,5 @@ class Refunded extends Charge {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
-	final protected function process() {return dfp_refund(
-		$this->payment(), df_invoice_by_trans($this->o(), $this->parentId())
-	) ?: 'skipped';}
+	final protected function process() {return dfp_refund($this->payment(), $this->parentId()) ?: 'skipped';}
 }

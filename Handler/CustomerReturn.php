@@ -183,8 +183,7 @@ final class CustomerReturn {
 			$m->disableEvent($c->getId(), 'charge.captured');
 		}
 		$m->responseSet($c);
-		DFP::processActionS($p, $action, $o);
-		DFP::updateOrderS($p, $o, O::STATE_PROCESSING, df_order_ds(O::STATE_PROCESSING), true);
+		dfp_action($p, $action);
 		$o->save();
 	}
 }
