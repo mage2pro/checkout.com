@@ -183,6 +183,12 @@ final class CustomerReturn {
 			$m->disableEvent($c->getId(), 'charge.captured');
 		}
 		$m->responseSet($c);
+		/**
+		 * 2017-03-26
+		 * Этот вызов приводит к добавлению транзакции типа $action:
+		 * https://github.com/mage2pro/core/blob/2.4.2/Payment/W/Nav.php#L100-L114
+		 * Идентификатор и данные транзакции мы уже установили в методе @see p()
+		 */		
 		dfp_action($p, $action);
 		$o->save();
 	}
