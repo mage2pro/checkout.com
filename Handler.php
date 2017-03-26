@@ -19,10 +19,13 @@ abstract class Handler extends \Df\Core\O {
 
 	/**
 	 * 2016-05-10
+	 * @used-by isInitiatedByMyself()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge::id()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge::parentId()
 	 * @param string|null $path [optional]
 	 * @return string|array(string => mixed)
 	 */
-	protected function o($path = null) {
+	final protected function r($path = null) {
 		/** @var array(string => mixed) $o */
 		$o = dfa($this->_data, 'message');
 		return !$path ? $o : dfc($this, function($path) use($o) {return
@@ -45,7 +48,7 @@ abstract class Handler extends \Df\Core\O {
 	 * @return bool
 	 */
 	private function isInitiatedByMyself() {return
-		in_array($this->type(), df_csv_parse($this->o('metadata/' . Method::DISABLED_EVENTS)))
+		in_array($this->type(), df_csv_parse($this->r('metadata/' . Method::DISABLED_EVENTS)))
 	;}
 
 	/**

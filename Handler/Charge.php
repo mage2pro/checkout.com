@@ -31,7 +31,7 @@ abstract class Charge extends Handler {
 	 * 2016-03-27
 	 * @return string
 	 */
-	final protected function id() {return $this->o('id');}
+	final protected function id() {return $this->r('id');}
 
 	/**
 	 * 2016-03-26
@@ -133,7 +133,7 @@ abstract class Charge extends Handler {
 	 * originalId is absent only for the primary transaction (charge.succeeded)
 	 * @return string|null
 	 */
-	final protected function parentId() {return $this->o('originalId');}
+	final protected function parentId() {return $this->r('originalId');}
 
 	/**
 	 * 2016-05-10
