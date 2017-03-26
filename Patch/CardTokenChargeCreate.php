@@ -1,6 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Patch;
-use \com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as _Parent;
+use com\checkout\ApiServices\Charges\RequestModels\CardTokenChargeCreate as _Parent;
 class CardTokenChargeCreate extends _Parent {
 	/**
 	 * 2016-05-08

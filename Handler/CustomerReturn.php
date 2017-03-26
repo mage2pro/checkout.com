@@ -96,7 +96,7 @@ final class CustomerReturn {
 		else {
 			/** @var Payment|DFP $payment */
 			self::action($order, $payment = $order->getPayment(), $charge, $r->action());
-			df_order_send_email($order);
+			df_mail_order($order);
 			if (AC::A === $r->action()
 				&& 'y' === strtolower($charge->getAutoCapture())
 				&& !$r->flagged()
