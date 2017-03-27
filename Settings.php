@@ -32,6 +32,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * 2016-05-05
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+	 * @used-by \Dfe\CheckoutCom\Response::getCaptureCharge()
 	 * @return ChargeService
 	 */
 	function apiCharge() {return $this->api()->chargeService();}

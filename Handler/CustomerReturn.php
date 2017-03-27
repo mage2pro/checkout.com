@@ -17,7 +17,6 @@ use Dfe\CheckoutCom\Method;
 use Dfe\CheckoutCom\Response;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\DB\Transaction;
-use Magento\Payment\Model\Method\AbstractMethod as M;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Order\Payment;
@@ -57,8 +56,10 @@ final class CustomerReturn {
 		 */
 		// How to get the last order programmatically? https://mage2.pro/t/1528
 		// How to get an order programmatically? https://mage2.pro/t/1562
+		/** @var S $s */
+		$s = dfps(__CLASS__);		
 		/** @var ChargeService $api */
-		$api = S::s()->apiCharge($order->getStore());
+		$api = $s->apiCharge($order->getStore());
 		/**
 		 * 2016-05-15
 		 * Even in the case of a request with autoCapture = true,
@@ -77,7 +78,7 @@ final class CustomerReturn {
 		 */
 		dfp_report(__CLASS__, json_decode($charge->{'json'}), 'customerReturn');
 		/** @var Response $r */
-		$r = Response::sp($charge, $order);
+		$r = new Response($charge, $order);
 		/** @var bool $result */
 		$result = $r->valid();
 		if (!$result) {

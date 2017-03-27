@@ -140,6 +140,13 @@ abstract class Charge extends Handler {
 	 * @return ChargeResponse|null
 	 */
 	final protected function parentCharge() {return dfc($this, function() {return
-		!$this->parentId() ? null : S::s()->apiCharge()->getCharge($this->parentId())
+		!$this->parentId() ? null : $this->ss()->apiCharge()->getCharge($this->parentId())
 	;});}
+
+	/**
+	 * 2017-03-27
+	 * @used-by parentCharge()
+	 * @return S
+	 */
+	private function ss() {return dfps($this->payment());}
 }

@@ -1,46 +1,56 @@
 <?php
 namespace Dfe\CheckoutCom;
-/**
- * 2016-06-08
- * I renamed it to get rid of the following
- * Magento 2 compiler (bin/magento setup:di:compile) failure:
- * «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
- * because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
- * http://stackoverflow.com/questions/17746481
- *
- * 2016-07-17
- * A sample failure response:
-	{
-		"id": "charge_test_153AF6744E5J7A98E1D9",
-		"responseMessage": "40144 - Threshold Risk - Decline",
-		"responseAdvancedInfo": null,
-		"responseCode": "40144",
-		"status": "Declined",
-		"authCode": "00000"
-		...
-	}
- *
- * 2016-08-05
- * A sample failure response when some request params are invalid:
-	{
-		"errorCode": "70000",
-		"message": "Validation error",
-		"errors": [
-			"Invalid value for 'token'"
-		],
-		"errorMessageCodes": [
-			"70006"
-		],
-		"eventId": "96320dfb-672c-4317-93d0-04317e8ea9bf"
-	}
- */
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\ApiServices\SharedModels\Charge as SCharge;
 use Df\Payment\Source\AC;
+use Dfe\CheckoutCom\Patch\ChargeService as API;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Sales\Model\Order;
-class Response extends \Df\Core\O {
+// 2016-05-15
+//
+// 2016-06-08
+// I renamed it to get rid of the following
+// Magento 2 compiler (bin/magento setup:di:compile) failure:
+// «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+// because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
+// http://stackoverflow.com/questions/17746481
+//
+// 2016-07-17
+// A sample failure response:
+//	{
+//		"id": "charge_test_153AF6744E5J7A98E1D9",
+//		"responseMessage": "40144 - Threshold Risk - Decline",
+//		"responseAdvancedInfo": null,
+//		"responseCode": "40144",
+//		"status": "Declined",
+//		"authCode": "00000"
+//		...
+//	}
+//
+// 2016-08-05
+// A sample failure response when some request params are invalid:
+//	{
+//		"errorCode": "70000",
+//		"message": "Validation error",
+//		"errors": [
+//			"Invalid value for 'token'"
+//		],
+//		"errorMessageCodes": [
+//			"70006"
+// 		],
+//		"eventId": "96320dfb-672c-4317-93d0-04317e8ea9bf"
+//	}
+final class Response {
+	/**
+	 * 2017-03-27
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
+	 * @used-by \Dfe\CheckoutCom\Method::r()
+	 * @param CCharge $c
+	 * @param Order $o
+	 */
+	function __construct(CCharge $c, Order $o) {$this->_c = $c; $this->_o = $o; $this->_s = dfps($o);}
+
 	/**
 	 * 2016-05-08
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
@@ -54,7 +64,7 @@ class Response extends \Df\Core\O {
 			// 2016-09-07
 			// https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 			/** @var array(string => string) $result */
-			$result = df_json_decode($this->charge()->{'json'});
+			$result = df_json_decode($this->_c->{'json'});
 			dfp_report($this, $result, 'response');
 			return $result;
 		});
@@ -75,7 +85,7 @@ class Response extends \Df\Core\O {
 	 * @return string
 	 */
 	function action() {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
-		? AC::A : S::s()->actionDesired($this[self::$P__ORDER])
+		? AC::A : $this->_s->actionDesired($this->_o)
 	;});}
 
 	/**
@@ -93,7 +103,7 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Response::action()
 	 * @return bool
 	 */
-	function flagged() {return self::$S__FLAGGED === $this->charge()->getStatus();}
+	function flagged() {return self::$S__FLAGGED === $this->_c->getStatus();}
 
 	/**
 	 * 2016-08-05
@@ -145,7 +155,7 @@ class Response extends \Df\Core\O {
 	 * @throws \Exception
 	 */
 	function magentoTransactionId() {return dfc($this, function() {return AC::A === $this->action()
-		? $this->charge()->getId() : self::getCaptureCharge($this->charge()->getId())->getId()
+		? $this->_c->getId() : self::getCaptureCharge($this->_c->getId())->getId()
 	;});}
 
 	/**
@@ -168,7 +178,7 @@ class Response extends \Df\Core\O {
 			list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
 			/** @var string $m */
 			$m = !$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})";
-			$result = df_var(S::s()->messageFailure(), ['message' => $m]);
+			$result = df_var($this->_s->messageFailure(), ['message' => $m]);
 		}
 		return $result;
 	});}
@@ -177,14 +187,14 @@ class Response extends \Df\Core\O {
 	 * 2016-05-08
 	 * 2016-05-09
 	 * Added support for the «Flagged» status: https://mage2.pro/t/1565
-		{
-			"id": "charge_test_253DB7144E5Z7A98EED4",
-			"responseMessage": "40142 - Threshold Risk",
-			"responseAdvancedInfo": "",
-			"responseCode": "10100",
-			"status": "Flagged",
-			"authCode": "188986"
-		}
+	 *	{
+	 *		"id": "charge_test_253DB7144E5Z7A98EED4",
+	 *		"responseMessage": "40142 - Threshold Risk",
+	 *		"responseAdvancedInfo": "",
+	 *		"responseCode": "10100",
+	 *		"status": "Flagged",
+	 *		"authCode": "188986"
+	 *	}
 	 *
 	 * 2016-05-15
 	 * For the transactions, which the Checkout.com merchant backend shows as «Authorised - 3D»,
@@ -194,36 +204,20 @@ class Response extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @return bool
 	 */
-	function valid() {return
-		in_array($this->charge()->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED])
-	;}
-
-	/** @return CCharge */
-	private function charge() {return $this[self::$P__CHARGE];}
+	function valid() {return in_array($this->_c->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);}
 
 	/**
 	 * 2016-05-15
 	 * @return bool
 	 */
 	private function waitForCapture() {return dfc($this, function() {return
-		df_is_localhost() || S::s()->waitForCapture()
+		df_is_localhost() || $this->_s->waitForCapture()
 	;});}
 
 	/**
 	 * 2016-05-15
-	 * @override
-	 * @return void
-	 */
-	protected function _construct() {
-		parent::_construct();
-		$this
-			->_prop(self::$P__CHARGE, CCharge::class)
-			->_prop(self::$P__ORDER, Order::class)
-		;
-	}
-
-	/**
-	 * 2016-05-15
+	 * @used-by magentoTransactionId()
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @param string $authId
 	 * @return CCharge
 	 * @throws \Exception
@@ -252,9 +246,13 @@ class Response extends \Df\Core\O {
 			/** @var int $numRetries */
 			$numRetries = 60;
 			$result = null;
+			/** @var S $s */
+			$s = dfps(__CLASS__);
+			/** @var API $api */
+			$api = $s->apiCharge();
 			while ($numRetries && !$result) {
 				/** @var ChargeHistory $history */
-				$history = S::s()->apiCharge()->getChargeHistory($authId);
+				$history = $api->getChargeHistory($authId);
 				df_log(print_r($history->getCharges(), true));
 				/**
 				 * 2016-05-11
@@ -271,7 +269,7 @@ class Response extends \Df\Core\O {
 				 * the object «status» field's value will be «Captured», not «Captured - 3D».
 				 */
 				if (self::S__CAPTURED === $sCharge->getStatus()) {
-					$result = S::s()->apiCharge()->getCharge($sCharge->getId());
+					$result = $api->getCharge($sCharge->getId());
 				}
 				else {
 					sleep(1);
@@ -287,16 +285,36 @@ class Response extends \Df\Core\O {
 	}
 
 	/**
-	 * 2016-05-15
-	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
-	 * @used-by \Dfe\CheckoutCom\Method::r()
-	 * @param CCharge $c
-	 * @param Order $o
-	 * @return $this
+	 * 2017-03-27
+	 * @used-by __construct()
+	 * @used-by a()
+	 * @used-by flagged()
+	 * @used-by magentoTransactionId()
+	 * @used-by valid()
+	 * @var CCharge
 	 */
-	static function sp(CCharge $c, Order $o) {return dfcf(function(CCharge $c, Order $o) {return
-		new self([self::$P__CHARGE => $c, self::$P__ORDER => $o])
-	;}, func_get_args());}
+	private $_c;
+
+	/**
+	 * 2017-03-27
+	 * @used-by __construct()
+	 * @used-by action()
+	 * @var Order
+	 */
+	private $_o;
+
+	/**
+	 * 2017-03-27
+	 * @used-by __construct()
+	 * @used-by action()
+	 * @used-by messageC()
+	 * @used-by waitForCapture()
+	 * @used-by
+	 * @used-by
+	 * @used-by
+	 * @var S
+	 */
+	private $_s;
 
 	/**
 	 * 2016-05-15
@@ -306,11 +324,6 @@ class Response extends \Df\Core\O {
 	 * @var string
 	 */
 	const S__CAPTURED = 'Captured';
-
-	/** @var string */
-	private static $P__CHARGE = 'charge';
-	/** @var string */
-	private static $P__ORDER = 'order';
 
 	/**
 	 * 2016-05-15
