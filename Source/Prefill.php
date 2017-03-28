@@ -1,7 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom\Source;
 /** @method static Prefill s() */
-final class Prefill extends \Df\Config\SourceT {
+final class Prefill extends \Df\Config\Source {
 	/**
 	 * 2016-05-10
 	 * @param string $key
