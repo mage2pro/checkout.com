@@ -173,7 +173,6 @@ final class CustomerReturn {
 	 * @param Payment $p
 	 * @param CCharge $c
 	 * @param string $action
-	 * @return void
 	 */
 	private static function action(O $o, Payment $p, CCharge $c, $action) {
 		/** @var Method $m */

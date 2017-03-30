@@ -14,7 +14,6 @@ class Voided extends Charge {
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L10-L36
 	 * @see \Dfe\CheckoutCom\Handler::process()
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
-	 * @return void
 	 */
 	final protected function process() {
 		// 2016-05-11

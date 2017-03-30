@@ -103,7 +103,6 @@ final class Method extends \Df\Payment\Method {
 	 * we will just skip this notification.
 	 * @param string $transactionId
 	 * @param string $eventId
-	 * @return void
 	 */
 	function disableEvent($transactionId, $eventId) {
 		/** @var ChargeResponse $charge */
@@ -172,7 +171,6 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_refund()
 	 * @used-by \Df\Payment\Method::refund()
 	 * @param float $amount
-	 * @return void
 	 */
 	protected function _refund($amount) {$this->leh(function() use($amount) {
 		/** @var ChargeRefund $refund */
@@ -197,15 +195,15 @@ final class Method extends \Df\Payment\Method {
 		/**
 		 * 2016-05-09
 		 * A sample success response:
-			{
-				"id": "charge_test_033B66645E5K7A9812E5",
-				"originalId": "charge_test_427BB6745E5K7A9813C9",
-				"responseMessage": "Approved",
-				"responseAdvancedInfo": "Approved",
-				"responseCode": "10000",
-				"status": "Refunded",
-				<...>
-			}
+		 *	{
+		 *		"id": "charge_test_033B66645E5K7A9812E5",
+		 *		"originalId": "charge_test_427BB6745E5K7A9813C9",
+		 *		"responseMessage": "Approved",
+		 *		"responseAdvancedInfo": "Approved",
+		 *		"responseCode": "10000",
+		 *		"status": "Refunded",
+		 *		<...>
+		 *	}
 		 */
 		df_assert_eq('Refunded', $response->getStatus());
 		$this->ii()->setTransactionId($response->getId());
@@ -216,7 +214,6 @@ final class Method extends \Df\Payment\Method {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#void-a-charge
 	 * @override
 	 * @see \Df\Payment\Method::_void()
-	 * @return void
 	 */
 	protected function _void() {$this->leh(function() {
 		/** @var Transaction|false|null $auth */
@@ -229,13 +226,13 @@ final class Method extends \Df\Payment\Method {
 			 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
 			 * Although the documentation states that the «track_id» parameter is optional,
 			 * the transaction will fail with empty ChargeVoid object:
-			  {
-				"errorCode": "70000",
-				"message": "Validation error",
-				"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
-				"errorMessageCodes": ["70002"],
-				"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
-			 }
+			 * {
+			 *	"errorCode": "70000",
+			 *	"message": "Validation error",
+			 *	"errors": ["An error was experienced while parsing the payload. Please ensure that the structure is correct."],
+			 *	"errorMessageCodes": ["70002"],
+			 *	"eventId": "cce6a001-ff91-451d-9b9e-0094d3c57984"
+			 * }
 			 */
 			$void->setTrackId($this->ii()->getOrder()->getIncrementId());
 			$this->disableEvent($auth->getTxnId(), 'charge.voided');
@@ -288,7 +285,6 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::charge()
 	 * @param float $amount
 	 * @param bool|null $capture [optional]
-	 * @return void
 	 * @throws Exception
 	 */
 	protected function charge($amount, $capture = true) {
@@ -318,11 +314,9 @@ final class Method extends \Df\Payment\Method {
 			$this->ii()->setTransactionId($this->r()->magentoTransactionId());
 			/** @var Card $card */
 			$card = $response->getCard();
-			/**
-			 * 2016-05-02
-			 * https://mage2.pro/t/941
-			 * «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
-			 */
+			// 2016-05-02
+			// https://mage2.pro/t/941
+			// «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
 			$this->ii()->setCcLast4($card->getLast4());
 			// 2016-05-02
 			$this->ii()->setCcType($card->getPaymentMethod());
@@ -338,16 +332,16 @@ final class Method extends \Df\Payment\Method {
 			 * Наоборот: если закрыть транзакцию типа «authorize»,
 			 * то операция «Capture Online» из административного интерфейса будет недоступна:
 			 * @see \Magento\Sales\Model\Order\Payment::canCapture()
-					if ($authTransaction && $authTransaction->getIsClosed()) {
-						$orderTransaction = $this->transactionRepository->getByTransactionType(
-							Transaction::TYPE_ORDER,
-							$this->getId(),
-							$this->getOrder()->getId()
-						);
-						if (!$orderTransaction) {
-							return false;
-						}
-					}
+			 *		if ($authTransaction && $authTransaction->getIsClosed()) {
+			 *			$orderTransaction = $this->transactionRepository->getByTransactionType(
+			 *				Transaction::TYPE_ORDER,
+			 *				$this->getId(),
+			 *				$this->getOrder()->getId()
+			 *			);
+			 *			if (!$orderTransaction) {
+			 *				return false;
+			 *			}
+			 *		}
 			 * https://github.com/magento/magento2/blob/2.1.3/app/code/Magento/Sales/Model/Order/Payment.php#L263-L281
 			 * «How is \Magento\Sales\Model\Order\Payment::canCapture() implemented and used?»
 			 * https://mage2.pro/t/650
@@ -406,7 +400,6 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @param Transaction $auth
 	 * @param float $amount [optional]
-	 * @return void
 	 */
 	private function capturePreauthorized(Transaction $auth, $amount) {
 		$this->leh(function() use($auth, $amount) {

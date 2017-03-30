@@ -13,7 +13,6 @@ class CardTokenChargeCreate extends _Parent {
 	 * 2016-05-08
 	 * @used-by \Dfe\CheckoutCom\Patch\ChargesMapper::requestPayloadConverter()
 	 * @param string|null $value
-	 * @return void
 	 */
 	function setDescriptorDf($value) {$this->_descriptorDf = $value;}
 
