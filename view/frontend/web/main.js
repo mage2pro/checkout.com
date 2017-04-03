@@ -37,19 +37,17 @@ define([
 	 */
 	getCardTypes: function() {return ['VI', 'MC', 'AE'];},
 	/**
-	 * 2016-03-02
+	 * 2016-04-14 http://docs.checkout.com/getting-started/checkoutkit-js
+	 * 2016-06-01
+	 * An unregistered buyer can change his email, so we do not initiate CheckoutKit just now,
+	 * and do it only on the «Place Order» button click.
+	 * @override
+	 * @see Df_Payment/card::initialize()
+	 * https://github.com/mage2pro/core/blob/2.4.21/Payment/view/frontend/web/card.js#L77-L110
 	 * @returns {Object}
 	*/
 	initialize: function() {
 		this._super();
-		/**
-		 * 2016-06-01
-		 * To note: anonymous user can change his email.
-		 * We should then only initiate CheckoutKit
-		 * when the buyer clicks the "Place Order" button
-		 */
-		// 2016-04-14
-		// http://docs.checkout.com/getting-started/checkoutkit-js
 		this.initDf();
 		return this;
 	},
