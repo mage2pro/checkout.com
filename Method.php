@@ -477,7 +477,7 @@ final class Method extends \Df\Payment\Method {
 			// not the transaction's ID.
 			// In this case, we postpone creating a Magento transaction yet,
 			// so we do not call $payment->setTransactionId($response->getId());
-			PO::setData($this, $result);
+			PO::setRedirectData($this, $result);
 			// 2016-05-06
 			// Postpone sending an order confirmation email to the customer,
 			// because the customer should pass 3D Secure validation first.
