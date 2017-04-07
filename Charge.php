@@ -46,7 +46,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * because it is used for the payment identification
 		 * when the customer is returned to the store after 3D Secure verification.
 		 *
-		 * My previous attempt was $result->setUdf1($this->payment()->getId());
+		 * My previous attempt was $result->setUdf1($this->op()->getId());
 		 * but it is wrong, because the order does not have ID on its placement,
 		 * it is not saved in the database yet.
 		 * But Increment ID is pregenerated, and we can rely on it.

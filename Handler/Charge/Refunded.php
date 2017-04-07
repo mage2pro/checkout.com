@@ -32,7 +32,7 @@ use Dfe\CheckoutCom\Handler\Charge;
  * as it should be.
  * https://github.com/mage2pro/checkout.com/blob/3a1d36/Method.php#L593
  */
-class Refunded extends Charge {
+final class Refunded extends Charge {
 	/**
 	 * 2016-03-27
 	 * @override
@@ -55,5 +55,5 @@ class Refunded extends Charge {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
-	final protected function process() {return dfp_refund($this->payment(), $this->parentId()) ?: 'skipped';}
+	protected function process() {return dfp_refund($this->op(), $this->parentId()) ?: 'skipped';}
 }

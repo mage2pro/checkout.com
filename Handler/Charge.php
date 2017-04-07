@@ -8,7 +8,12 @@ use Dfe\CheckoutCom\Settings as S;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
-// 2016-05-10
+/**
+ * 2016-05-10
+ * @see \Dfe\CheckoutCom\Handler\Charge\Captured::invoice()
+ * @see \Dfe\CheckoutCom\Handler\Charge\Captured::process()
+ * @see \Dfe\CheckoutCom\Handler\Charge\Refunded::process()
+ */
 abstract class Charge extends Handler {
 	/**
 	 * 2016-03-28
@@ -17,7 +22,7 @@ abstract class Charge extends Handler {
 	 * @see \Dfe\CheckoutCom\Handler::eligible()
 	 * @return bool
 	 */
-	final protected function eligible() {return !!$this->payment();}
+	final protected function eligible() {return !!$this->op();}
 
 	/**
 	 * 2016-05-10
@@ -42,13 +47,19 @@ abstract class Charge extends Handler {
 	 * @return Order|DfOrder
 	 * @throws LE
 	 */
-	final protected function o() {return df_order($this->payment());}
+	final protected function o() {return df_order($this->op());}
 
 	/**
 	 * 2016-03-26
+	 * @used-by eligible()
+	 * @used-by o()
+	 * @used-by ss()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::process()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Refunded::process()
+	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Voided::process()
 	 * @return Payment|DfPayment|null
 	 */
-	final protected function payment() {return dfc($this, function() {return
+	final protected function op() {return dfc($this, function() {return
 		$this->paymentByTxnId($this->parentId())
 	;});}
 
@@ -148,5 +159,5 @@ abstract class Charge extends Handler {
 	 * @used-by parentCharge()
 	 * @return S
 	 */
-	private function ss() {return dfps($this->payment());}
+	private function ss() {return dfps($this->op());}
 }

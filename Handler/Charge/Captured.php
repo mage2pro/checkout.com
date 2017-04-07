@@ -10,7 +10,7 @@ use Magento\Sales\Model\Service\InvoiceService;
 // 2016-05-10
 // charge.captured
 // http://docs.checkout.com/getting-started/webhooks
-class Captured extends Charge {
+final class Captured extends Charge {
 	/**
 	 * 2016-03-25
 	 * @override
@@ -22,7 +22,7 @@ class Captured extends Charge {
 	 * @return string|null
 	 * @throws LE
 	 */
-	final protected function process() {
+	protected function process() {
 		/** @var string|null $result */
 		$result = null;
 		/** @var O|DfOrder $o */
@@ -31,7 +31,7 @@ class Captured extends Charge {
 		// The payment is «Flagged».
 		// The «Accept» operation should be performed.
 		if ($o->isPaymentReview()) {
-			$this->payment()->accept();
+			$this->op()->accept();
 			$o->save();
 		}
 		// 2016-05-11
