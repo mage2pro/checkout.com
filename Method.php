@@ -9,6 +9,7 @@ use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrderInternal as PO;
 use Df\Payment\Source\AC;
+use Df\Payment\Token;
 use Dfe\CheckoutCom\Patch\ChargeService;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
@@ -387,7 +388,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by \Df\Payment\Method::assignData()
 	 * @return string[]
 	 */
-	protected function iiaKeys() {return [self::$TOKEN];}
+	protected function iiaKeys() {return [Token::KEY];}
 
 	/**
 	 * 2016-04-21
@@ -585,9 +586,9 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-08-21
 	 * @return array(string => mixed)
 	 */
-	private function request() {return dfc($this, function() {return
-		Charge::build($this, $this->iia(self::$TOKEN), $this->isCaptureDesired())
-	;});}
+	private function request() {return dfc($this, function() {return Charge::build(
+		$this, $this->isCaptureDesired()
+	);});}
 
 	/**
 	 * 2016-05-07
@@ -626,12 +627,4 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by \Dfe\CheckoutCom\Handler::isInitiatedByMyself()
 	 */
 	const DISABLED_EVENTS = 'disabled_events';
-
-	/**
-	 * 2016-03-06
-	 * @used-by \Dfe\CheckoutCom\Method::iiaKeys()
-	 * @used-by \Dfe\CheckoutCom\Method::response()
-	 * @var string
-	 */
-	private static $TOKEN = 'token';
 }

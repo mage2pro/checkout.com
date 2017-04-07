@@ -1,6 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Df\Config\Source\NoWhiteBlack as NWB;
+use Df\Payment\Token;
 use Dfe\CheckoutCom\Patch\CardTokenChargeCreate as lCharge;
 use Dfe\CheckoutCom\Patch\ChargesMapper;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
@@ -15,7 +16,7 @@ use Magento\Sales\Model\Order\Item as OI;
  * @method Method m()
  * @method Settings ss()
  */
-final class Charge extends \Df\Payment\Charge\WithToken {
+final class Charge extends \Df\Payment\Charge {
 	/**
 	 * 2016-05-06
 	 * @used-by build()
@@ -173,7 +174,7 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 		 * «A valid card token (with prefix card_tok_)»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setCardToken($this->token());
+		$result->setCardToken(Token::get($this->op()));
 		$this->setProducts($result);
 		// 2016-04-23
 		// «Shipping address details.»
@@ -427,12 +428,12 @@ final class Charge extends \Df\Payment\Charge\WithToken {
 
 	/**
 	 * 2016-05-06
+	 * @used-by \Dfe\CheckoutCom\Method::request()
 	 * @param Method $m
-	 * @param string $token
 	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	static function build(Method $m, $token, $capture = true) {return
-		(new ChargesMapper((new self($m, $token))->_build($capture)))->requestPayloadConverter()
+	static function build(Method $m, $capture = true) {return
+		(new ChargesMapper((new self($m))->_build($capture)))->requestPayloadConverter()
 	;}
 }
