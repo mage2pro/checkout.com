@@ -1,7 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Df\Config\Source\NoWhiteBlack as NWB;
-use Df\Payment\Operation\Source\Order as OpSource;
 use Df\Payment\Token;
 use Dfe\CheckoutCom\Patch\CardTokenChargeCreate as lCharge;
 use Dfe\CheckoutCom\Patch\ChargesMapper;
@@ -435,6 +434,6 @@ final class Charge extends \Df\Payment\Charge {
 	 * @return array(string => mixed)
 	 */
 	static function build(Method $m, $capture = true) {return
-		(new ChargesMapper((new self(new OpSource($m)))->_build($capture)))->requestPayloadConverter()
+		(new ChargesMapper((new self($m))->_build($capture)))->requestPayloadConverter()
 	;}
 }
