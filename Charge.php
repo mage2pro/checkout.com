@@ -174,7 +174,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * «A valid card token (with prefix card_tok_)»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setCardToken(Token::get($this->op()));
+		$result->setCardToken(Token::get($this->ii()));
 		$this->setProducts($result);
 		// 2016-04-23
 		// «Shipping address details.»

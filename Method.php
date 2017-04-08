@@ -419,7 +419,7 @@ final class Method extends \Df\Payment\Method {
 			 * If not specified, the default is authorisation charge amount.»
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
-			$capture->setValue($this->amountFormat(dfp_charge_amount($this)));
+			$capture->setValue($this->amountFormat(dfp_due($this)));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
