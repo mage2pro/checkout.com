@@ -26,7 +26,6 @@ final class Charge extends \Df\Payment\Charge {
 	private function _build($capture) {
 		/** @var lCharge $result */
 		$result = new lCharge;
-		df_assert($this->oii());
 		/**
 		 * 2016-05-08
 		 * «How To Use Billing Descriptors to Decrease Chargebacks»
@@ -66,7 +65,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * So we can just call @see \Magento\Checkout\Model\Session::getLastRealOrder()
 		 * How to get the last order programmatically? https://mage2.pro/t/1528
 		 */
-		$result->setTrackId($this->oii());
+		$result->setTrackId($this->id());
 		$result->setCustomerName($this->addressSB()->getName());
 		/**
 		 * 2016-04-21
@@ -379,7 +378,7 @@ final class Charge extends \Df\Payment\Charge {
 		 */
 		'server' => df_webserver()
 		,'user_agent' => df_request_ua()
-		,'quote_id' => $this->oii()
+		,'quote_id' => $this->id()
 		// 2016-06-25
 		// Magento version
 		,'magento_version' => df_magento_version()
