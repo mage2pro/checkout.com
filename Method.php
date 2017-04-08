@@ -286,15 +286,14 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::charge()
 	 * @used-by \Df\Payment\Method::authorize()
 	 * @used-by \Df\Payment\Method::capture()
-	 * @param float $amount
 	 * @param bool|null $capture [optional]
 	 * @throws Exception
 	 */
-	protected function charge($amount, $capture = true) {
+	protected function charge($capture = true) {
 		/** @var Transaction|false|null $auth */
 		$auth = !$capture ? null : $this->ii()->getAuthorizationTransaction();
 		if ($auth) {
-			$this->capturePreauthorized($auth, $amount);
+			$this->capturePreauthorized($auth);
 		}
 		else {
 			/**
@@ -402,10 +401,9 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-05-11
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @param Transaction $auth
-	 * @param float $amount [optional]
 	 */
-	private function capturePreauthorized(Transaction $auth, $amount) {
-		$this->leh(function() use($auth, $amount) {
+	private function capturePreauthorized(Transaction $auth) {
+		$this->leh(function() use($auth) {
 			// 2016-05-03
 			// https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
 			/** @var ChargeCapture $capture */
@@ -421,28 +419,28 @@ final class Method extends \Df\Payment\Method {
 			 * If not specified, the default is authorisation charge amount.»
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
-			$capture->setValue($this->amountFormat($amount));
+			$capture->setValue($this->amountFormat(dfp_charge_amount($this)));
 			/** @var ChargeResponse $response */
 			$response = $this->api()->CaptureCardCharge($capture);
 			/**
 			 * 2016-06-08
 			 * A sample success response:
-				{
-					"id": "charge_test_910FE7244E5J7A98EFFA",
-					"originalId": "charge_test_352BA7344E5Z7A98EFE5",
-					"liveMode": false,
-					"created": "2016-05-08T11:01:06Z",
-					"value": 31813,
-					"currency": "USD",
-					"trackId": "ORD-2016/05-00123",
-					"chargeMode": 2,
-					"responseMessage": "Approved",
-					"responseAdvancedInfo": "Approved",
-					"responseCode": "10000",
-					"status": "Captured",
-					"hasChargeback": "N"
-			 		...
-				}
+			 *	{
+			 *		"id": "charge_test_910FE7244E5J7A98EFFA",
+			 *		"originalId": "charge_test_352BA7344E5Z7A98EFE5",
+			 *		"liveMode": false,
+			 *		"created": "2016-05-08T11:01:06Z",
+			 *		"value": 31813,
+			 *		"currency": "USD",
+			 *		"trackId": "ORD-2016/05-00123",
+			 *		"chargeMode": 2,
+			 *		"responseMessage": "Approved",
+			 *		"responseAdvancedInfo": "Approved",
+			 *		"responseCode": "10000",
+			 *		"status": "Captured",
+			 *		"hasChargeback": "N"
+			 * 		...
+			 *	}
 			 */
 			df_assert_eq(Response::S__CAPTURED, $response->getStatus());
 			/**
