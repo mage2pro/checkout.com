@@ -171,9 +171,9 @@ final class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see \Df\Payment\Method::_refund()
 	 * @used-by \Df\Payment\Method::refund()
-	 * @param float $amount
+	 * @param float $a
 	 */
-	protected function _refund($amount) {$this->leh(function() use($amount) {
+	protected function _refund($a) {$this->leh(function() use($a) {
 		/** @var ChargeRefund $refund */
 		$refund = new ChargeRefund;
 		/**
@@ -189,7 +189,7 @@ final class Method extends \Df\Payment\Method {
 		 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 		 */
 		$refund->setChargeId($this->ii()->getRefundTransactionId());
-		$refund->setValue($this->amountFormat($amount));
+		$refund->setValue($this->amountFormat($a));
 		$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
 		/** @var ChargeResponse $response */
 		$response = $this->api()->refundCardChargeRequest($refund);
