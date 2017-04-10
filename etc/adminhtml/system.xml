@@ -29,8 +29,8 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 				showInStore='1'
 			>
 				<label>Checkout.com</label>
-				<dfExtension>Dfe\CheckoutCom\Ext</dfExtension>
-				<frontend_model>Df\Config\Block\System\Config\Form\Fieldset\Ext</frontend_model>
+				<dfExtension>Dfe_CheckoutCom</dfExtension>
+				<frontend_model>Df\Config\Fieldset</frontend_model>
 				<field
 					id='enable'
 					translate='label'
