@@ -163,7 +163,6 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 					id='webhook' 
 					translate='label' 
 					type='Df\Framework\Form\Element\Webhook'
-					dfWebhook_routePath='dfe-checkout-com'
 					sortOrder='9'
 					showInDefault='1' 
 					showInWebsite='1'
