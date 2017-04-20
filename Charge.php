@@ -316,7 +316,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * But the «productId» parameter disappears from the documentation:
 		 * http://docs.checkout.com/reference/merchant-api-reference/complex-request-objects/products
 		 */
-		$result->setTrackingUrl(df_oi_url($i));
+		$result->setTrackingUrl(df_oqi_url($i));
 		/**
 		 * 2016-04-23
 		 * «Description of the product.Max of 500 characters.»
@@ -339,7 +339,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * 2016-05-03
 		 * Использовать @see amountF() здесь не требуется.
 		 * 2017-02-01
-		 * df_oi_price() использует @see \Magento\Sales\Model\Order\Item::getPrice(),
+		 * df_oqi_price() использует @see \Magento\Sales\Model\Order\Item::getPrice(),
 		 * а не @see \Magento\Sales\Model\Order\Item::getPriceInclTax().
 		 * Это нормально для модуля 2Checkout: @see \Dfe\TwoCheckout\LineItem\Product::price(),
 		 * потому что там мы передаём налоги платёжной системе отдельной строкой.
@@ -347,17 +347,17 @@ final class Charge extends \Df\Payment\Charge {
 		 * что сумма стоимостей позиций заказа у нас не будет равна сумме заказа
 		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
-		$result->setPrice($this->cFromDoc(df_oi_price($i)));
+		$result->setPrice($this->cFromDoc(df_oqi_price($i)));
 		// 2016-04-23
 		// «Units of the product to be shipped. Max length of 3 digits.»
 		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setQuantity(df_oi_qty($i));
+		$result->setQuantity(df_oqi_qty($i));
 		/**
 		 * 2016-04-23
 		 * «image link to product on merchant website.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setImage(df_oi_image($i));
+		$result->setImage(df_oqi_image($i));
 		return $result;
 	}
 
