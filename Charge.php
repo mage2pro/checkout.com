@@ -252,31 +252,27 @@ final class Charge extends \Df\Payment\Charge {
 		    $parsedPhone = $phoneParser->parse(
 				$this->addressSB()->getTelephone(), $this->addressSB()->getCountryId()
 			);
-			/**
-			 * 2016-04-23
-			 * «Contact phone number for the card holder.
-			 * Its length should be between 6 and 25 characters.
-			 * Allowed characters are: numbers, +, (,) ,/ and ' '.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 */
+			// 2016-04-23
+			// «Contact phone number for the card holder.
+			// Its length should be between 6 and 25 characters.
+			// Allowed characters are: numbers, +, (,) ,/ and ' '.»
+			// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 			$result->setNumber($parsedPhone->getNationalNumber());
-			/**
-			 * 2016-04-23
-			 * «Country code for the phone number of the card holder
-			 * e.g. 44 for United Kingdom.
-			 * Please refer to Country ISO and Code section
-			 * in the Other Codes menu option.»
-			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			 *
-			 * 2016-08-18
-			 * From now, the country code should be a string,
-			 * https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
-			 * The following data will fail
-			 *	"phone": {
-			 *		"number": "9629197300",
-			 *		"countryCode": 7
-			 *	}
-			 */
+			// 2016-04-23
+			// «Country code for the phone number of the card holder
+			// e.g. 44 for United Kingdom.
+			// Please refer to Country ISO and Code section
+			// in the Other Codes menu option.»
+			// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+			//
+			// 2016-08-18
+			// From now, the country code should be a string,
+			// https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
+			// The following data will fail
+			//	"phone": {
+			//		"number": "9629197300",
+			//		"countryCode": 7
+			//	}
 			$result->setCountryCode(strval($parsedPhone->getCountryCode()));
 		} catch (\libphonenumber\NumberParseException $e) {}
 		return $result;
