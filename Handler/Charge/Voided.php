@@ -9,7 +9,7 @@ final class Voided extends Charge {
 	/**
 	 * 2016-05-10
 	 * @override
-	 * How is a payment authorization voiding implemented? https://mage2.pro/t/topic/938
+	 * How is a payment authorization voiding implemented? https://mage2.pro/t/938
 	 * Similar to @see \Magento\Sales\Controller\Adminhtml\Order\VoidPayment::execute()
 	 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L10-L36
 	 * @see \Dfe\CheckoutCom\Handler::process()
