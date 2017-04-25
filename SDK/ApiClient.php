@@ -1,5 +1,5 @@
 <?php
-namespace Dfe\CheckoutCom\Patch;
+namespace Dfe\CheckoutCom\SDK;
 use com\checkout\helpers\AppSetting;
 class ApiClient extends \com\checkout\ApiClient {
 	/**

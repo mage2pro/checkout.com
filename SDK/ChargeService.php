@@ -1,5 +1,5 @@
 <?php
-namespace Dfe\CheckoutCom\Patch;
+namespace Dfe\CheckoutCom\SDK;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as Response;
 final class ChargeService extends \com\checkout\ApiServices\Charges\ChargeService {
 	/**

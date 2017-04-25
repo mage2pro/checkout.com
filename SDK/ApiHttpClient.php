@@ -1,5 +1,5 @@
 <?php
-namespace Dfe\CheckoutCom\Patch;
+namespace Dfe\CheckoutCom\SDK;
 // 2016-08-05
 class ApiHttpClient {
 	/**

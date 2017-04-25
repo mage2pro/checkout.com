@@ -1,8 +1,8 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Df\Config\Source\NoWhiteBlack as NWB;
-use Dfe\CheckoutCom\Patch\ApiClient as API;
-use Dfe\CheckoutCom\Patch\ChargeService;
+use Dfe\CheckoutCom\SDK\ApiClient as API;
+use Dfe\CheckoutCom\SDK\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
 use Magento\Sales\Model\Order as O;
 /** @method static Settings s() */

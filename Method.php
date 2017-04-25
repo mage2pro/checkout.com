@@ -10,7 +10,7 @@ use com\checkout\helpers\ApiHttpClientCustomException as CE;
 use Df\Payment\PlaceOrderInternal as PO;
 use Df\Payment\Source\AC;
 use Df\Payment\Token;
-use Dfe\CheckoutCom\Patch\ChargeService;
+use Dfe\CheckoutCom\SDK\ChargeService;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;

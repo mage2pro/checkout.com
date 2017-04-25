@@ -4,7 +4,7 @@ use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use com\checkout\ApiServices\Charges\ResponseModels\ChargeHistory;
 use com\checkout\ApiServices\SharedModels\Charge as SCharge;
 use Df\Payment\Source\AC;
-use Dfe\CheckoutCom\Patch\ChargeService as API;
+use Dfe\CheckoutCom\SDK\ChargeService as API;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Sales\Model\Order;
 // 2016-05-15
