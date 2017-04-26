@@ -109,7 +109,7 @@ final class Method extends \Df\Payment\Method {
 		/** @var ChargeResponse $charge */
 		$charge = $this->api()->getCharge($transactionId);
 		/** @var array(string => string) $metadata */
-		$metadata = df_nta($charge->getMetadata());
+		$metadata = df_eta($charge->getMetadata());
 		/** @var string[] $events */
 		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, ''));
 		if (!in_array($eventId, $events)) {
