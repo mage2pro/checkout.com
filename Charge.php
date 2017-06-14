@@ -240,7 +240,7 @@ final class Charge extends \Df\Payment\Charge {
 	private function cPhone() {return dfc($this, function() {
 		/** @var CPhone $result */
 		$result = new CPhone;
-		/** @var lPhone $lPhone */
+		/** @var lPhone|bool $lPhone */
 		if ($lPhone = df_phone($this->addressSB(), false)) {
 			// 2016-04-23
 			// «Contact phone number for the card holder.
