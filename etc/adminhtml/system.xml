@@ -22,7 +22,6 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 			<group
 				id='checkout_com'
 				translate='label'
-				type='text'
 				sortOrder='308'
 				showInDefault='1'
 				showInWebsite='1'
