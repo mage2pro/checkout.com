@@ -141,9 +141,9 @@ define([
 	 * 2016-11-10
 	 * @override
 	 * @see Df_Payment/card::prefill()
-	 * https://github.com/mage2pro/core/blob/2.8.2/Payment/view/frontend/web/card.js#L152-L167
+	 * https://github.com/mage2pro/core/blob/2.8.3/Payment/view/frontend/web/card.js#L152-L167
 	 * @used-by Df_Payment/card::initialize()
-	 * https://github.com/mage2pro/core/blob/2.8.2/Payment/view/frontend/web/card.js#L134-L137
+	 * https://github.com/mage2pro/core/blob/2.8.3/Payment/view/frontend/web/card.js#L134-L137
 	 * @param {*} d 
 	 */
 	prefill: function(d) {
