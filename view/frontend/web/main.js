@@ -1,3 +1,4 @@
+// 2016-05-18
 define([
 	'df', 'Df_StripeClone/main', 'jquery'
 ], function(df, parent, $) {'use strict'; return parent.extend({
