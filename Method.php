@@ -151,6 +151,15 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-03-15
 	 * @override
 	 * @see \Df\Payment\Method::getInfoBlockType()
+	 * @used-by \Magento\Payment\Helper\Data::getInfoBlock():
+	 *		public function getInfoBlock(InfoInterface $info, LayoutInterface $layout = null) {
+	 *			$layout = $layout ?: $this->_layout;
+	 *			$blockType = $info->getMethodInstance()->getInfoBlockType();
+	 *			$block = $layout->createBlock($blockType);
+	 *			$block->setInfo($info);
+	 *			return $block;
+	 *		}
+	 * https://github.com/magento/magento2/blob/2.2.0-RC1.6/app/code/Magento/Payment/Helper/Data.php#L182-L196
 	 * @return string
 	 */
 	function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
