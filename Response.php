@@ -126,7 +126,7 @@ final class Response {
 	 * as the corresponding Magento «capture» transaction ID, which is bad.
 	 *
 	 * 2016-05-11
-	 * The documentation confirms such Checkout.com behaviour:
+	 * The documentation confirms such Checkout.com behavior:
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/refund-card-charge
 	 * «To process a refund the merchant must send the Charge ID of the Captured transaction»
 	 * «For an Automatic Capture, the Charge Response will contain
