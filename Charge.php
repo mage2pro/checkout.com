@@ -297,7 +297,7 @@ final class Charge extends \Df\Payment\Charge {
 		$result->setName($i->getName());
 		/**
 		 * 2016-08-18
-		 * It was the folowing code here:
+		 * It was the following code here:
 		 * $result->setProductId($item->getProductId());
 		 * But the «productId» parameter disappears from the documentation:
 		 * http://docs.checkout.com/reference/merchant-api-reference/complex-request-objects/products
