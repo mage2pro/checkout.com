@@ -178,6 +178,11 @@ final class Charge extends \Df\Payment\Charge {
 		// «Shipping address details.»
 		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setShippingDetails($this->cAddress());
+		/**
+		 * 2017-08-19
+		 * @todo Pass the «billingDetails» too:
+		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		 */
 		// 2016-04-23
 		// «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
 		// Max length of key(s) and value(s) is 100 each.
@@ -189,49 +194,39 @@ final class Charge extends \Df\Payment\Charge {
 
 	/**
 	 * 2016-05-06
+	 * 2016-04-23 http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+	 * @used-by \Dfe\CheckoutCom\Charge::_build()
 	 * @return CAddress
 	 */
-	private function cAddress() {return dfc($this, function() {
-		/** @var CAddress $result */
-		$result = new CAddress;
-		/** @var OA $a */
-		$a = $this->addressSB();		
-		// 2016-04-23
-		// «Address field line 1. Max length of 100 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setAddressLine1($a->getStreetLine(1));
-		// 2016-04-23
-		// «Address field line 2. Max length of 100 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setAddressLine2($a->getStreetLine(2));
-		// 2016-04-23
-		// «Address postcode. Max. length of 50 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setPostcode($a->getPostcode());
-		// 2016-04-23
-		// «The country ISO2 code e.g. US.
-		// See provided list of supported ISO formatted countries.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setCountry($a->getCountryId());
-		// 2016-04-23
-		// «Address city. Max length of 100 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setCity($a->getCity());
-		// 2016-04-23
-		// «Address state. Max length of 100 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setState($a->getRegion());
-		// 2016-04-23
-		// «Contact phone object for the card holder.
-		// If provided, it will contain the countryCode and number properties
-		// e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setPhone($this->cPhone());
-		// 2016-04-23
-		// «Shipping address details.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		return $result;
-	});}
+	private function cAddress() {
+		$r = new CAddress; /** @var CAddress $r */
+		/**
+		 * 2017-04-10
+		 * Если адрес доставки отсутствует, то:
+		 * 1) @uses \Magento\Sales\Model\Order::getShippingAddress() возвращает null
+		 * 1) @uses \Magento\Quote\Model\Quote::getShippingAddress() возвращает пустой объект
+		 */
+		if ($a = $this->addressS()) { /** @var OA|null $a */
+			// 2016-04-23 «Address field line 1. Max length of 100 characters.»
+			$r->setAddressLine1($a->getStreetLine(1));
+			// 2016-04-23 «Address field line 2. Max length of 100 characters.»
+			$r->setAddressLine2($a->getStreetLine(2));
+			// 2016-04-23 «Address postcode. Max. length of 50 characters.»
+			$r->setPostcode($a->getPostcode());
+			// 2016-04-23 «The country ISO2 code e.g. US. See provided list of supported ISO formatted countries.»
+			$r->setCountry($a->getCountryId());
+			// 2016-04-23 «Address city. Max length of 100 characters.»
+			$r->setCity($a->getCity());
+			// 2016-04-23 «Address state. Max length of 100 characters.»
+			$r->setState($a->getRegion());
+			// 2016-04-23
+			// «Contact phone object for the card holder.
+			// If provided, it will contain the countryCode and number properties
+			// e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
+			$r->setPhone($this->cPhone());
+		}
+		return $r;
+	}
 
 	/**
 	 * 2016-05-06
