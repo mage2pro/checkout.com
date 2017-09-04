@@ -130,11 +130,9 @@ final class Charge extends \Df\Payment\Charge {
 		/*if ($order->getCustomerId()) {
 			$request->setCustomerId($order->getCustomerId());
 		} */
-		/**
-		 * 2016-04-21
-		 * «A description that can be added to this object.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		// 2016-04-21
+		// 2017-09-04 «Description of the charge», optional, string, the length is not limited.
+		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setDescription($this->description());
 		/**
 		 * 2016-04-21
