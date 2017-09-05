@@ -32,6 +32,10 @@ http://docs.checkout.com/reference/merchant-api-reference/charges#the-charge-obj
 «A description that can be added to this object.»
 				-->
 				<description>{order.id}</description>
+				<descriptionMaxLength>
+					<title>The Checkout.com documentation: «Merchant API Reference» → «Charge with Card Token» → «Request Payload Fields». See the «description» parameter.</title>
+					<url>http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields</url>
+				</descriptionMaxLength>
 				<messageFailure><![CDATA[Sorry, the payment attempt is failed.
 <br/>The payment service's message: «<b>{message}</b>».
 <br/>Please try again, or try another payment method.]]></messageFailure>
