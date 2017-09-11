@@ -33,6 +33,11 @@ http://docs.checkout.com/reference/merchant-api-reference/charges#the-charge-obj
 				-->
 				<description>{order.id}</description>
 				<description_rules>
+					<locations>
+						<merchant>
+							<shown>1</shown>
+						</merchant>
+					</locations>
 					<maxLength>
 						<title>The Checkout.com documentation: «Merchant API Reference» → «Charge with Card Token» → «Request Payload Fields». See the «description» parameter.</title>
 						<url>http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields</url>
