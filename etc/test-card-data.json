@@ -1,0 +1,14 @@
+{
+	"Success": {
+		"cvv": "257"
+		,"expiration-month": 6
+		,"expiration-year": 2025
+		,"number": "5436031030606378"
+	}
+	,"Failure": {
+		"cvv": "204"
+		,"expiration-month": 6
+		,"expiration-year": 2019
+		,"number": "5436031030606378"
+	}
+}

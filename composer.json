@@ -1,6 +1,6 @@
 {
 	"name": "mage2pro/checkout.com"
-	,"version": "1.4.0"
+	,"version": "1.4.1"
 	,"description": "The «Checkout.com» payment extension for Magento 2."
 	,"type": "magento2-module"
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"

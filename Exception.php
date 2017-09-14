@@ -33,12 +33,12 @@ final class Exception extends \Df\Payment\Exception {
 	 * @see \Df\Payment\Exception::message()
 	 * @return string
 	 */
-	function message() {return df_api_rr_failed('Checkout.com',
+	function message() {return dfc($this, function() {return df_api_rr_failed('Checkout.com',
 		$this->_r->a(!$this->_r->hasId() ? null : [
 			'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
 		])
 		,$this->_request
-	);}
+	);});}
 
 	/**
 	 * 2016-07-17
