@@ -118,7 +118,7 @@ return parent.extend({
 		}
 		if (this.validate()) {
 			// 2017-07-26 «Sometimes getting duplicate orders in checkout»: https://mage2.pro/t/4217
-			this.isPlaceOrderActionAllowed(false);
+			this.state_waitingForServerResponse(true);
 			this.initDf().done(function() {
 				/**
 				 * 2016-04-21
@@ -149,7 +149,7 @@ return parent.extend({
 						// «Server Operation Failed»
 						// «The last server operation failed.»
 						_this.showErrorMessage('It looks like you have entered incorrect bank card data.');
-						_this.isPlaceOrderActionAllowed(true);
+						_this.state_waitingForServerResponse(false);
 					}
 					else {
 						_this.token = response.id;
