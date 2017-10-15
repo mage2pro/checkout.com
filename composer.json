@@ -1,6 +1,6 @@
 {
 	"name": "mage2pro/checkout.com"
-	,"version": "1.4.2"
+	,"version": "1.4.3"
 	,"description": "The «Checkout.com» payment extension for Magento 2."
 	,"type": "magento2-module"
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"
@@ -12,7 +12,7 @@
 		"role": "Developer"
 	}]
 	,"require": {
-		"mage2pro/core": ">=2.12.10", "mage2pro/phone": ">=1.0.0", "checkout/checkout-php-api": "^1.2.3"
+		"mage2pro/core": ">=3.2.2", "mage2pro/phone": ">=1.0.0", "checkout/checkout-php-api": "^1.2.3"
 	}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
 	,"keywords": [

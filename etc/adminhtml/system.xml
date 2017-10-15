@@ -156,7 +156,7 @@ The value 'checkout.com' is not accepted by the pattern '[a-zA-Z0-9_]{1,}'.
 					showInDefault='1' showInStore='1' showInWebsite='1'
 					sortOrder='10'
 					translate='label'
-					type='Df\Directory\FormElement\Currency'
+					type='Df\Directory\FE\Currency'
 				>
 					<label>Payment Currency</label>
 					<depends><field id='enable'>1</field></depends>
