@@ -119,16 +119,16 @@ return parent.extend({
 		if (this.validate()) {
 			// 2017-07-26 «Sometimes getting duplicate orders in checkout»: https://mage2.pro/t/4217
 			this.state_waitingForServerResponse(true);
-			this.initDf().done(function() {
+			this.initDf().done($.proxy(function() {
 				/**
 				 * 2016-04-21
 				 * http://docs.checkout.com/reference/checkoutkit-js-reference/actions#create-card-token
 				 */
 				CheckoutKit.createCardToken({
-					cvv: _this.creditCardVerificationNumber()
-					,expiryMonth: _this.creditCardExpMonth()
-					,expiryYear: _this.creditCardExpYear()
-					,number: _this.creditCardNumber()
+					cvv: this.creditCardVerificationNumber()
+					,expiryMonth: this.creditCardExpMonth()
+					,expiryYear: this.creditCardExpYear()
+					,number: this.creditCardNumber()
 					/**
 					 * 2016-04-14
 					 * «Charges Required-Field Matrix»
@@ -139,8 +139,8 @@ return parent.extend({
 					 * How to get the current customer's email on the frontend checkout screen?
 					 * https://mage2.pro/t/1295
 					 */
-					,'email-address': _this.dfc.email()
-				}, function(response) {
+					,'email-address': this.dfc.email()
+				}, $.proxy(function(response) {
 					if ('error' === response.type) {
 						// 2016-08-05
 						// We can get error messages from the response:
@@ -148,15 +148,15 @@ return parent.extend({
 						// But they are not informative and contain a text like
 						// «Server Operation Failed»
 						// «The last server operation failed.»
-						_this.showErrorMessage('It looks like you have entered incorrect bank card data.');
-						_this.state_waitingForServerResponse(false);
+						this.showErrorMessage('It looks like you have entered incorrect bank card data.');
+						this.state_waitingForServerResponse(false);
 					}
 					else {
-						_this.token = response.id;
-						_this.placeOrderInternal();
+						this.token = response.id;
+						this.placeOrderInternal();
 					}
-				});
-			});
+				}, this));
+			}, this));
 		}
 	},
 	/**
