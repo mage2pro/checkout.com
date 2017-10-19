@@ -39,7 +39,7 @@ final class Settings extends \Df\StripeClone\Settings {
 
 	/**
 	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D Secure validation for All Customers?»
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for all customers?»
 	 * @return bool
 	 */
 	function force3DS_forAll() {return $this->b();}
@@ -47,7 +47,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Force 3D Secure validation for the Particular Customer Locations (detected by IP Address)?»
+	 * «Use 3D Secure validation for particular customer locations (detected by IP Address)?»
 	 * @param string $iso2
 	 * @return string
 	 */
@@ -55,7 +55,7 @@ final class Settings extends \Df\StripeClone\Settings {
 
 	/**
 	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Force 3D Secure validation for the New Customers?»
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for new customers?»
 	 * @return bool
 	 */
 	function force3DS_forNew() {return $this->b();}
@@ -63,7 +63,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	/**
 	 * 2016-05-13
 	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Force 3D Secure validation for the Particular Shipping Destinations?»
+	 * «Use 3D Secure validation for particular shipping destinations?»
 	 * @param string $iso2
 	 * @return string
 	 */
