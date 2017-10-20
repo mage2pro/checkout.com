@@ -1,5 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom;
+use Df\Payment\Settings\_3DS;
 use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\SDK\ApiClient as API;
 use Dfe\CheckoutCom\SDK\ChargeService;
@@ -55,37 +56,12 @@ final class Settings extends \Df\StripeClone\Settings {
 	 */
 	function statement() {return $this->v();}
 
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for all customers?»
-	 * @return bool
+	/**  
+	 * 2017-10-20
+	 * @used-by \Dfe\CheckoutCom\Charge::_build()
+	 * @return _3DS
 	 */
-	function use3DS_forAll() {return $this->b();}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Use 3D Secure validation for particular customer locations (detected by IP Address)?»
-	 * @param string $iso2
-	 * @return string
-	 */
-	function use3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for new customers?»
-	 * @return bool
-	 */
-	function use3DS_forNew() {return $this->b();}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Use 3D Secure validation for particular shipping destinations?»
-	 * @param string $iso2
-	 * @return string
-	 */
-	function use3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
+	function _3ds() {return dfc($this, function() {return new _3DS($this);});}
 
 	/**
 	 * 2016-05-15

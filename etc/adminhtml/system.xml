@@ -303,7 +303,7 @@ https://mage2.pro/t/329
 					<comment><![CDATA[Customers from which countries can (or can not) use the method?]]></comment>
 				</field>
 				<group
-					id='_3DS'
+					id='3ds'
 					showInDefault='1' showInStore='1' showInWebsite='1'
 					sortOrder='21'
 					translate='label'

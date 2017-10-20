@@ -109,7 +109,9 @@ final class Charge extends \Df\Payment\Charge {
 		 * In the risk settings dashboard
 		 * 3D Secure is forced for transactions above 150 USD.
 		 */
-		$result->setChargeMode($this->use3DS() ? 2 : 1);
+		$result->setChargeMode($this->s()->_3ds()->enable_(
+			$this->addressSB()->getCountryId(), $this->o()->getCustomerId()
+		) ? 2 : 1);
 		/**
 		 * 2016-04-21
 		 * How are an order's getCustomerEmail() and setCustomerEmail() methods
@@ -390,22 +392,6 @@ final class Charge extends \Df\Payment\Charge {
 	 */
 	private function setProducts(lCharge $c) {$this->oiLeafs(function(OI $i) use($c) {
 		$c->setProducts($this->cProduct($i))
-	;});}
-
-	/**
-	 * 2016-05-13
-	 * @return bool
-	 */
-	private function use3DS() {$s = $this->s(); return dfc($this, function() use($s) {return
-		$s->use3DS_forAll()
-		|| $s->use3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
-		|| $s->use3DS_forShippingDestinations($this->addressSB()->getCountryId())
-		// 2016-05-31
-		// Today it seems that the PHP request to freegeoip.net stopped returning any value,
-		// whereas it still returns results when the request is sent from the browser.
-		// Apparently, freegeoip.net banned my User-Agent?
-		// In all cases, we cannot rely on freegeoip.net and risk getting an empty response.
-		|| $s->use3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
 	;});}
 
 	/**
