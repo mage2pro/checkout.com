@@ -38,38 +38,6 @@ final class Settings extends \Df\StripeClone\Settings {
 	function apiCharge() {return $this->api()->chargeService();}
 
 	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for all customers?»
-	 * @return bool
-	 */
-	function force3DS_forAll() {return $this->b();}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Use 3D Secure validation for particular customer locations (detected by IP Address)?»
-	 * @param string $iso2
-	 * @return string
-	 */
-	function force3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for new customers?»
-	 * @return bool
-	 */
-	function force3DS_forNew() {return $this->b();}
-
-	/**
-	 * 2016-05-13
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
-	 * «Use 3D Secure validation for particular shipping destinations?»
-	 * @param string $iso2
-	 * @return string
-	 */
-	function force3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
-
-	/**
 	 * 2016-03-09  
 	 * @override
 	 * @see \Df\Payment\Settings\BankCard::prefill()
@@ -86,6 +54,38 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @return string[]
 	 */
 	function statement() {return $this->v();}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for all customers?»
+	 * @return bool
+	 */
+	function use3DS_forAll() {return $this->b();}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Use 3D Secure validation for particular customer locations (detected by IP Address)?»
+	 * @param string $iso2
+	 * @return string
+	 */
+	function use3DS_forIPs($iso2) {return $this->nwbn('countries', $iso2);}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Use 3D Secure validation for new customers?»
+	 * @return bool
+	 */
+	function use3DS_forNew() {return $this->b();}
+
+	/**
+	 * 2016-05-13
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Use 3D Secure validation for particular shipping destinations?»
+	 * @param string $iso2
+	 * @return string
+	 */
+	function use3DS_forShippingDestinations($iso2) {return $this->nwbn('countries', $iso2);}
 
 	/**
 	 * 2016-05-15

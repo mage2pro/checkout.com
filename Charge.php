@@ -397,15 +397,15 @@ final class Charge extends \Df\Payment\Charge {
 	 * @return bool
 	 */
 	private function use3DS() {$s = $this->s(); return dfc($this, function() use($s) {return
-		$s->force3DS_forAll()
-		|| $s->force3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
-		|| $s->force3DS_forShippingDestinations($this->addressSB()->getCountryId())
+		$s->use3DS_forAll()
+		|| $s->use3DS_forNew() && df_customer_is_new($this->o()->getCustomerId())
+		|| $s->use3DS_forShippingDestinations($this->addressSB()->getCountryId())
 		// 2016-05-31
 		// Today it seems that the PHP request to freegeoip.net stopped returning any value,
 		// whereas it still returns results when the request is sent from the browser.
 		// Apparently, freegeoip.net banned my User-Agent?
 		// In all cases, we cannot rely on freegeoip.net and risk getting an empty response.
-		|| $s->force3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
+		|| $s->use3DS_forIPs(df_visitor()->iso2() ?: $this->addressSB()->getCountryId())
 	;});}
 
 	/**
