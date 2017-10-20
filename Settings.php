@@ -1,13 +1,19 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Df\Payment\Settings\_3DS;
-use Df\Config\Source\NoWhiteBlack as NWB;
 use Dfe\CheckoutCom\SDK\ApiClient as API;
 use Dfe\CheckoutCom\SDK\ChargeService;
 use Dfe\CheckoutCom\Source\Prefill;
 use Magento\Sales\Model\Order as O;
 /** @method static Settings s() */
 final class Settings extends \Df\StripeClone\Settings {
+	/**
+	 * 2017-10-20
+	 * @used-by \Dfe\CheckoutCom\Charge::_build()
+	 * @return _3DS
+	 */
+	function _3ds() {return dfc($this, function() {return new _3DS($this);});}
+
 	/**
 	 * 2016-05-15
 	 * @used-by \Dfe\CheckoutCom\Method::isCaptureDesired()
@@ -55,13 +61,6 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @return string[]
 	 */
 	function statement() {return $this->v();}
-
-	/**  
-	 * 2017-10-20
-	 * @used-by \Dfe\CheckoutCom\Charge::_build()
-	 * @return _3DS
-	 */
-	function _3ds() {return dfc($this, function() {return new _3DS($this);});}
 
 	/**
 	 * 2016-05-15
