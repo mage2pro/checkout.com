@@ -49,7 +49,7 @@ final class Response {
 	 * @param CCharge $c
 	 * @param Order $o
 	 */
-	function __construct(CCharge $c, Order $o) {$this->_c = $c; $this->_o = $o; $this->_s = dfps($o);}
+	function __construct(CCharge $c, Order $o) {$this->_c = $c; $this->_o = $o; $this->_s = dfps($this);}
 
 	/**
 	 * 2016-05-08
