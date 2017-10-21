@@ -1,3 +1,5 @@
+The extension integrates your Magento 2 store with the **[Checkout.com](https://www.checkout.com)** payment service.
+
 ## How to install
 ```
 composer require mage2pro/checkout.com:*
