@@ -391,7 +391,6 @@ https://mage2.pro/t/329
 					>
 						<label>Countries</label>
 						<can_be_empty>1</can_be_empty>
-						<comment>Customers from which countries can (or can not) use the method?</comment>
 						<depends>
 							<field id='forAll'>0</field>
 							<!-- 2016-03-08 «The negative syntax for a backend config field <depends> condition»
