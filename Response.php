@@ -59,7 +59,6 @@ final class Response {
 	 * @return array(string => string)
 	 */
 	function a($k = null) {
-		/** @var array(string => string) $result */
 		$result = dfc($this, function() {
 			// 2016-09-07
 			// https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
@@ -67,7 +66,7 @@ final class Response {
 			$result = df_json_decode($this->_c->{'json'});
 			dfp_report($this, $result, 'response');
 			return $result;
-		});
+		}); /** @var array(string => string) $result */
 		return is_null($k) ? $result : (
 			is_array($k) ? df_clean(dfa_select_ordered($result, $k)) : dfa($result, $k)
 		);
