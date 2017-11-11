@@ -43,8 +43,7 @@ final class CustomerReturn {
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/1561
 		 */
-		/** @var O|DfOrder $order */
-		$order = df_checkout_session()->getLastRealOrder();
+		$order = df_checkout_session()->getLastRealOrder(); /** @var O|DfOrder $order */
 		/**
 		 * 2016-05-08
 		 * Generally, there could be multiple payment attemts for a single order
@@ -56,10 +55,8 @@ final class CustomerReturn {
 		 */
 		// How to get the last order programmatically? https://mage2.pro/t/1528
 		// How to get an order programmatically? https://mage2.pro/t/1562
-		/** @var S $s */
-		$s = dfps(__CLASS__);		
-		/** @var ChargeService $api */
-		$api = $s->apiCharge($order->getStore());
+		$s = dfps(__CLASS__); /** @var S $s */
+		$api = $s->apiCharge($order->getStore()); /** @var ChargeService $api */
 		/**
 		 * 2016-05-15
 		 * Even in the case of a request with autoCapture = true,
@@ -68,8 +65,7 @@ final class CustomerReturn {
 		 * after the 3D Secure verification.
 		 * (both cases were observed)
 		 */
-		/** @var CCharge $charge */
-		$charge = $api->verifyCharge($token);
+		$charge = $api->verifyCharge($token); /** @var CCharge $charge */
 		/**
 		 * 2016-09-07
 		 * @see \com\checkout\ApiServices\Charges\ResponseModels\Charge::__construct():
@@ -77,10 +73,8 @@ final class CustomerReturn {
 		 * https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 		 */
 		dfp_report(__CLASS__, json_decode($charge->{'json'}), 'customerReturn');
-		/** @var Response $r */
-		$r = new Response($charge, $order);
-		/** @var bool $result */
-		$result = $r->valid();
+		$r = new Response($charge, $order); /** @var Response $r */
+		$result = $r->valid(); /** @var bool $result */
 		if (!$result) {
 			// 2016-05-06
 			// «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
@@ -102,8 +96,7 @@ final class CustomerReturn {
 				&& 'y' === strtolower($charge->getAutoCapture())
 				&& !$r->flagged()
 			) {
-				/** @var CCharge $captureCharge */
-				$captureCharge = Response::getCaptureCharge($charge->getId());
+				$captureCharge = Response::getCaptureCharge($charge->getId()); /** @var CCharge $captureCharge */
 				$order->unsetData(O::PAYMENT);
 				dfp_webhook_case($payment);
 				$payment->unsetData('method_instance');
@@ -148,17 +141,14 @@ final class CustomerReturn {
 				// Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
 				// для Magento 2, и я был ещё недостаточно опытен.
 				$payment->setParentTransactionId($charge->getId());
-				/** @var InvoiceService $invoiceService */
-				$invoiceService = df_o(InvoiceService::class);
-				/** @var Invoice|DfInvoice $invoice */
-				$invoice = $invoiceService->prepareInvoice($order);
+				$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
+				$invoice = $invoiceService->prepareInvoice($order); /** @var Invoice|DfInvoice $invoice */
 				df_register('current_invoice', $invoice);
 				$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
 				$invoice->register();
 				$order->setIsInProcess(true);
 				$order->setCustomerNoteNotify(true);
-				/** @var Transaction $t */
-				$t = df_db_transaction();
+				$t = df_db_transaction(); /** @var Transaction $t */
 				$t->addObject($invoice);
 				$t->addObject($order);
 				$t->save();
@@ -175,11 +165,9 @@ final class CustomerReturn {
 	 * @param string $action
 	 */
 	private static function action(O $o, Payment $p, CCharge $c, $action) {
-		/** @var Method $m */
-		$m = dfpm($p);
+		$m = dfpm($p); /** @var Method $m */
 		if (AC::A === $action) {
-			// 2016-05-15
-			// Disable this event because we will trigger Capture manually.
+			// 2016-05-15 Disable this event because we will trigger Capture manually.
 			$m->disableEvent($c->getId(), 'charge.captured');
 		}
 		$m->responseSet($c);
