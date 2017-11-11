@@ -102,24 +102,24 @@ final class Method extends \Df\Payment\Method {
 	 * Mark an event as already processed,
 	 * so when Checkout.com will notify us about the event,
 	 * we will just skip this notification.
+	 * @used-by _refund()
+	 * @used-by _void()
+	 * @used-by capturePreauthorized()
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::action()
 	 * @param string $transactionId
 	 * @param string $eventId
 	 */
 	function disableEvent($transactionId, $eventId) {
-		/** @var ChargeResponse $charge */
-		$charge = $this->api()->getCharge($transactionId);
-		/** @var array(string => string) $metadata */
-		$metadata = df_eta($charge->getMetadata());
-		/** @var string[] $events */
-		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, ''));
+		$charge = $this->api()->getCharge($transactionId); /** @var ChargeResponse $charge */
+		$metadata = df_eta($charge->getMetadata()); /** @var array(string => string) $metadata */
+		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, '')); /** @var string[] $events */
 		if (!in_array($eventId, $events)) {
 			$events[]= $eventId;
 		}
 		$metadata[self::DISABLED_EVENTS] = df_csv($events);
 		// 2016-05-11
 		// «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
-		/** @var ChargeUpdate $update */
-		$update = new ChargeUpdate;
+		$update = new ChargeUpdate; /** @var ChargeUpdate $update */
 		$update->setChargeId($transactionId);
 		$update->setMetadata($metadata);
 		$this->api()->UpdateCardCharge($update);
@@ -166,6 +166,7 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
+	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::action()
 	 * @param ChargeResponse $response
 	 */
 	function responseSet(ChargeResponse $response) {$this->_response = $response;}

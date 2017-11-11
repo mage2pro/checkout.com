@@ -159,6 +159,7 @@ final class CustomerReturn {
 
 	/**
 	 * 2016-05-16
+	 * @used-by p()
 	 * @param O $o
 	 * @param Payment $p
 	 * @param CCharge $c
