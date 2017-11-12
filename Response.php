@@ -62,8 +62,7 @@ final class Response {
 		$result = dfc($this, function() {
 			// 2016-09-07
 			// https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
-			/** @var array(string => string) $result */
-			$result = df_json_decode($this->_c->{'json'});
+			$result = df_json_decode($this->_c->{'json'}); /** @var array(string => string) $result */
 			dfp_report($this, $result, 'response');
 			return $result;
 		}); /** @var array(string => string) $result */
