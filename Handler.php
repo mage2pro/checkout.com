@@ -47,9 +47,9 @@ abstract class Handler extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return bool
 	 */
-	private function isInitiatedByMyself() {return
-		in_array($this->type(), df_csv_parse($this->r('metadata/' . Method::DISABLED_EVENTS)))
-	;}
+	private function isInitiatedByMyself() {return in_array(
+		$this->type(), df_csv_parse($this->r('metadata/' . Method::DISABLED_EVENTS))
+	);}
 
 	/**
 	 * 2016-03-25
@@ -58,7 +58,7 @@ abstract class Handler extends \Df\Core\O {
 	 * @throws E
 	 */
 	static function p(array $request) {
-		/** @var mixed $result */
+		/** @var string $result */
 		try {
 			dfp_report(__CLASS__, $request, $request['eventType']);
 			/**
@@ -67,11 +67,8 @@ abstract class Handler extends \Df\Core\O {
 			 * as an event's parts separator, it uses only dot («.») as a separator.
 			 * http://docs.checkout.com/getting-started/webhooks
 			 */
-			/** @var string $suffix */
-			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType']));
-			/** @var Handler $i */
-			$i = df_new(df_con(__CLASS__, $suffix, DefaultT::class), $request);
-			/** @var string $result */
+			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType'])); /** @var string $suffix */
+			$i = df_new(df_con(__CLASS__, $suffix, DefaultT::class), $request); /** @var Handler $i */
 			$result =
 				!$i->eligible() ? 'The event is not for our store.' : (
 					$i->isInitiatedByMyself()
@@ -79,18 +76,14 @@ abstract class Handler extends \Df\Core\O {
 						. ' so we do not need to process the notification.'
 					: $i->process()
 				)
-			;
+			; 
 		}
 		catch (E $e) {
-			/**
-			 * 2016-03-27
-			 * https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
-			 */
-			df_response()->setStatusCode(500);
+			/// 2016-03-27 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
+			df_response_code(500);
 			df_sentry(__CLASS__, $e, ['extra' => ['request' => $request]]);
 			if (df_my_local()) {
-				// 2016-03-27
-				// Show the stack trace on the screen
+				// 2016-03-27 Show the stack trace on the screen
 				throw $e;
 			}
 			else {
