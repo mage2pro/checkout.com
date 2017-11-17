@@ -79,16 +79,13 @@ abstract class Handler extends \Df\Core\O {
 			; 
 		}
 		catch (E $e) {
-			/// 2016-03-27 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
+			// 2016-03-27 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#5xx_Server_Error
 			df_response_code(500);
 			df_sentry(__CLASS__, $e, ['extra' => ['request' => $request]]);
 			if (df_my_local()) {
-				// 2016-03-27 Show the stack trace on the screen
-				throw $e;
+				throw $e; // 2016-03-27 Show the stack trace on the screen
 			}
-			else {
-				$result = __($e->getMessage());
-			}
+			$result = __($e->getMessage());
 		}
 		return $result;
 	}
