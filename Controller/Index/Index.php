@@ -1,6 +1,6 @@
 <?php
 namespace Dfe\CheckoutCom\Controller\Index;
-use Df\Framework\W\Response\Json;
+use Df\Framework\W\Result\Json;
 use Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Handler\CustomerReturn;
 class Index extends \Magento\Framework\App\Action\Action {
