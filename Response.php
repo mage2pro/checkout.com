@@ -163,22 +163,16 @@ final class Response {
 	 * @return string
 	 */
 	function messageC() {return dfc($this, function() {
-		/** @var string $result */
+		/** @var string $r */
 		if (!$this->hasId()) {
-			$result = __(
-				'Sorry, this payment method is not working now.'
-				 .'<br/>Please use another payment method.'
-			);
+			$r = __('Sorry, this payment method is not working now.<br/>Please use another payment method.');
 		}
 		else {
-			/** @var string $m1 */
-			/** @var string $m2 */
+			/** @var string $m1 */ /** @var string $m2 */
 			list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
-			/** @var string $m */
-			$m = !$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})";
-			$result = df_var($this->_s->messageFailure(), ['message' => $m]);
+			$r = $this->_s->messageFailure(!$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})");
 		}
-		return $result;
+		return $r;
 	});}
 
 	/**
