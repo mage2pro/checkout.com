@@ -17,7 +17,7 @@ use Magento\Payment\Model\InfoInterface as II;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Address as OrderAddress;
 use Magento\Sales\Model\Order\Payment as OP;
-use Magento\Sales\Model\Order\Payment\Transaction;
+use Magento\Sales\Model\Order\Payment\Transaction as T;
 /** @method Settings s() */
 final class Method extends \Df\Payment\Method {
 	/**
@@ -238,8 +238,7 @@ final class Method extends \Df\Payment\Method {
 	 * @param float $a
 	 */
 	protected function _refund($a) {$this->leh(function() use($a) {
-		/** @var ChargeRefund $refund */
-		$refund = new ChargeRefund;
+		$refund = new ChargeRefund; /** @var ChargeRefund $refund */
 		/**
 		 * 2016-05-09
 		 * The «capture» transaction's ID differs from the previous transaction's ID.
@@ -255,8 +254,7 @@ final class Method extends \Df\Payment\Method {
 		$refund->setChargeId($this->ii()->getRefundTransactionId());
 		$refund->setValue($this->amountFormat($a));
 		$this->disableEvent($this->ii()->getRefundTransactionId(), 'charge.refunded');
-		/** @var ChargeResponse $response */
-		$response = $this->api()->refundCardChargeRequest($refund);
+		$response = $this->api()->refundCardChargeRequest($refund); /** @var ChargeResponse $response */
 		/**
 		 * 2016-05-09
 		 * A sample success response:
@@ -281,11 +279,9 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_void()
 	 */
 	protected function _void() {$this->leh(function() {
-		/** @var Transaction|false|null $auth */
-		$auth = $this->ii()->getAuthorizationTransaction();
-		if ($auth) {
-			/** @var ChargeVoid $void */
-			$void = new ChargeVoid;
+		if ($auth = $this->ii()->getAuthorizationTransaction()) {
+			/** @var T|false|null $auth */
+			$void = new ChargeVoid; /** @var ChargeVoid $void */
 			/**
 			 * 2016-05-03
 			 * http://developers.checkout.com/docs/server/api-reference/charges/void-card-charge#request-payload-fields
@@ -301,13 +297,10 @@ final class Method extends \Df\Payment\Method {
 			 */
 			$void->setTrackId($this->ii()->getOrder()->getIncrementId());
 			$this->disableEvent($auth->getTxnId(), 'charge.voided');
-			/** @var ChargeResponse $response */
-			$response = $this->api()->voidCharge($auth->getTxnId(), $void);
-			/**
-			 * 2016-05-13
-			 * This makes the «void» transaction ID the same in Magento and in Checkout.com
-			 * (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
-			 */
+			$response = $this->api()->voidCharge($auth->getTxnId(), $void); /** @var ChargeResponse $response */
+			// 2016-05-13
+			// This makes the «void» transaction ID the same in Magento and in Checkout.com
+			// (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
 			$this->ii()->setTransactionId($response->getId());
 		}
 	});}
@@ -334,10 +327,7 @@ final class Method extends \Df\Payment\Method {
 	 * I did not find such information on the Checkout.com website.
 	 * «Does Checkout.com have minimum and maximum amount limitations on a single payment?»
 	 * https://mage2.pro/t/2687
-	 *
-	 * 2017-02-10
-	 * I have got an answer from the Checkout.com support: https://mage2.pro/t/2687/3
-	 *
+	 * 2017-02-10 I have got an answer from the Checkout.com support: https://mage2.pro/t/2687/3
 	 * @see \Df\Payment\Method::amountLimits()
 	 * @used-by \Df\Payment\Method::isAvailable()
 	 * @return null
@@ -354,18 +344,14 @@ final class Method extends \Df\Payment\Method {
 	 * @throws Exception
 	 */
 	protected function charge($capture = true) {
-		/** @var Transaction|false|null $auth */
-		$auth = !$capture ? null : $this->ii()->getAuthorizationTransaction();
-		if ($auth) {
+		if ($auth = !$capture ? null : $this->ii()->getAuthorizationTransaction()) {
+			/** @var T|false|null $auth */
 			$this->capturePreauthorized($auth);
 		}
 		else {
-			/**
-			 * 2016-04-23
-			 * http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
-			 */
-			/** @var ChargeResponse $response */
-		    $response = $this->response();
+			// 2016-04-23
+			// http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
+		    $response = $this->response(); /** @var ChargeResponse $response */
 			if (!$this->r()->valid()) {
 				throw new Exception($this->r(), $this->request());
 			}
@@ -378,8 +364,7 @@ final class Method extends \Df\Payment\Method {
 			 * @used-by \Magento\Sales\Model\Order\Payment::canVoid()
 			 */
 			$this->ii()->setTransactionId($this->r()->magentoTransactionId());
-			/** @var Card $card */
-			$card = $response->getCard();
+			$card = $response->getCard(); /** @var Card $card */
 			// 2016-05-02
 			// https://mage2.pro/t/941
 			// «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
@@ -464,9 +449,9 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-11
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
-	 * @param Transaction $auth
+	 * @param T $auth
 	 */
-	private function capturePreauthorized(Transaction $auth) {
+	private function capturePreauthorized(T $auth) {
 		$this->leh(function() use($auth) {
 			// 2016-05-03
 			// https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
@@ -484,8 +469,7 @@ final class Method extends \Df\Payment\Method {
 			 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-actions/capture-card-charge#request-payload-fields
 			 */
 			$capture->setValue($this->amountFormat(dfp_due($this)));
-			/** @var ChargeResponse $response */
-			$response = $this->api()->CaptureCardCharge($capture);
+			$response = $this->api()->CaptureCardCharge($capture); /** @var ChargeResponse $response */
 			/**
 			 * 2016-06-08
 			 * A sample success response:
@@ -524,18 +508,17 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-08
 	 * A sample response when a 3D Secure validation is needed:
-		{
-			"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
-			"liveMode": false,
-			"chargeMode": 2,
-			"responseCode": "10000",
-			"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
-		}
+	 *	{
+	 *		"id": "pay_tok_8fba2ead-625c-420d-80bf-c831d82951f4",
+	 *		"liveMode": false,
+	 *		"chargeMode": 2,
+	 *		"responseCode": "10000",
+	 *		"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
+	 *	}
 	 * @return string|null
 	 */
 	private function ckoRedirectUrl() {return dfc($this, function() {
-		/** @var string|null $result */
-		if ($result = $this->r()->a('redirectUrl')) {
+		if ($result = $this->r()->a('redirectUrl')) { /** @var string|null $result */
 			// 2016-05-07
 			// If a 3D Secure validation is needed,
 			// then $response->getId() returns a token (see a sample response above),
@@ -591,58 +574,20 @@ final class Method extends \Df\Payment\Method {
 	 * @return float
 	 */
 	private function minimumAmount($c) {return dfa([
-		'AED' => 5
-		,'ARS' => 20
-		,'AUD' => 1.5
-		,'BHD' => .5
-		,'BIF' => 2000
-		,'BYR' => 20000
-		,'BZD' => 3
-		,'CAD' => 1.5
-		,'CHF' => 1
-		,'CLF' => .05
-		,'CLP' => 700
-		,'COP' => 3000
-		,'DJF' => 200
-		,'DKK' => 7
-		,'GBP' => 1
-		,'GNF' => 9300
-		,'EUR' => 1
-		,'HKD' => 8
-		,'IDR' => 13500
-		,'INR' => 70
-		,'ISK' => 120
-		,'JPY' => 120
-		,'JOD' => 1
-		,'KMF' => 500
-		,'KRW' => 1200
-		,'KWD' => .5
-		,'NGN' => 350
-		,'NZD' => 1.5
-		,'MXN' => 20
-		,'MYR' => 4.5
-		,'OMR' => .5
-		,'PEN' => 5
-		,'PHP' => 50
-		,'PYG' => 6000
-		,'RWF' => 850
-		,'SGD' => 1.5
-		,'VND' => 22800
-		,'USD' => 1
-		,'VUV' => 120
-		,'XAF' => 650
-		,'XOF' => 650
-		,'XPF' => 120
-		,'ZAR' => 15
+		'AED' => 5, 'ARS' => 20, 'AUD' => 1.5, 'BHD' => .5, 'BIF' => 2000, 'BYR' => 20000, 'BZD' => 3
+		,'CAD' => 1.5, 'CHF' => 1, 'CLF' => .05, 'CLP' => 700, 'COP' => 3000, 'DJF' => 200, 'DKK' => 7
+		,'GBP' => 1, 'GNF' => 9300, 'EUR' => 1, 'HKD' => 8, 'IDR' => 13500, 'INR' => 70, 'ISK' => 120
+		,'JPY' => 120, 'JOD' => 1, 'KMF' => 500, 'KRW' => 1200, 'KWD' => .5, 'NGN' => 350, 'NZD' => 1.5
+		,'MXN' => 20, 'MYR' => 4.5, 'OMR' => .5, 'PEN' => 5, 'PHP' => 50, 'PYG' => 6000, 'RWF' => 850
+		,'SGD' => 1.5, 'VND' => 22800, 'USD' => 1, 'VUV' => 120, 'XAF' => 650, 'XOF' => 650, 'XPF' => 120
+		, 'ZAR' => 15
 	], $c, 1);}
 
 	/**
 	 * 2016-05-15
 	 * @return Response
 	 */
-	private function r() {return dfc($this, function() {return new Response(
-		$this->response(), $this->o()
-	);});}
+	private function r() {return dfc($this, function() {return new Response($this->response(), $this->o());});}
 
 	/**
 	 * 2016-08-21
