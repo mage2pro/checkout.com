@@ -1,10 +1,10 @@
 {
 	"name": "mage2pro/checkout.com"
-	,"version": "1.5.0"
+	,"version": "1.5.1"
 	,"description": "Checkout.com integration with Magento 2"
 	,"type": "magento2-module"
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"
-	,"license": "The MIT License (MIT)"
+	,"license": "MIT"
 	,"authors": [{
 		"name": "Dmitry Fedyuk",
 		"email": "admin@mage2.pro",
