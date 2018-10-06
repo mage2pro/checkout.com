@@ -43,7 +43,7 @@ final class CustomerReturn {
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/1561
 		 */
-		$order = df_checkout_session()->getLastRealOrder(); /** @var O|DfOrder $order */
+		$order = df_order_last(); /** @var O|DfOrder $order */
 		/**
 		 * 2016-05-08
 		 * Generally, there could be multiple payment attemts for a single order
