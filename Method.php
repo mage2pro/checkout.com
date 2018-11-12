@@ -324,9 +324,8 @@ final class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see \Df\Payment\Method::amountFactorTable()
 	 * @used-by \Df\Payment\Method::amountFactor()
-	 * @return int
-	 * 2017-02-10
 	 * @see minimumAmount()
+	 * @return array(int => string)
 	 */
 	protected function amountFactorTable() {return [
 		1000 => 'BHD,KWD,OMR,JOD', 1 => 'BYR,BIF,DJF,GNF,KMF,XAF,CLF,XPF,JPY,PYG,RWF,KRW,VUV,VND,XOF'
