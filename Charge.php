@@ -3,8 +3,6 @@ namespace Dfe\CheckoutCom;
 use com\checkout\ApiServices\SharedModels\Address as CAddress;
 use com\checkout\ApiServices\SharedModels\Phone as CPhone;
 use com\checkout\ApiServices\SharedModels\Product as CProduct;
-use Df\Config\Source\NoWhiteBlack as NWB;
-use Df\Payment\Token;
 use Dfe\CheckoutCom\SDK\CardTokenChargeCreate as lCharge;
 use Dfe\CheckoutCom\SDK\ChargesMapper;
 use libphonenumber\PhoneNumber as lPhone;
@@ -172,7 +170,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * «A valid card token (with prefix card_tok_)»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setCardToken(Token::get($this->ii()));
+		$result->setCardToken($this->token());
 		$this->setProducts($result);
 		// 2016-04-23
 		// «Shipping address details.»
