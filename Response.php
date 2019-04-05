@@ -53,6 +53,9 @@ final class Response {
 
 	/**
 	 * 2016-05-08
+	 * @used-by hasId()
+	 * @used-by messageC()
+	 * @used-by \Dfe\CheckoutCom\Exception::message()
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @used-by \Dfe\CheckoutCom\Method::ckoRedirectUrl()
 	 * @param string|string[]|null $k [optional]
