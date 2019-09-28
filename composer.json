@@ -1,6 +1,6 @@
 {
 	"name": "mage2pro/checkout.com"
-	,"version": "1.5.3"
+	,"version": "1.5.4"
 	,"description": "Checkout.com integration with Magento 2"
 	,"type": "magento2-module"
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"

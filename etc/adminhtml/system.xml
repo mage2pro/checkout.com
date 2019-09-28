@@ -227,7 +227,7 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 					type='text'
 				>
 					<label>Billing Descriptor</label>
-					<comment><![CDATA[An arbitrary string to be displayed on your customer's bank card statement.
+					<comment><![CDATA[An arbitrary string to be shown on your customer's bank card statement.
 <br/>This may be up to <b>22</b> characters, may not include <b><>"'</b> characters, and will appear on your customer's statement in capital letters.
 <br/>Non-ASCII characters are automatically stripped.
 <br/><a href='https://www.checkout.com/blog/billing-descriptors/' target='_blank'>How To Use Billing Descriptors to Decrease Chargebacks</a>.
@@ -244,7 +244,7 @@ Normally, the «Capture» transaction should be handled on a Webhook notificatio
 					type='Df\Framework\Form\Element\Textarea'
 				>
 					<label>Failure Message</label>
-					<comment><![CDATA[The failure message will be displayed to the customer on an unsuccessful payment attempt.
+					<comment><![CDATA[It is shown to customers on an unsuccessful payment attempt.
 <br/>You can use HTML tags and the following variables in the template: <table class='df-note'><tbody>
 	<tr>
 		<td>{message}</td>
