@@ -53,26 +53,19 @@ final class Response {
 
 	/**
 	 * 2016-05-08
+	 * 2016-09-07
+	 * https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 	 * @used-by hasId()
 	 * @used-by messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @used-by \Dfe\CheckoutCom\Method::ckoRedirectUrl()
 	 * @param string|string[]|null $k [optional]
 	 * @return array(string => string)
 	 */
-	function a($k = null) {
-		$result = dfc($this, function() {
-			// 2016-09-07
-			// https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
-			$result = df_json_decode($this->_c->{'json'}); /** @var array(string => string) $result */
-			dfp_report($this, $result, 'response');
-			return $result;
-		}); /** @var array(string => string) $result */
-		return is_null($k) ? $result : (
-			is_array($k) ? df_clean(dfa_select_ordered($result, $k)) : dfa($result, $k)
-		);
-	}
+	function a($k = null) {return dfaoc($this, function() {/** @var array(string => string) $r */
+		dfp_report($this, $r = df_json_decode($this->_c->{'json'}), 'response');
+		return $r;
+	}, $k);}
 
 	/**
 	 * 2016-05-08
@@ -172,7 +165,7 @@ final class Response {
 		}
 		else {
 			/** @var string $m1 */ /** @var string $m2 */
-			list($m1, $m2) = array_values($this->a(['responseMessage', 'responseAdvancedInfo']));
+			list($m1, $m2) = $this->a(['responseMessage', 'responseAdvancedInfo']);
 			$r = $this->_s->messageFailure(!$m2 || $m2 === $m1 ? $m1 : "{$m1} ({$m2})");
 		}
 		return $r;
