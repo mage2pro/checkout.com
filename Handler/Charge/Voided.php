@@ -1,7 +1,7 @@
 <?php
 namespace Dfe\CheckoutCom\Handler\Charge;
 use Dfe\CheckoutCom\Handler\Charge;
-use Magento\Framework\DataObject as O;
+use Magento\Framework\DataObject as _DO;
 // 2016-05-10
 // charge.voided
 // http://docs.checkout.com/getting-started/webhooks
@@ -16,10 +16,8 @@ final class Voided extends Charge {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 */
 	protected function process() {
-		// 2016-05-11
-		// isPaymentReview() means that the transaction is «Flagged».
-		// We need to void it.
-		$this->o()->isPaymentReview() ? $this->op()->deny() : $this->op()->void(new O);
+		// 2016-05-11 isPaymentReview() means that the transaction is «Flagged». We need to void it.
+		$this->o()->isPaymentReview() ? $this->op()->deny() : $this->op()->void(new _DO);
 		$this->o()->save();
 	}
 }

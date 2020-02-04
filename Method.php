@@ -11,6 +11,7 @@ use Df\Payment\PlaceOrderInternal as PO;
 use Df\Payment\Source\AC;
 use Df\Payment\Token;
 use Dfe\CheckoutCom\SDK\ChargeService;
+use Magento\Framework\DataObject as _DO;
 use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Payment\Model\Info as I;
 use Magento\Payment\Model\InfoInterface as II;
@@ -155,11 +156,8 @@ final class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	function denyPayment(II $payment) {
-		/**
-		 * 2016-05-09
-		 * Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
-		 */
-		$payment->void(new \Magento\Framework\DataObject());
+		// 2016-05-09 Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
+		$payment->void(new _DO);
 		return true;
 	}
 
