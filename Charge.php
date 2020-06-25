@@ -249,7 +249,7 @@ final class Charge extends \Df\Payment\Charge {
 			// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 			//
 			// 2016-08-18
-			// From now, the country code should be a string,
+			// From now on, the country code should be a string,
 			// https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
 			// The following data will fail
 			//	"phone": {
