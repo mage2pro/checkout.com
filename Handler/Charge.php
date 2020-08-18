@@ -10,9 +10,9 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 /**
  * 2016-05-10
- * @see \Dfe\CheckoutCom\Handler\Charge\Captured::invoice()
- * @see \Dfe\CheckoutCom\Handler\Charge\Captured::process()
- * @see \Dfe\CheckoutCom\Handler\Charge\Refunded::process()
+ * @see \Dfe\CheckoutCom\Handler\Charge\Captured
+ * @see \Dfe\CheckoutCom\Handler\Charge\Refunded
+ * @see \Dfe\CheckoutCom\Handler\Charge\Voided
  */
 abstract class Charge extends Handler {
 	/**
@@ -59,9 +59,7 @@ abstract class Charge extends Handler {
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Voided::process()
 	 * @return Payment|DfPayment|null
 	 */
-	final protected function op() {return dfc($this, function() {return
-		$this->paymentByTxnId($this->parentId())
-	;});}
+	final protected function op() {return dfc($this, function() {return $this->paymentByTxnId($this->parentId());});}
 
 	/**
 	 * 2016-03-26
@@ -69,8 +67,7 @@ abstract class Charge extends Handler {
 	 * @return Payment|DfPayment|null
 	 */
 	final protected function paymentByTxnId($id) {return dfc($this, function($id) {
-		/** @var Payment|null $result */
-		$result = null;
+		$result = null; /** @var Payment|null $result */
 		if ($id) {
 			/** @var int|null $paymentId */
 			$paymentId = df_fetch_one('sales_payment_transaction', 'payment_id', ['txn_id' => $id]);
@@ -95,31 +92,31 @@ abstract class Charge extends Handler {
 				 * идентификатор транзакции, потому что метод
 				 * @see \Magento\Sales\Model\Order\Payment\Operations\CaptureOperation::capture()
 				 * перетрёт наш идентификатор кодом:
-						$payment->setTransactionId(
-							$this->transactionManager->generateTransactionId(
-								$payment,
-								Transaction::TYPE_CAPTURE,
-								$payment->getAuthorizationTransaction()
-							)
-						);
+				 *		$payment->setTransactionId(
+				 *			$this->transactionManager->generateTransactionId(
+				 *				$payment,
+				 *				Transaction::TYPE_CAPTURE,
+				 *				$payment->getAuthorizationTransaction()
+				 *			)
+				 *		);
 				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Operations/CaptureOperation.php#L40-L46
 				 * Однако мне следовало посмотреть глубже, в реализацию метода
 				 * @see \Magento\Sales\Model\Order\Payment\Transaction\Manager::generateTransactionId()
 				 * чтобы понять, что когда нестандартный идентификатор транзакции уже установлен,
 				 * то метод его не перетирает:
-					if (!$payment->getParentTransactionId()
-						&& !$payment->getTransactionId() && $transactionBasedOn
-					) {
-						$payment->setParentTransactionId($transactionBasedOn->getTxnId());
-					}
-					// generate transaction id for an offline action or payment method that didn't set it
-					if (
-				 		($parentTxnId = $payment->getParentTransactionId())
-				 		&& !$payment->getTransactionId()
-				 	) {
-						return "{$parentTxnId}-{$type}";
-					}
-					return $payment->getTransactionId();
+			 	 *	if (!$payment->getParentTransactionId()
+				 *		&& !$payment->getTransactionId() && $transactionBasedOn
+				 *	) {
+				 *		$payment->setParentTransactionId($transactionBasedOn->getTxnId());
+				 *	}
+				 *	// generate transaction id for an offline action or payment method that didn't set it
+				 *	if (
+				 *		($parentTxnId = $payment->getParentTransactionId())
+				 * 		&& !$payment->getTransactionId()
+				 * 	) {
+				 *		return "{$parentTxnId}-{$type}";
+				 *	}
+				 *	return $payment->getTransactionId();
 				 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Transaction/Manager.php#L73-L80
 				 * Поэтому никакие обходные манёвры нам не нужны,
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.

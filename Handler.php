@@ -2,7 +2,12 @@
 namespace Dfe\CheckoutCom;
 use Dfe\CheckoutCom\Handler\DefaultT;
 use Exception as E;
-abstract class Handler extends \Df\Core\OLegacy {
+/**
+ * @see \Dfe\CheckoutCom\Handler\Charge
+ * @see \Dfe\CheckoutCom\Handler\CustomerReturn
+ * @see \Dfe\CheckoutCom\Handler\DefaultT
+ */
+abstract class Handler extends \Df\Core\O {
 	/**
 	 * 2016-03-25
 	 * @used-by \Dfe\CheckoutCom\Handler::p()

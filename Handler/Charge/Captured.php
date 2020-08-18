@@ -7,9 +7,7 @@ use Magento\Framework\Exception\LocalizedException as LE;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\InvoiceService;
-// 2016-05-10
-// charge.captured
-// http://docs.checkout.com/getting-started/webhooks
+# 2016-05-10 charge.captured http://docs.checkout.com/getting-started/webhooks
 final class Captured extends Charge {
 	/**
 	 * 2016-03-25
@@ -23,19 +21,14 @@ final class Captured extends Charge {
 	 * @throws LE
 	 */
 	protected function process() {
-		/** @var string|null $result */
-		$result = null;
-		/** @var O|DfOrder $o */
-		$o = $this->o();
-		// 2016-05-11
-		// The payment is «Flagged».
-		// The «Accept» operation should be performed.
+		$r = null; /** @var string|null $r */
+		$o = $this->o(); /** @var O|DfOrder $o */
+		# 2016-05-11 The payment is «Flagged». The «Accept» operation should be performed.
 		if ($o->isPaymentReview()) {
 			$this->op()->accept();
 			$o->save();
 		}
-		// 2016-05-11
-		// The payment is in the «Authorized» state.
+		# 2016-05-11 The payment is in the «Authorized» state.
 		else {
 			// 2016-12-30
 			// Мы не должны считать исключительной ситуацией повторное получение
@@ -46,7 +39,7 @@ final class Captured extends Charge {
 			// by making your event processing idempotent.»
 			// https://stripe.com/docs/webhooks#best-practices
 			if (!$o->canInvoice()) {
-				$result = __('The order does not allow an invoice to be created.');
+				$r = __('The order does not allow an invoice to be created.');
 			}
 			else {
 				$o->setIsInProcess(true);
@@ -55,7 +48,7 @@ final class Captured extends Charge {
 				df_mail_invoice($this->invoice());
 			}
 		}
-		return $result;
+		return $r;
 	}
 
 	/**
@@ -65,17 +58,15 @@ final class Captured extends Charge {
 	 */
 	private function invoice() {
 		if (!isset($this->{__METHOD__})) {
-			/** @var InvoiceService $invoiceService */
-			$invoiceService = df_o(InvoiceService::class);
-			/** @var Invoice|DfInvoice $result */
-			$result = $invoiceService->prepareInvoice($this->o());
-			if (!$result) {
+			$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
+			$r = $invoiceService->prepareInvoice($this->o()); /** @var Invoice|DfInvoice $r */
+			if (!$r) {
 				throw new LE(__('We can\'t save the invoice right now.'));
 			}
-			if (!$result->getTotalQty()) {
+			if (!$r->getTotalQty()) {
 				throw new LE(__('You can\'t create an invoice without products.'));
 			}
-			df_register('current_invoice', $result);
+			df_register('current_invoice', $r);
 			/**
 			 * 2016-03-26
 			 * @used-by \Magento\Sales\Model\Order\Invoice::register()
@@ -84,9 +75,9 @@ final class Captured extends Charge {
 			 * and not \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
 			 * that was created by the transaction capture.
 			 */
-			$result->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-			$result->register();
-			$this->{__METHOD__} = $result;
+			$r->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+			$r->register();
+			$this->{__METHOD__} = $r;
 		}
 		return $this->{__METHOD__};
 	}
