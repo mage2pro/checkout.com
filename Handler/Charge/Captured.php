@@ -30,14 +30,14 @@ final class Captured extends Charge {
 		}
 		# 2016-05-11 The payment is in the «Authorized» state.
 		else {
-			// 2016-12-30
-			// Мы не должны считать исключительной ситуацией повторное получение
-			// ранее уже полученного оповещения.
-			// В документации к Stripe, например, явно сказано:
-			// «Webhook endpoints may occasionally receive the same event more than once.
-			// We advise you to guard against duplicated event receipts
-			// by making your event processing idempotent.»
-			// https://stripe.com/docs/webhooks#best-practices
+			# 2016-12-30
+			# Мы не должны считать исключительной ситуацией повторное получение
+			# ранее уже полученного оповещения.
+			# В документации к Stripe, например, явно сказано:
+			# «Webhook endpoints may occasionally receive the same event more than once.
+			# We advise you to guard against duplicated event receipts
+			# by making your event processing idempotent.»
+			# https://stripe.com/docs/webhooks#best-practices
 			if (!$o->canInvoice()) {
 				$r = __('The order does not allow an invoice to be created.');
 			}

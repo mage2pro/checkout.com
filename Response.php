@@ -7,17 +7,17 @@ use Df\Payment\Source\AC;
 use Dfe\CheckoutCom\SDK\ChargeService as API;
 use Dfe\CheckoutCom\Settings as S;
 use Magento\Sales\Model\Order;
-// 2016-05-15
+# 2016-05-15
 //
-// 2016-06-08
-// I renamed it to get rid of the following
-// Magento 2 compiler (bin/magento setup:di:compile) failure:
-// «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
-// because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
-// http://stackoverflow.com/questions/17746481
+# 2016-06-08
+# I renamed it to get rid of the following
+# Magento 2 compiler (bin/magento setup:di:compile) failure:
+# «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+# because the name is already in use in vendor/mage2pro/checkout.com/Response.php on line 4»
+# http://stackoverflow.com/questions/17746481
 //
-// 2016-07-17
-// A sample failure response:
+# 2016-07-17
+# A sample failure response:
 //	{
 //		"id": "charge_test_153AF6744E5J7A98E1D9",
 //		"responseMessage": "40144 - Threshold Risk - Decline",
@@ -28,8 +28,8 @@ use Magento\Sales\Model\Order;
 //		...
 //	}
 //
-// 2016-08-05
-// A sample failure response when some request params are invalid:
+# 2016-08-05
+# A sample failure response when some request params are invalid:
 //	{
 //		"errorCode": "70000",
 //		"message": "Validation error",
@@ -38,7 +38,7 @@ use Magento\Sales\Model\Order;
 //		],
 //		"errorMessageCodes": [
 //			"70006"
-// 		],
+# 		],
 //		"eventId": "96320dfb-672c-4317-93d0-04317e8ea9bf"
 //	}
 final class Response {

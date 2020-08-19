@@ -156,7 +156,7 @@ final class Method extends \Df\Payment\Method {
 	 * @return bool
 	 */
 	function denyPayment(II $payment) {
-		// 2016-05-09 Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
+		# 2016-05-09 Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
 		$payment->void(new _DO);
 		return true;
 	}
@@ -181,8 +181,8 @@ final class Method extends \Df\Payment\Method {
 			$events[]= $eventId;
 		}
 		$metadata[self::DISABLED_EVENTS] = df_csv($events);
-		// 2016-05-11
-		// «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
+		# 2016-05-11
+		# «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
 		$update = new ChargeUpdate; /** @var ChargeUpdate $update */
 		$update->setChargeId($transactionId);
 		$update->setMetadata($metadata);
@@ -308,9 +308,9 @@ final class Method extends \Df\Payment\Method {
 			$void->setTrackId($this->ii()->getOrder()->getIncrementId());
 			$this->disableEvent($auth->getTxnId(), 'charge.voided');
 			$response = $this->api()->voidCharge($auth->getTxnId(), $void); /** @var ChargeResponse $response */
-			// 2016-05-13
-			// This makes the «void» transaction ID the same in Magento and in Checkout.com
-			// (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
+			# 2016-05-13
+			# This makes the «void» transaction ID the same in Magento and in Checkout.com
+			# (prevents Magento from generating a transaction ID like <Parent Identifier>-void).
 			$this->ii()->setTransactionId($response->getId());
 		}
 	});}
@@ -358,8 +358,8 @@ final class Method extends \Df\Payment\Method {
 			$this->capturePreauthorized($auth);
 		}
 		else {
-			// 2016-04-23
-			// http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
+			# 2016-04-23
+			# http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
 		    $response = $this->response(); /** @var ChargeResponse $response */
 			if (!$this->r()->valid()) {
 				throw new Exception($this->r(), $this->request());
@@ -374,11 +374,11 @@ final class Method extends \Df\Payment\Method {
 			 */
 			$this->ii()->setTransactionId($this->r()->magentoTransactionId());
 			$card = $response->getCard(); /** @var Card $card */
-			// 2016-05-02
-			// https://mage2.pro/t/941
-			// «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
+			# 2016-05-02
+			# https://mage2.pro/t/941
+			# «How is the \Magento\Sales\Model\Order\Payment's setCcLast4() / getCcLast4() used?»
 			$this->ii()->setCcLast4($card->getLast4());
-			// 2016-05-02
+			# 2016-05-02
 			$this->ii()->setCcType($card->getPaymentMethod());
 			/**
 			 * 2016-03-15
@@ -462,8 +462,8 @@ final class Method extends \Df\Payment\Method {
 	 */
 	private function capturePreauthorized(T $auth) {
 		$this->leh(function() use($auth) {
-			// 2016-05-03
-			// https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
+			# 2016-05-03
+			# https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
 			/** @var ChargeCapture $capture */
 			$capture = new ChargeCapture;
 			$this->disableEvent($auth->getTxnId(), 'charge.captured');
@@ -528,17 +528,17 @@ final class Method extends \Df\Payment\Method {
 	 */
 	private function ckoRedirectUrl() {return dfc($this, function() {
 		if ($result = $this->r()->a('redirectUrl')) { /** @var string|null $result */
-			// 2016-05-07
-			// If a 3D Secure validation is needed,
-			// then $response->getId() returns a token (see a sample response above),
-			// not the transaction's ID.
-			// In this case, we postpone creating a Magento transaction yet,
-			// so we do not call $payment->setTransactionId($response->getId());
+			# 2016-05-07
+			# If a 3D Secure validation is needed,
+			# then $response->getId() returns a token (see a sample response above),
+			# not the transaction's ID.
+			# In this case, we postpone creating a Magento transaction yet,
+			# so we do not call $payment->setTransactionId($response->getId());
 			PO::setRedirectData($this, $result);
-			// 2016-05-06
-			// Postpone sending an order confirmation email to the customer,
-			// because the customer should pass 3D Secure validation first.
-			// «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
+			# 2016-05-06
+			# Postpone sending an order confirmation email to the customer,
+			# because the customer should pass 3D Secure validation first.
+			# «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
 			$this->o()->setCanSendNewEmailFlag(false);
 		}
 		return $result;

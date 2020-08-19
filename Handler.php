@@ -87,7 +87,7 @@ abstract class Handler extends \Df\Core\O {
 			df_500();
 			df_sentry(__CLASS__, $e, ['extra' => ['request' => $request]]);
 			if (df_my_local()) {
-				throw $e; // 2016-03-27 Show the stack trace on the screen
+				throw $e; # 2016-03-27 Show the stack trace on the screen
 			}
 			$result = __($e->getMessage());
 		}

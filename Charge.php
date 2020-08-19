@@ -130,9 +130,9 @@ final class Charge extends \Df\Payment\Charge {
 		/*if ($order->getCustomerId()) {
 			$request->setCustomerId($order->getCustomerId());
 		} */
-		// 2016-04-21
-		// 2017-09-04 «Description of the charge», optional, string, the length is not limited.
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-21
+		# 2017-09-04 «Description of the charge», optional, string, the length is not limited.
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setDescription($this->description());
 		/**
 		 * 2016-04-21
@@ -148,19 +148,19 @@ final class Charge extends \Df\Payment\Charge {
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
 		$result->setValue($this->amountF());
-		// 2016-04-21
-		// «Three-letter ISO currency code representing the currency in which the charge was made.
-		// (refer to currency codes and names)»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-21
+		# «Three-letter ISO currency code representing the currency in which the charge was made.
+		# (refer to currency codes and names)»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setCurrency($this->currencyC());
-		// 2016-04-21
-		// «Transaction indicator. 1 for regular, 2 for recurring, 3 for MOTO.
-		// Defaults to 1 if not specified.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-21
+		# «Transaction indicator. 1 for regular, 2 for recurring, 3 for MOTO.
+		# Defaults to 1 if not specified.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setTransactionIndicator(1);
-		// 2016-04-21
-		// «Customer/Card holder Ip.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-21
+		# «Customer/Card holder Ip.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		/** @var string $ip */
 		if ('127.0.0.1' !== ($ip = $this->customerIp())) {
 			$result->setCustomerIp($ip);
@@ -172,20 +172,20 @@ final class Charge extends \Df\Payment\Charge {
 		 */
 		$result->setCardToken($this->token());
 		$this->setProducts($result);
-		// 2016-04-23
-		// «Shipping address details.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-23
+		# «Shipping address details.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setShippingDetails($this->cAddress());
 		/**
 		 * 2017-08-19
 		 * @todo Pass the «billingDetails» too:
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		// 2016-04-23
-		// «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
-		// Max length of key(s) and value(s) is 100 each.
-		// A max. of 10 KVP are allowed.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-23
+		# «A hash of FieldName and value pairs e.g. {'keys1': 'Value1'}.
+		# Max length of key(s) and value(s) is 100 each.
+		# A max. of 10 KVP are allowed.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setMetadata($this->pMetadata());
 		return $result;
 	}
@@ -205,22 +205,22 @@ final class Charge extends \Df\Payment\Charge {
 		 * 1) @uses \Magento\Quote\Model\Quote::getShippingAddress() возвращает пустой объект
 		 */
 		if ($a = $this->addressS()) { /** @var OA|null $a */
-			// 2016-04-23 «Address field line 1. Max length of 100 characters.»
+			# 2016-04-23 «Address field line 1. Max length of 100 characters.»
 			$r->setAddressLine1($a->getStreetLine(1));
-			// 2016-04-23 «Address field line 2. Max length of 100 characters.»
+			# 2016-04-23 «Address field line 2. Max length of 100 characters.»
 			$r->setAddressLine2($a->getStreetLine(2));
-			// 2016-04-23 «Address postcode. Max. length of 50 characters.»
+			# 2016-04-23 «Address postcode. Max. length of 50 characters.»
 			$r->setPostcode($a->getPostcode());
-			// 2016-04-23 «The country ISO2 code e.g. US. See provided list of supported ISO formatted countries.»
+			# 2016-04-23 «The country ISO2 code e.g. US. See provided list of supported ISO formatted countries.»
 			$r->setCountry($a->getCountryId());
-			// 2016-04-23 «Address city. Max length of 100 characters.»
+			# 2016-04-23 «Address city. Max length of 100 characters.»
 			$r->setCity($a->getCity());
-			// 2016-04-23 «Address state. Max length of 100 characters.»
+			# 2016-04-23 «Address state. Max length of 100 characters.»
 			$r->setState($a->getRegion());
-			// 2016-04-23
-			// «Contact phone object for the card holder.
-			// If provided, it will contain the countryCode and number properties
-			// e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
+			# 2016-04-23
+			# «Contact phone object for the card holder.
+			# If provided, it will contain the countryCode and number properties
+			# e.g. 'phone':{'countryCode': '44' , 'number':'12345678'}.»
 			$r->setPhone($this->cPhone());
 		}
 		return $r;
@@ -235,23 +235,23 @@ final class Charge extends \Df\Payment\Charge {
 		$result = new CPhone;
 		/** @var lPhone|bool $lPhone */
 		if ($lPhone = df_phone($this->addressSB(), false)) {
-			// 2016-04-23
-			// «Contact phone number for the card holder.
-			// Its length should be between 6 and 25 characters.
-			// Allowed characters are: numbers, +, (,) ,/ and ' '.»
-			// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+			# 2016-04-23
+			# «Contact phone number for the card holder.
+			# Its length should be between 6 and 25 characters.
+			# Allowed characters are: numbers, +, (,) ,/ and ' '.»
+			# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 			$result->setNumber($lPhone->getNationalNumber());
-			// 2016-04-23
-			// «Country code for the phone number of the card holder
-			// e.g. 44 for United Kingdom.
-			// Please refer to Country ISO and Code section
-			// in the Other Codes menu option.»
-			// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+			# 2016-04-23
+			# «Country code for the phone number of the card holder
+			# e.g. 44 for United Kingdom.
+			# Please refer to Country ISO and Code section
+			# in the Other Codes menu option.»
+			# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 			//
-			// 2016-08-18
-			// From now on, the country code should be a string,
-			// https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
-			// The following data will fail
+			# 2016-08-18
+			# From now on, the country code should be a string,
+			# https://mail.google.com/mail/u/0/#inbox/1569b34a5375cf7f
+			# The following data will fail
 			//	"phone": {
 			//		"number": "9629197300",
 			//		"countryCode": 7
@@ -327,15 +327,15 @@ final class Charge extends \Df\Payment\Charge {
 		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
 		$result->setPrice($this->cFromDoc(df_oqi_price($i)));
-		// 2016-04-23
-		// «Units of the product to be shipped. Max length of 3 digits.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2016-04-23
+		# «Units of the product to be shipped. Max length of 3 digits.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$result->setQuantity(df_oqi_qty($i));
-		// 2016-04-23
-		// «Image link to product on merchant website. Max length 200 characters.»
-		// http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		// 2017-04-22
-		// При превышении длины будет предупреждение (не сбой):
+		# 2016-04-23
+		# «Image link to product on merchant website. Max length 200 characters.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
+		# 2017-04-22
+		# При превышении длины будет предупреждение (не сбой):
 		//		"warnings": [{"code": "70181", "description": "Invalid length for product image url"}],
 		/** @var string $imageUrl */
 		if (201 > mb_strlen($imageUrl = df_oqi_image($i))) {
@@ -362,21 +362,21 @@ final class Charge extends \Df\Payment\Charge {
 		'server' => df_webserver()
 		,'user_agent' => df_request_ua()
 		,'quote_id' => $this->id()
-		// 2016-06-25
-		// Magento version
+		# 2016-06-25
+		# Magento version
 		,'magento_version' => df_magento_version()
-		// 2016-06-26
-		// The version of the your Magento/Checkout plugin the merchant is using
+		# 2016-06-26
+		# The version of the your Magento/Checkout plugin the merchant is using
 		,'plugin_version' => df_package_version($this)
-		// 2016-06-25
-		// The version of our PHP core library (if you are using the our PHP core library)
+		# 2016-06-25
+		# The version of our PHP core library (if you are using the our PHP core library)
 		,'lib_version' => \CheckoutApi_Client_Constant::LIB_VERSION
-		// 2016-06-25
-		// JS/API/Kit
+		# 2016-06-25
+		# JS/API/Kit
 		,'integration_type' => 'Kit'
-		// 2016-06-25
-		// Merchant\'s server time
-		// Something like "2015-02-11T06:16:47+0100" (ISO 8601)
+		# 2016-06-25
+		# Merchant\'s server time
+		# Something like "2015-02-11T06:16:47+0100" (ISO 8601)
 		,'time' => df_now('Y-m-d\TH:i:sO', 'Europe/London')
 	], [0, 100]);}
 

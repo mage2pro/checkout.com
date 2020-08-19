@@ -33,8 +33,8 @@ class Index extends \Magento\Framework\App\Action\Action {
 		/** @var string|null $token */
 		return !($token = df_request('cko-payment-token')) ? $this->webhook() :
 			(CustomerReturn::p($token) ? $this->_redirect('checkout/onepage/success')
-				// 2016-05-06
-				// «How to redirect a customer to the checkout payment step?» https://mage2.pro/t/1523
+				# 2016-05-06
+				# «How to redirect a customer to the checkout payment step?» https://mage2.pro/t/1523
 				: $this->_redirect('checkout', ['_fragment' => 'payment'])
 			)
 		;
@@ -55,7 +55,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * @return Json
 	 */
 	private function webhook() {
-		// 2016-12-30 Checkout.com does not pass the «User-Agent» HTTP Header.
+		# 2016-12-30 Checkout.com does not pass the «User-Agent» HTTP Header.
 		df_sentry_m($this)->user(['id' => df_is_localhost() ? 'Checkout.com webhook on localhost' : 'Checkout.com']);
 		return Json::i(Handler::p(df_json_decode(@file_get_contents($this->file()))));
 	}

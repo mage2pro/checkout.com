@@ -109,7 +109,7 @@ abstract class Charge extends Handler {
 				 *	) {
 				 *		$payment->setParentTransactionId($transactionBasedOn->getTxnId());
 				 *	}
-				 *	// generate transaction id for an offline action or payment method that didn't set it
+				 *	# generate transaction id for an offline action or payment method that didn't set it
 				 *	if (
 				 *		($parentTxnId = $payment->getParentTransactionId())
 				 * 		&& !$payment->getTransactionId()
@@ -122,10 +122,10 @@ abstract class Charge extends Handler {
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
 				 */
 				$result->setTransactionId($this->id());
-				// 2017-01-05
-				// Раньше я этого вообще не делал.
-				// Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
-				// для Magento 2, и я был ещё недостаточно опытен.
+				# 2017-01-05
+				# Раньше я этого вообще не делал.
+				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
+				# для Magento 2, и я был ещё недостаточно опытен.
 				$result->setParentTransactionId($id);
 			}
 		}

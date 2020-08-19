@@ -1,13 +1,13 @@
 <?php
 namespace Dfe\CheckoutCom\Handler;
 use com\checkout\ApiServices\Charges\ChargeService;
-// 2016-06-08
-// I renamed it to get rid of the following
-// Magento 2 compiler (bin/magento setup:di:compile) failure:
-// «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
-// because the name is already in use
-// in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
-// http://stackoverflow.com/questions/17746481
+# 2016-06-08
+# I renamed it to get rid of the following
+# Magento 2 compiler (bin/magento setup:di:compile) failure:
+# «Fatal error: Cannot use com\checkout\ApiServices\Charges\ResponseModels\Charge as Charge
+# because the name is already in use
+# in vendor/mage2pro/checkout.com/Handler/CustomerReturn.php on line 4»
+# http://stackoverflow.com/questions/17746481
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as CCharge;
 use Df\Payment\Source\AC;
 use Df\Sales\Model\Order as DfOrder;
@@ -53,8 +53,8 @@ final class CustomerReturn {
 		 * In our case (immediately after placing the order and the 3D Secure verification),
 		 * the payment is unique for the current order.
 		 */
-		// How to get the last order programmatically? https://mage2.pro/t/1528
-		// How to get an order programmatically? https://mage2.pro/t/1562
+		# How to get the last order programmatically? https://mage2.pro/t/1528
+		# How to get an order programmatically? https://mage2.pro/t/1562
 		$s = dfps(__CLASS__); /** @var S $s */
 		$api = $s->apiCharge($order->getStore()); /** @var ChargeService $api */
 		/**
@@ -76,16 +76,16 @@ final class CustomerReturn {
 		$r = new Response($charge, $order); /** @var Response $r */
 		$result = $r->valid(); /** @var bool $result */
 		if (!$result) {
-			// 2016-05-06
-			// «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
-			// https://mage2.pro/t/1525
-			// Another way: df_checkout_session()->getLastRealOrder()->cancel()->save();
+			# 2016-05-06
+			# «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
+			# https://mage2.pro/t/1525
+			# Another way: df_checkout_session()->getLastRealOrder()->cancel()->save();
 			$order->cancel();
 			$order->save();
 			df_checkout_session()->restoreQuote();
-			// 2016-07-14
-			// Show an explanation message to the customer
-			// when it returns to the store after an unsuccessful payment attempt.
+			# 2016-07-14
+			# Show an explanation message to the customer
+			# when it returns to the store after an unsuccessful payment attempt.
 			df_checkout_error($r->messageC());
 		}
 		else {
@@ -123,7 +123,7 @@ final class CustomerReturn {
 				 *	) {
 				 *		$payment->setParentTransactionId($transactionBasedOn->getTxnId());
 				 *	}
-				 *	// generate transaction id for an offline action or payment method that didn't set it
+				 *	# generate transaction id for an offline action or payment method that didn't set it
 				 *	if (
 				 * 		($parentTxnId = $payment->getParentTransactionId())
 				 * 		&& !$payment->getTransactionId()
@@ -136,10 +136,10 @@ final class CustomerReturn {
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
 				 */
 				$payment->setTransactionId($captureCharge->getId());
-				// 2017-01-05
-				// Раньше я этого вообще не делал.
-				// Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
-				// для Magento 2, и я был ещё недостаточно опытен.
+				# 2017-01-05
+				# Раньше я этого вообще не делал.
+				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
+				# для Magento 2, и я был ещё недостаточно опытен.
 				$payment->setParentTransactionId($charge->getId());
 				$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
 				$invoice = $invoiceService->prepareInvoice($order); /** @var Invoice|DfInvoice $invoice */
@@ -168,7 +168,7 @@ final class CustomerReturn {
 	private static function action(O $o, Payment $p, CCharge $c, $action) {
 		$m = dfpm($p); /** @var Method $m */
 		if (AC::A === $action) {
-			// 2016-05-15 Disable this event because we will trigger Capture manually.
+			# 2016-05-15 Disable this event because we will trigger Capture manually.
 			$m->disableEvent($c->getId(), 'charge.captured');
 		}
 		$m->responseSet($c);
