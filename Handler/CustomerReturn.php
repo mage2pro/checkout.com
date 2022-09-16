@@ -43,7 +43,7 @@ final class CustomerReturn {
 		 * How to get an order by its increment id programmatically?
 		 * https://mage2.pro/t/1561
 		 */
-		$order = df_order_last(); /** @var O|DfOrder $order */
+		$o = df_order_last(); /** @var O|DfOrder $o */
 		/**
 		 * 2016-05-08
 		 * Generally, there could be multiple payment attemts for a single order
@@ -73,15 +73,15 @@ final class CustomerReturn {
 		 * https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
 		 */
 		dfp_report(__CLASS__, json_decode($charge->{'json'}), 'customerReturn');
-		$r = new Response($charge, $order); /** @var Response $r */
+		$r = new Response($charge, $o); /** @var Response $r */
 		$result = $r->valid(); /** @var bool $result */
 		if (!$result) {
 			# 2016-05-06
 			# «How to cancel the last order and restore the last quote on an unsuccessfull payment?»
 			# https://mage2.pro/t/1525
 			# Another way: df_checkout_session()->getLastRealOrder()->cancel()->save();
-			$order->cancel();
-			$order->save();
+			$o->cancel();
+			$o->save();
 			df_checkout_session()->restoreQuote();
 			# 2016-07-14
 			# Show an explanation message to the customer
@@ -90,14 +90,14 @@ final class CustomerReturn {
 		}
 		else {
 			/** @var Payment|DFP $payment */
-			self::action($order, $payment = $order->getPayment(), $charge, $r->action());
-			df_mail_order($order);
+			self::action($o, $payment = $o->getPayment(), $charge, $r->action());
+			df_mail_order($o);
 			if (AC::A === $r->action()
 				&& 'y' === strtolower($charge->getAutoCapture())
 				&& !$r->flagged()
 			) {
 				$captureCharge = Response::getCaptureCharge($charge->getId()); /** @var CCharge $captureCharge */
-				$order->unsetData(O::PAYMENT);
+				$o->unsetData(O::PAYMENT);
 				dfp_webhook_case($payment);
 				$payment->unsetData('method_instance');
 				/**
@@ -138,19 +138,19 @@ final class CustomerReturn {
 				$payment->setTransactionId($captureCharge->getId());
 				# 2017-01-05
 				# Раньше я этого вообще не делал.
-				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
-				# для Magento 2, и я был ещё недостаточно опытен.
+				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем для Magento 2,
+				# и я был ещё недостаточно опытен.
 				$payment->setParentTransactionId($charge->getId());
 				$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
-				$invoice = $invoiceService->prepareInvoice($order); /** @var Invoice|DfInvoice $invoice */
+				$invoice = $invoiceService->prepareInvoice($o); /** @var Invoice|DfInvoice $invoice */
 				df_register('current_invoice', $invoice);
 				$invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
 				$invoice->register();
-				$order->setIsInProcess(true);
-				$order->setCustomerNoteNotify(true);
+				$o->setIsInProcess(true);
+				$o->setCustomerNoteNotify(true);
 				$t = df_db_transaction(); /** @var Transaction $t */
 				$t->addObject($invoice);
-				$t->addObject($order);
+				$t->addObject($o);
 				$t->save();
 			}
 		}
