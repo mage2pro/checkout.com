@@ -56,7 +56,7 @@ final class CustomerReturn {
 		# How to get the last order programmatically? https://mage2.pro/t/1528
 		# How to get an order programmatically? https://mage2.pro/t/1562
 		$s = dfps(__CLASS__); /** @var S $s */
-		$api = $s->apiCharge($order->getStore()); /** @var ChargeService $api */
+		$api = $s->apiCharge(); /** @var ChargeService $api */
 		/**
 		 * 2016-05-15
 		 * Even in the case of a request with autoCapture = true,
