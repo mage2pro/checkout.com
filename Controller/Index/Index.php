@@ -41,14 +41,6 @@ class Index extends \Magento\Framework\App\Action\Action {
 	});}
 
 	/**
-	 * 2016-03-25
-	 * @return string
-	 */
-	private function file() {return
-		df_my_local() ? BP . '/_my/test/checkout.com/charge.voided.json' : 'php://input'
-	;}
-
-	/**
 	 * 2016-05-05
 	 * Processing notifications (Webhooks).
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
@@ -57,6 +49,8 @@ class Index extends \Magento\Framework\App\Action\Action {
 	private function webhook() {
 		# 2016-12-30 Checkout.com does not pass the «User-Agent» HTTP Header.
 		df_sentry_m($this)->user(['id' => df_is_localhost() ? 'Checkout.com webhook on localhost' : 'Checkout.com']);
-		return Json::i(Handler::p(df_json_decode(@file_get_contents($this->file()))));
+		return Json::i(Handler::p(df_json_decode(df_file_read(
+			df_my_local() ? BP . '/_my/test/checkout.com/charge.voided.json' : 'php://input'
+		))));
 	}
 }
