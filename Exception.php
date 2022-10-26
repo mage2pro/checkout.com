@@ -3,15 +3,15 @@ namespace Dfe\CheckoutCom;
 /**
  * 2016-07-17
  * A sample failure response:
-	{
-		"id": "charge_test_153AF6744E5J7A98E1D9",
-		"responseMessage": "40144 - Threshold Risk - Decline",
-		"responseAdvancedInfo": null,
-		"responseCode": "40144",
-		"status": "Declined",
-		"authCode": "00000"
-		...
-	}
+ *	{
+ *		"id": "charge_test_153AF6744E5J7A98E1D9",
+ *		"responseMessage": "40144 - Threshold Risk - Decline",
+ *		"responseAdvancedInfo": null,
+ *		"responseCode": "40144",
+ *		"status": "Declined",
+ *		"authCode": "00000"
+ *		...
+ *	}
  */
 final class Exception extends \Df\Payment\Exception {
 	/**
@@ -56,8 +56,8 @@ final class Exception extends \Df\Payment\Exception {
 
 	/**
 	 * 2016-08-20
-	 * @used-by \Dfe\CheckoutCom\Exception::__construct()
-	 * @used-by \Dfe\CheckoutCom\Exception::message()
+	 * @used-by self::__construct()
+	 * @used-by self::message()
 	 * @var array(string => mixed)
 	 */
 	private $_request;

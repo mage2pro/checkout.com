@@ -17,12 +17,11 @@ use Magento\Sales\Model\Order\Payment;
 abstract class Charge extends Handler {
 	/**
 	 * 2016-03-28
-	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @override
 	 * @see \Dfe\CheckoutCom\Handler::eligible()
-	 * @return bool
+	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 */
-	final protected function eligible() {return !!$this->op();}
+	final protected function eligible():bool {return !!$this->op();}
 
 	/**
 	 * 2016-05-10
@@ -51,9 +50,9 @@ abstract class Charge extends Handler {
 
 	/**
 	 * 2016-03-26
-	 * @used-by eligible()
-	 * @used-by o()
-	 * @used-by ss()
+	 * @used-by self::eligible()
+	 * @used-by self::o()
+	 * @used-by self::ss()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::process()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Refunded::process()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Voided::process()
@@ -153,7 +152,7 @@ abstract class Charge extends Handler {
 
 	/**
 	 * 2017-03-27
-	 * @used-by parentCharge()
+	 * @used-by self::parentCharge()
 	 * @return S
 	 */
 	private function ss() {return dfps($this->op());}

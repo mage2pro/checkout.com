@@ -55,8 +55,8 @@ final class Response {
 	 * 2016-05-08
 	 * 2016-09-07
 	 * https://github.com/CKOTech/checkout-php-library/blob/v1.2.4/com/checkout/ApiServices/Charges/ResponseModels/Charge.php?ts=4#L129
-	 * @used-by hasId()
-	 * @used-by messageC()
+	 * @used-by self::hasId()
+	 * @used-by self::messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
 	 * @used-by \Dfe\CheckoutCom\Method::ckoRedirectUrl()
 	 * @param string|string[]|null $k [optional]
@@ -101,8 +101,8 @@ final class Response {
 
 	/**
 	 * 2016-08-05
+	 * @used-by self::messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @used-by \Dfe\CheckoutCom\Response::messageC()
 	 * @return bool
 	 */
 	function hasId() {return !!$this->a('id');}
@@ -196,7 +196,7 @@ final class Response {
 
 	/**
 	 * 2016-05-15
-	 * @used-by magentoTransactionId()
+	 * @used-by self::magentoTransactionId()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @param string $authId
 	 * @return CCharge
@@ -266,32 +266,29 @@ final class Response {
 
 	/**
 	 * 2017-03-27
-	 * @used-by __construct()
-	 * @used-by a()
-	 * @used-by flagged()
-	 * @used-by magentoTransactionId()
-	 * @used-by valid()
+	 * @used-by self::__construct()
+	 * @used-by self::a()
+	 * @used-by self::flagged()
+	 * @used-by self::magentoTransactionId()
+	 * @used-by self::valid()
 	 * @var CCharge
 	 */
 	private $_c;
 
 	/**
 	 * 2017-03-27
-	 * @used-by __construct()
-	 * @used-by action()
+	 * @used-by self::__construct()
+	 * @used-by self::action()
 	 * @var Order
 	 */
 	private $_o;
 
 	/**
 	 * 2017-03-27
-	 * @used-by __construct()
-	 * @used-by action()
-	 * @used-by messageC()
-	 * @used-by waitForCapture()
-	 * @used-by
-	 * @used-by
-	 * @used-by
+	 * @used-by self::__construct()
+	 * @used-by self::action()
+	 * @used-by self::messageC()
+	 * @used-by self::waitForCapture()
 	 * @var S
 	 */
 	private $_s;

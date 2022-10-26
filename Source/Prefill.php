@@ -10,14 +10,13 @@ final class Prefill extends \Df\Config\Source {
 	function config($key) {return dfa($this->_config(), $key);}
 
 	/**
-	 * 2016-04-13
-	 * http://docs.checkout.com/getting-started/testing-and-simulating-charges#test-cards
+	 * 2016-04-13 http://docs.checkout.com/getting-started/testing-and-simulating-charges#test-cards
 	 * @override
 	 * @see \Df\Config\Source::map()
 	 * @used-by \Df\Config\Source::toOptionArray()
 	 * @return array(string => string)
 	 */
-	protected function map() {return [0 => 'No'] + dfa_combine_self(array_keys($this->_config()));}
+	protected function map():array {return [0 => 'No'] + dfa_combine_self(array_keys($this->_config()));}
 
 	/**
 	 * 2016-05-10

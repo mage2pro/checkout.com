@@ -10,32 +10,31 @@ use Exception as E;
 abstract class Handler extends \Df\Core\O {
 	/**
 	 * 2016-03-25
-	 * @used-by \Dfe\CheckoutCom\Handler::p()
+	 * @used-by self::p()
+	 * @see \Dfe\CheckoutCom\Handler\DefaultT::process()
 	 * @return mixed
 	 */
 	abstract protected function process();
 
 	/**
 	 * 2016-03-28
-	 * @used-by \Dfe\CheckoutCom\Handler::p()
-	 * @return bool
+	 * @used-by self::p()
+	 * @see \Dfe\CheckoutCom\Handler\Charge::eligible()
+	 * @see \Dfe\CheckoutCom\Handler\DefaultT::eligible()
 	 */
-	protected function eligible() {return false;}
+	protected function eligible():bool {return false;}
 
 	/**
 	 * 2016-05-10
-	 * @used-by isInitiatedByMyself()
+	 * @used-by self::isInitiatedByMyself()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::id()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::parentId()
 	 * @param string|null $path [optional]
 	 * @return string|array(string => mixed)
 	 */
 	final protected function r($path = null) {
-		/** @var array(string => mixed) $o */
-		$o = dfa($this->_data, 'message');
-		return !$path ? $o : dfc($this, function($path) use($o) {return
-			dfa_deep($o, $path)
-		;}, [$path]);
+		$o = $this['message']; /** @var array(string => mixed) $o */
+		return !$path ? $o : dfc($this, function($path) use($o) {return dfa_deep($o, $path);}, [$path]);
 	}
 
 	/**
@@ -52,45 +51,41 @@ abstract class Handler extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return bool
 	 */
-	private function isInitiatedByMyself() {return in_array(
-		$this->type(), df_csv_parse($this->r('metadata/' . Method::DISABLED_EVENTS))
-	);}
+	private function isInitiatedByMyself() {return in_array($this->type(), df_csv_parse($this->r(
+		'metadata/' . Method::DISABLED_EVENTS
+	)));}
 
 	/**
 	 * 2016-03-25
-	 * @param array(string => mixed) $request
+	 * @param array(string => mixed) $req
 	 * @return mixed
 	 * @throws E
 	 */
-	static function p(array $request) {
-		/** @var string $result */
+	static function p(array $req) {/** @var string $r */
 		try {
-			dfp_report(__CLASS__, $request, $request['eventType']);
-			/**
-			 * 2016-05-13
-			 * Unlike Stripe, Checkout.com does not use the underline character («_»)
-			 * as an event's parts separator, it uses only dot («.») as a separator.
-			 * http://docs.checkout.com/getting-started/webhooks
-			 */
-			$suffix = df_cc_class_uc('handler', explode('.', $request['eventType'])); /** @var string $suffix */
-			$i = df_new(df_con(__CLASS__, $suffix, DefaultT::class), $request); /** @var Handler $i */
-			$result =
+			dfp_report(__CLASS__, $req, $req['eventType']);
+			# 2016-05-13
+			# Unlike Stripe, Checkout.com does not use the underline character («_»)
+			# as an event's parts separator, it uses only dot («.») as a separator.
+			# http://docs.checkout.com/getting-started/webhooks
+			$suffix = df_cc_class_uc('handler', explode('.', $req['eventType'])); /** @var string $suffix */
+			$i = df_new(df_con(__CLASS__, $suffix, DefaultT::class), $req); /** @var Handler $i */
+			$r =
 				!$i->eligible() ? 'The event is not for our store.' : (
 					$i->isInitiatedByMyself()
-					? 'The action is initiated inside the store,'
-						. ' so we do not need to process the notification.'
+					? 'The action is initiated inside the store, so we do not need to process the notification.'
 					: $i->process()
 				)
 			; 
 		}
 		catch (E $e) {
 			df_500();
-			df_sentry(__CLASS__, $e, ['extra' => ['request' => $request]]);
+			df_sentry(__CLASS__, $e, ['extra' => ['request' => $req]]);
 			if (df_my_local()) {
 				throw $e; # 2016-03-27 Show the stack trace on the screen
 			}
-			$result = __($e->getMessage());
+			$r = __($e->getMessage());
 		}
-		return $result;
+		return $r;
 	}
 }

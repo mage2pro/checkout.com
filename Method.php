@@ -164,11 +164,10 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-11
 	 * Mark an event as already processed,
-	 * so when Checkout.com will notify us about the event,
-	 * we will just skip this notification.
-	 * @used-by _refund()
-	 * @used-by _void()
-	 * @used-by capturePreauthorized()
+	 * so when Checkout.com will notify us about the event, we will just skip this notification.
+	 * @used-by self::_refund()
+	 * @used-by self::_void()
+	 * @used-by self::capturePreauthorized()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::action()
 	 * @param string $transactionId
 	 * @param string $eventId
@@ -181,8 +180,7 @@ final class Method extends \Df\Payment\Method {
 			$events[]= $eventId;
 		}
 		$metadata[self::DISABLED_EVENTS] = df_csv($events);
-		# 2016-05-11
-		# «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
+		# 2016-05-11 «Update a charge» https://github.com/CKOTech/checkout-php-library/wiki/Charges#update-a-charge
 		$update = new ChargeUpdate; /** @var ChargeUpdate $update */
 		$update->setChargeId($transactionId);
 		$update->setMetadata($metadata);
@@ -457,7 +455,7 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-11
-	 * @used-by \Dfe\CheckoutCom\Method::charge()
+	 * @used-by self::charge()
 	 * @param T $auth
 	 */
 	private function capturePreauthorized(T $auth) {
@@ -578,7 +576,7 @@ final class Method extends \Df\Payment\Method {
 	 * 2017-02-10
 	 * The result should be in the basic monetary unit (like dollars), not in fractions (like cents).
 	 * https://mage2.pro/t/2687/3
-	 * @used-by amountLimits()
+	 * @used-by self::amountLimits()
 	 * @param string $c
 	 * @return float
 	 */
@@ -620,8 +618,8 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-08
-	 * @used-by \Dfe\CheckoutCom\Method::response()
-	 * @used-by \Dfe\CheckoutCom\Method::responseSet()
+	 * @used-by self::response()
+	 * @used-by self::responseSet()
 	 * @var ChargeResponse
 	 */
 	private $_response;
@@ -639,7 +637,7 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-05-11
 	 * It is a metadata key, which stores the list of Checkout.com events,
 	 * which we will ignore (do not process), because they are already processed.
-	 * @used-by \Dfe\CheckoutCom\Method::disableEvent()
+	 * @used-by self::disableEvent()
 	 * @used-by \Dfe\CheckoutCom\Handler::isInitiatedByMyself()
 	 */
 	const DISABLED_EVENTS = 'disabled_events';

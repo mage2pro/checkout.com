@@ -3,14 +3,12 @@ namespace Dfe\CheckoutCom\Handler;
 use Dfe\CheckoutCom\Handler;
 final class DefaultT extends Handler {
 	/**
-	 * 2016-05-11
-	 * Override the method in order to return «Not implemented.» instead of «The event is not for our store.»
+	 * 2016-05-11 I override the parent's method to return «Not implemented.» instead of «The event is not for our store.».
 	 * @override
 	 * @see \Dfe\CheckoutCom\eligible::p()
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
-	 * @return bool
 	 */
-	final protected function eligible() {return true;}
+	protected function eligible():bool {return true;}
 
 	/**
 	 * 2016-03-25
@@ -19,7 +17,7 @@ final class DefaultT extends Handler {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
-	final protected function process() {return "«{$this->type()}» event handling is not implemented.";}
+	protected function process() {return "«{$this->type()}» event handling is not implemented.";}
 }
 
 

@@ -23,8 +23,7 @@ use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Service\InvoiceService;
 final class CustomerReturn {
 	/**
-	 * 2016-05-05
-	 * Handles a customer return to the store after a 3D Secure verification
+	 * 2016-05-05 Handles the customer's return to the store after a 3D Secure verification.
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
 	 * @param string $token
 	 * @return bool
@@ -57,14 +56,12 @@ final class CustomerReturn {
 		# How to get an order programmatically? https://mage2.pro/t/1562
 		$s = dfps(__CLASS__); /** @var S $s */
 		$api = $s->apiCharge(); /** @var ChargeService $api */
-		/**
-		 * 2016-05-15
-		 * Even in the case of a request with autoCapture = true,
-		 * at this point the token still has an Authorize status, and not a Capture status.
-		 * Also, a charge.captured event may be triggered when the user is redirected to the store
-		 * after the 3D Secure verification.
-		 * (both cases were observed)
-		 */
+		# 2016-05-15
+		# Even in the case of a request with autoCapture = true,
+		# at this point the token still has an Authorize status, and not a Capture status.
+		# Also, a charge.captured event may be triggered when the user is redirected to the store
+		# after the 3D Secure verification.
+		# (both cases were observed)
 		$charge = $api->verifyCharge($token); /** @var CCharge $charge */
 		/**
 		 * 2016-09-07
@@ -159,7 +156,7 @@ final class CustomerReturn {
 
 	/**
 	 * 2016-05-16
-	 * @used-by p()
+	 * @used-by self::p()
 	 * @param O $o
 	 * @param Payment $p
 	 * @param CCharge $c
