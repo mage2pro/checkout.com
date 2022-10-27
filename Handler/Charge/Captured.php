@@ -44,8 +44,8 @@ final class Captured extends Charge {
 			else {
 				$o->setIsInProcess(true);
 				$o->setCustomerNoteNotify(true);
-				df_db_transaction()->addObject($this->invoice())->addObject($o)->save();
-				df_mail_invoice($this->invoice());
+				df_db_transaction()->addObject($i = $this->invoice())->addObject($o)->save(); /** @var Invoice|DfInvoice $i */
+				df_mail_invoice($i);
 			}
 		}
 		return $r;
@@ -53,32 +53,30 @@ final class Captured extends Charge {
 
 	/**
 	 * 2016-03-26
+	 * @used-by self::process()
 	 * @return Invoice|DfInvoice
 	 * @throws LE
 	 */
 	private function invoice() {
-		if (!isset($this->{__METHOD__})) {
-			$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
-			$r = $invoiceService->prepareInvoice($this->o()); /** @var Invoice|DfInvoice $r */
-			if (!$r) {
-				throw new LE(__('We can\'t save the invoice right now.'));
-			}
-			if (!$r->getTotalQty()) {
-				throw new LE(__('You can\'t create an invoice without products.'));
-			}
-			df_register('current_invoice', $r);
-			/**
-			 * 2016-03-26
-			 * @used-by \Magento\Sales\Model\Order\Invoice::register()
-			 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Invoice.php#L599-L609
-			 * We use \Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE,
-			 * and not \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
-			 * that was created by the transaction capture.
-			 */
-			$r->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
-			$r->register();
-			$this->{__METHOD__} = $r;
+		$invoiceService = df_o(InvoiceService::class); /** @var InvoiceService $invoiceService */
+		$r = $invoiceService->prepareInvoice($this->o()); /** @var Invoice|DfInvoice $r */
+		if (!$r) {
+			throw new LE(__("We can't save the invoice right now."));
 		}
-		return $this->{__METHOD__};
+		if (!$r->getTotalQty()) {
+			throw new LE(__("You can't create an invoice without products."));
+		}
+		df_register('current_invoice', $r);
+		/**
+		 * 2016-03-26
+		 * @used-by \Magento\Sales\Model\Order\Invoice::register()
+		 * https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/Model/Order/Invoice.php#L599-L609
+		 * We use \Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE,
+		 * and not \Magento\Sales\Model\Order\Invoice::CAPTURE_OFFINE,
+		 * that was created by the transaction capture.
+		 */
+		$r->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
+		$r->register();
+		return $r;
 	}
 }
