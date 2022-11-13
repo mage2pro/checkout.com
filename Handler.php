@@ -30,7 +30,7 @@ abstract class Handler extends \Df\Core\O {
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::id()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::parentId()
 	 * @param string|null $path [optional]
-	 * @return string|array(string => mixed)
+	 * @return string|array(string => mixed)|null
 	 */
 	final protected function r($path = null) {
 		$o = $this['message']; /** @var array(string => mixed) $o */
