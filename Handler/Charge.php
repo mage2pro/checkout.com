@@ -24,14 +24,6 @@ abstract class Charge extends Handler {
 	final protected function eligible():bool {return !!$this->op();}
 
 	/**
-	 * 2016-05-10
-	 * @return string|null
-	 */
-	final protected function grandParentId() {return dfc($this, function() {return
-		!$this->parentId() ? null : $this->parentCharge()->getOriginalId()
-	;});}
-
-	/**
 	 * 2016-03-27
 	 * @return string
 	 */

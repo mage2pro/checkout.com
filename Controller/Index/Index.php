@@ -26,7 +26,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	 * https://github.com/magento/magento2/blob/2.2.1/lib/internal/Magento/Framework/App/Action/Action.php#L84-L125
 	 * @return \Magento\Framework\Controller\Result\Redirect
 	 */
-	function execute() {return df_lxh(function(){
+	function execute() {return df_lxh(function() {
 		/** @var string|null $token */
 		return !($token = df_request('cko-payment-token')) ? $this->webhook() :
 			(CustomerReturn::p($token) ? $this->_redirect('checkout/onepage/success')
