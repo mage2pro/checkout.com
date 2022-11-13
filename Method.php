@@ -54,17 +54,15 @@ final class Method extends \Df\Payment\Method {
 	 *		}
 	 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment/Operations/AbstractOperation.php#L56-L75
 	 * https://github.com/magento/magento2/blob/2.2.1/app/code/Magento/Sales/Model/Order/Payment/Operations/AbstractOperation.php#L59-L78
-	 * @return bool
 	 */
-	function canCapture() {return true;}
+	function canCapture():bool {return true;}
 
 	/**
 	 * 2016-03-08
 	 * @override
 	 * @see \Df\Payment\Method::canCapturePartial()
-	 * @return bool
 	 */
-	function canCapturePartial() {return true;}
+	function canCapturePartial():bool {return true;}
 
 	/**
 	 * 2016-03-08
@@ -93,17 +91,15 @@ final class Method extends \Df\Payment\Method {
 	 *		}
 	 * https://github.com/magento/magento2/blob/2.2.1/app/code/Magento/Sales/Model/Order/Invoice/Validation/CanRefund.php#L84-L94
 	 * It is since Magento 2.2: https://github.com/magento/magento2/commit/767151b4
-	 * @return bool
 	 */
-	function canRefund() {return true;}
+	function canRefund():bool {return true;}
 
 	/**
 	 * 2016-03-08
 	 * @override
 	 * @see \Df\Payment\Method::canRefundPartialPerInvoice()
-	 * @return bool
 	 */
-	function canRefundPartialPerInvoice() {return true;}
+	function canRefundPartialPerInvoice():bool {return true;}
 
 	/**
 	 * 2016-05-08
@@ -111,18 +107,15 @@ final class Method extends \Df\Payment\Method {
 	 * the shop can not prevent it, and it will break the Review mode,
 	 * because a shop's administrator is unable to pass 3D Secure validation
 	 * for a customer's bank card.
-	 *
 	 * 2016-05-09
 	 * If Checkout.com marks a payment as «Flagged»,
 	 * then it ignores the «autoCapture» request parameter,
 	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
 	 * So we can employ the Review mode for such payments.
-	 *
 	 * @override
 	 * @see \Df\Payment\Method::canReviewPayment()
-	 * @return bool
 	 */
-	function canReviewPayment() {return true;}
+	function canReviewPayment():bool {return true;}
 
 	/**
 	 * 2016-03-15
@@ -142,9 +135,8 @@ final class Method extends \Df\Payment\Method {
 	 *		}
 	 * https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Sales/Model/Order/Payment.php#L528-L543
 	 * https://github.com/magento/magento2/blob/2.2.1/app/code/Magento/Sales/Model/Order/Payment.php#L562-L578
-	 * @return bool
 	 */
-	function canVoid() {return true;}
+	function canVoid():bool {return true;}
 
 	/**
 	 * 2016-05-09
@@ -152,12 +144,12 @@ final class Method extends \Df\Payment\Method {
 	 * we can «capture» or «void» it.
 	 * @override
 	 * @see \Df\Payment\Method::denyPayment()
-	 * @param II|I|OP  $payment
+	 * @param II|I|OP $p
 	 * @return bool
 	 */
-	function denyPayment(II $payment) {
+	function denyPayment(II $p):bool {
 		# 2016-05-09 Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
-		$payment->void(new _DO);
+		$p->void(new _DO);
 		return true;
 	}
 
@@ -222,9 +214,8 @@ final class Method extends \Df\Payment\Method {
 	 *			return $block;
 	 *		}
 	 * https://github.com/magento/magento2/blob/2.2.0-RC1.6/app/code/Magento/Payment/Helper/Data.php#L182-L196
-	 * @return string
 	 */
-	function getInfoBlockType() {return \Magento\Payment\Block\Info\Cc::class;}
+	function getInfoBlockType():string {return \Magento\Payment\Block\Info\Cc::class;}
 
 	/**
 	 * 2016-05-08
@@ -286,7 +277,7 @@ final class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see \Df\Payment\Method::_void()
 	 */
-	protected function _void() {$this->leh(function() {
+	protected function _void():void {$this->leh(function() {
 		if ($auth = $this->ii()->getAuthorizationTransaction()) {
 			/** @var T|false|null $auth */
 			$void = new ChargeVoid; /** @var ChargeVoid $void */
@@ -350,7 +341,7 @@ final class Method extends \Df\Payment\Method {
 	 * @param bool|null $capture [optional]
 	 * @throws Exception
 	 */
-	protected function charge($capture = true) {
+	protected function charge($capture = true):void {
 		if ($auth = !$capture ? null : $this->ii()->getAuthorizationTransaction()) {
 			/** @var T|false|null $auth */
 			$this->capturePreauthorized($auth);
@@ -443,7 +434,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by \Df\Payment\Method::assignData()
 	 * @return string[]
 	 */
-	protected function iiaKeys() {return [Token::KEY];}
+	protected function iiaKeys():array {return [Token::KEY];}
 
 	/**
 	 * 2016-04-21
@@ -567,7 +558,7 @@ final class Method extends \Df\Payment\Method {
 				$e = new LE(__($e->getErrorMessage()), $e);
 			}
 			df_sentry($this, $e);
-			throw df_le($e);
+			throw df_lx($e);
 		}
 		return $result;
 	}

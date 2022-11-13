@@ -156,9 +156,8 @@ final class Response {
 	 * 2016-07-17
 	 * @used-by \Dfe\CheckoutCom\Exception::messageC()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
-	 * @return string
 	 */
-	function messageC() {return dfc($this, function() {return !$this->hasId()
+	function messageC():string {return dfc($this, function() {return !$this->hasId()
 		? __('Sorry, this payment method is not working now.<br/>Please use another payment method.')
 		: $this->_s->messageFailure(df_desc(...$this->a(['responseMessage', 'responseAdvancedInfo'])))
 	;});}

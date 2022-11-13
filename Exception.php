@@ -31,9 +31,8 @@ final class Exception extends \Df\Payment\Exception {
 	 * 2016-07-17
 	 * @override
 	 * @see \Df\Payment\Exception::message()
-	 * @return string
 	 */
-	function message() {return dfc($this, function() {return df_api_rr_failed('Checkout.com',
+	function message():string {return dfc($this, function() {return df_api_rr_failed('Checkout.com',
 		$this->_r->a(!$this->_r->hasId() ? null : [
 			'status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo'
 		])
@@ -44,9 +43,9 @@ final class Exception extends \Df\Payment\Exception {
 	 * 2016-07-17
 	 * @override
 	 * @see \Df\Core\Exception::messageC()
-	 * @return string
+	 * @used-by \Df\Payment\PlaceOrderInternal::message()
 	 */
-	function messageC() {return $this->_r->messageC();}
+	function messageC():string {return $this->_r->messageC();}
 
 	/**
 	 * 2016-07-17
