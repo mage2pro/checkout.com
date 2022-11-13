@@ -516,21 +516,21 @@ final class Method extends \Df\Payment\Method {
 	 * @return string|null
 	 */
 	private function ckoRedirectUrl() {return dfc($this, function() {
-		if ($result = $this->r()->a('redirectUrl')) { /** @var string|null $result */
+		if ($r = $this->r()->a('redirectUrl')) { /** @var string|null $r */
 			# 2016-05-07
 			# If a 3D Secure validation is needed,
 			# then $response->getId() returns a token (see a sample response above),
 			# not the transaction's ID.
 			# In this case, we postpone creating a Magento transaction yet,
 			# so we do not call $payment->setTransactionId($response->getId());
-			PO::setRedirectData($this, $result);
+			PO::setRedirectData($this, $r);
 			# 2016-05-06
 			# Postpone sending an order confirmation email to the customer,
 			# because the customer should pass 3D Secure validation first.
 			# «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
 			$this->o()->setCanSendNewEmailFlag(false);
 		}
-		return $result;
+		return $r;
 	});}
 
 	/**
