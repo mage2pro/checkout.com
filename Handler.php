@@ -2,6 +2,7 @@
 namespace Dfe\CheckoutCom;
 use Dfe\CheckoutCom\Handler\DefaultT;
 use Exception as E;
+use Magento\Framework\Phrase;
 /**
  * @see \Dfe\CheckoutCom\Handler\Charge
  * @see \Dfe\CheckoutCom\Handler\CustomerReturn
@@ -58,10 +59,10 @@ abstract class Handler extends \Df\Core\O {
 	/**
 	 * 2016-03-25
 	 * @param array(string => mixed) $req
-	 * @return mixed
+	 * @return Phrase|string
 	 * @throws E
 	 */
-	static function p(array $req) {/** @var string $r */
+	static function p(array $req) {/** @var Phrase|string $r */
 		try {
 			dfp_report(__CLASS__, $req, $req['eventType']);
 			# 2016-05-13

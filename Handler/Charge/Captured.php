@@ -4,6 +4,7 @@ use Df\Sales\Model\Order as DfOrder;
 use Df\Sales\Model\Order\Invoice as DfInvoice;
 use Dfe\CheckoutCom\Handler\Charge;
 use Magento\Framework\Exception\LocalizedException as LE;
+use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order as O;
 use Magento\Sales\Model\Order\Invoice;
 use Magento\Sales\Model\Service\InvoiceService;
@@ -17,7 +18,7 @@ final class Captured extends Charge {
 	 * How does the backend invoicing work? https://mage2.pro/t/933
 	 * @see \Dfe\CheckoutCom\Handler::process()
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
-	 * @return string|null
+	 * @return Phrase|null
 	 * @throws LE
 	 */
 	protected function process() {
@@ -29,24 +30,22 @@ final class Captured extends Charge {
 			$o->save();
 		}
 		# 2016-05-11 The payment is in the «Authorized» state.
+		# 2016-12-30
+		# Мы не должны считать исключительной ситуацией повторное получение
+		# ранее уже полученного оповещения.
+		# В документации к Stripe, например, явно сказано:
+		# «Webhook endpoints may occasionally receive the same event more than once.
+		# We advise you to guard against duplicated event receipts
+		# by making your event processing idempotent.»
+		# https://stripe.com/docs/webhooks#best-practices
+		elseif (!$o->canInvoice()) {
+			$r = __('The order does not allow an invoice to be created.');
+		}
 		else {
-			# 2016-12-30
-			# Мы не должны считать исключительной ситуацией повторное получение
-			# ранее уже полученного оповещения.
-			# В документации к Stripe, например, явно сказано:
-			# «Webhook endpoints may occasionally receive the same event more than once.
-			# We advise you to guard against duplicated event receipts
-			# by making your event processing idempotent.»
-			# https://stripe.com/docs/webhooks#best-practices
-			if (!$o->canInvoice()) {
-				$r = __('The order does not allow an invoice to be created.');
-			}
-			else {
-				$o->setIsInProcess(true);
-				$o->setCustomerNoteNotify(true);
-				df_db_transaction()->addObject($i = $this->invoice())->addObject($o)->save(); /** @var Invoice|DfInvoice $i */
-				df_mail_invoice($i);
-			}
+			$o->setIsInProcess(true);
+			$o->setCustomerNoteNotify(true);
+			df_db_transaction()->addObject($i = $this->invoice())->addObject($o)->save(); /** @var Invoice|DfInvoice $i */
+			df_mail_invoice($i);
 		}
 		return $r;
 	}
