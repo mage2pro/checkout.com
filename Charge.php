@@ -382,11 +382,9 @@ final class Charge extends \Df\Payment\Charge {
 	/**
 	 * 2016-05-06
 	 * @used-by \Dfe\CheckoutCom\Method::request()
-	 * @param Method $m
-	 * @param bool $capture [optional]
 	 * @return array(string => mixed)
 	 */
-	static function build(Method $m, $capture = true) {return
+	static function build(Method $m, $capture = true):array {return
 		(new ChargesMapper((new self($m))->_build($capture)))->requestPayloadConverter()
 	;}
 }
