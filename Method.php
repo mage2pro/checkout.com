@@ -176,26 +176,31 @@ final class Method extends \Df\Payment\Method {
 	}
 
 	/**
-	 * @override
-	 * @see \Df\Payment\Method::getConfigPaymentAction()
-	 * @return string
-	 *
 	 * 2016-05-07
 	 * We can arrive here only from @used-by \Magento\Sales\Model\Order\Payment::place()
 	 * but from 2 different code points.
-	 *
 	 * 2016-05-08
 	 * Returns null, if 3D Secure validation is needed.
 	 * @used-by \Magento\Sales\Model\Order\Payment::place()
 	 * https://github.com/magento/magento2/blob/2.1.3/app/code/Magento/Sales/Model/Order/Payment.php#L334-L355
-	 *
 	 * 2016-05-09
 	 * If Checkout.com marks a payment as «Flagged»,
 	 * then it ignores the «autoCapture» request parameter,
 	 * so the shop should additionally do the «capture» operation: https://mage2.pro/t/1565
 	 * So we can employ the Review mode for such payments.
+	 * @override
+	 * @see \Df\Payment\Method::getConfigPaymentAction()
+	 * 1) @used-by \Df\StripeClone\Method::isInitializeNeeded()
+	 * 2) @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * 		$action = $methodInstance->getConfigPaymentAction();
+	 * https://github.com/magento/magento2/blob/2.2.0/app/code/Magento/Sales/Model/Order/Payment.php#L354
+	 * 3) @used-by \Magento\Sales\Model\Order\Payment::place()
+	 * 		$methodInstance->initialize($methodInstance->getConfigData('payment_action'), $stateObject);
+	 * https://github.com/magento/magento2/blob/2.2.0/app/code/Magento/Sales/Model/Order/Payment.php#L359-L360
+	 * 		'payment_action' => 'getConfigPaymentAction'
+	 * https://github.com/mage2pro/core/blob/3.2.31/Payment/Method.php#L898-L904
 	 */
-	function getConfigPaymentAction() {return $this->ckoRedirectUrl() ? null : $this->r()->action();}
+	function getConfigPaymentAction():string {return $this->ckoRedirectUrl() ? '' : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
