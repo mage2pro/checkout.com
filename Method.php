@@ -221,9 +221,8 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-08
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::action()
-	 * @param ChargeResponse $response
 	 */
-	function responseSet(ChargeResponse $response) {$this->_response = $response;}
+	function responseSet(ChargeResponse $response):void {$this->_response = $response;}
 
 	/**
 	 * 2016-03-15
