@@ -20,7 +20,7 @@ final class Exception extends \Df\Payment\Exception {
 	 * @see \Df\Core\Exception::__construct()
 	 * @param array(string => mixed) $request [optional]
 	 */
-	function __construct(Response $response, array $request = []):void {
+	function __construct(Response $response, array $request = []) {
 		parent::__construct();
 		$this->_r = $response;
 		$this->_request = $request;
