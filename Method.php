@@ -144,8 +144,6 @@ final class Method extends \Df\Payment\Method {
 	 * we can «capture» or «void» it.
 	 * @override
 	 * @see \Df\Payment\Method::denyPayment()
-	 * @param II|I|OP $p
-	 * @return bool
 	 */
 	function denyPayment(II $p):bool {
 		# 2016-05-09 Similar to https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Controller/Adminhtml/Order/VoidPayment.php#L22
