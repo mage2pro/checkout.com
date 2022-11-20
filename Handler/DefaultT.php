@@ -17,7 +17,7 @@ final class DefaultT extends Handler {
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 * @return mixed
 	 */
-	protected function process() {return "«{$this->type()}» event handling is not implemented.";}
+	protected function process() {return "«{$this['eventType']}» event handling is not implemented.";}
 }
 
 
