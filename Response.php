@@ -92,9 +92,8 @@ final class Response {
 		}
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
 	 * @used-by \Dfe\CheckoutCom\Response::action()
-	 * @return bool
 	 */
-	function flagged() {return self::$S__FLAGGED === $this->_c->getStatus();}
+	function flagged():bool {return self::$S__FLAGGED === $this->_c->getStatus();}
 
 	/**
 	 * 2016-08-05
