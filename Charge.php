@@ -261,8 +261,7 @@ final class Charge extends \Df\Payment\Charge {
 	 * @return CProduct
 	 */
 	private function cProduct(OI $i) {
-		/** @var CProduct $result */
-		$result = new CProduct;
+		$r = new CProduct; /** @var CProduct $r */
 		/**
 		 * 2016-04-23
 		 * «Name of product. Max of 100 characters.»
@@ -280,21 +279,21 @@ final class Charge extends \Df\Payment\Charge {
 		 * Поэтому заменил $parent->getName() на $i->getName().
 		 * @see \Dfe\TwoCheckout\LineItem\Product::nameRaw()
 		 */
-		$result->setName($i->getName());
+		$r->setName($i->getName());
 		/**
 		 * 2016-08-18
 		 * It was the following code here:
-		 * $result->setProductId($item->getProductId());
+		 * $r->setProductId($item->getProductId());
 		 * But the «productId» parameter disappears from the documentation:
 		 * http://docs.checkout.com/reference/merchant-api-reference/complex-request-objects/products
 		 */
-		$result->setTrackingUrl(df_oqi_url($i));
+		$r->setTrackingUrl(df_oqi_url($i));
 		/**
 		 * 2016-04-23
 		 * «Description of the product.Max of 500 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setDescription($i->getDescription());
+		$r->setDescription($i->getDescription());
 		/**
 		 * 2016-04-23
 		 * «Stock Unit Identifier.
@@ -302,7 +301,7 @@ final class Charge extends \Df\Payment\Charge {
 		 * Max length of 100 characters.»
 		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		 */
-		$result->setSku($i->getSku());
+		$r->setSku($i->getSku());
 		/**
 		 * 2016-04-23
 		 * «Product price per unit. Max. of 6 digits.»
@@ -319,11 +318,11 @@ final class Charge extends \Df\Payment\Charge {
 		 * что сумма стоимостей позиций заказа у нас не будет равна сумме заказа
 		 * (стоимость доставки, кстати, тоже не передаём).
 		 */
-		$result->setPrice($this->cFromDoc(df_oqi_price($i)));
+		$r->setPrice($this->cFromDoc(df_oqi_price($i)));
 		# 2016-04-23
 		# «Units of the product to be shipped. Max length of 3 digits.»
 		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		$result->setQuantity(df_oqi_qty($i));
+		$r->setQuantity(df_oqi_qty($i));
 		# 2016-04-23
 		# «Image link to product on merchant website. Max length 200 characters.»
 		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
@@ -332,9 +331,9 @@ final class Charge extends \Df\Payment\Charge {
 		//		"warnings": [{"code": "70181", "description": "Invalid length for product image url"}],
 		/** @var string $imageUrl */
 		if (201 > mb_strlen($imageUrl = df_oqi_image($i))) {
-			$result->setImage($imageUrl);
+			$r->setImage($imageUrl);
 		}
-		return $result;
+		return $r;
 	}
 
 	/**
