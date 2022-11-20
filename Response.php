@@ -99,9 +99,8 @@ final class Response {
 	 * 2016-08-05
 	 * @used-by self::messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @return bool
 	 */
-	function hasId() {return !!$this->a('id');}
+	function hasId():bool {return !!$this->a('id');}
 
 	/**
 	 * 2016-05-11
