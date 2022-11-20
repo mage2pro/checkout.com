@@ -40,6 +40,13 @@ abstract class Handler extends \Df\Core\O {
 
 	/**
 	 * 2016-05-11
+	 * @used-by self::isInitiatedByMyself()
+	 * @used-by \Dfe\CheckoutCom\Handler\DefaultT::process()
+	 */
+	final protected function type():string {return $this['eventType'];}
+
+	/**
+	 * 2016-05-11
 	 * This method determines whether this action is initiated in the same store.
 	 * If this is the case, then we do not handle it
 	 * (On a side note, this handling can lead to hard to debug failures).
