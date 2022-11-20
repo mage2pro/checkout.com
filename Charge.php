@@ -377,7 +377,6 @@ final class Charge extends \Df\Payment\Charge {
 	 * «An array of Product details»
 	 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 	 * @used-by self::_build()
-	 * @param lCharge $c
 	 */
 	private function setProducts(lCharge $c):void {$this->oiLeafs(function(OI $i) use($c) {
 		$c->setProducts($this->cProduct($i))
