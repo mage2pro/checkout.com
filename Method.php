@@ -327,9 +327,8 @@ final class Method extends \Df\Payment\Method {
 	 * 2017-02-10 I have got an answer from the Checkout.com support: https://mage2.pro/t/2687/3
 	 * @see \Df\Payment\Method::amountLimits()
 	 * @used-by \Df\Payment\Method::isAvailable()
-	 * @return null
 	 */
-	protected function amountLimits() {return function($c) {return [$this->minimumAmount($c), null];};}
+	protected function amountLimits():\Closure {return function($c) {return [$this->minimumAmount($c), null];};}
 
 	/**
 	 * 2016-03-07
