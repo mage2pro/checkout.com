@@ -51,9 +51,8 @@ abstract class Handler extends \Df\Core\O {
 	 * If this is the case, then we do not handle it
 	 * (On a side note, this handling can lead to hard to debug failures).
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
-	 * @return bool
 	 */
-	private function isInitiatedByMyself() {return in_array($this->type(), df_csv_parse($this->r(
+	private function isInitiatedByMyself():bool {return in_array($this->type(), df_csv_parse($this->r(
 		'metadata/' . Method::DISABLED_EVENTS
 	)));}
 
