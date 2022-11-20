@@ -49,10 +49,10 @@ final class Settings extends \Df\StripeClone\Settings {
 
 	/**
 	 * 2016-05-15
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Wait for «Capture» transaction on an order placement if the Payment Action is «Capture»?»
-	 * @return bool
+	 * «Mage2.PRO» → «Payment» → «Checkout.com» →
+	 * «Wait for «Capture» transaction on an order placement if the Payment Action is «Capture»?»
 	 */
-	function waitForCapture() {return $this->b();}
+	function waitForCapture():bool {return $this->b();}
 
 	/**
 	 * 2016-05-05
