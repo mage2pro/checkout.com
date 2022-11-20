@@ -58,7 +58,7 @@ final class Response {
 	 * @used-by self::hasId()
 	 * @used-by self::messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @used-by \Dfe\CheckoutCom\Method::ckoRedirectUrl()
+	 * @used-by \Dfe\CheckoutCom\Method::needRedirect()
 	 * @param string|string[]|null $k [optional]
 	 * @return array(string => string)
 	 */
