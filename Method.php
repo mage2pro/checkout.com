@@ -338,10 +338,9 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::charge()
 	 * @used-by \Df\Payment\Method::authorize()
 	 * @used-by \Df\Payment\Method::capture()
-	 * @param bool|null $capture [optional]
 	 * @throws Exception
 	 */
-	protected function charge($capture = true):void {
+	protected function charge(bool $capture = true):void {
 		if ($auth = !$capture ? null : $this->ii()->getAuthorizationTransaction()) {
 			/** @var T|false|null $auth */
 			$this->capturePreauthorized($auth);

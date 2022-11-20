@@ -190,9 +190,8 @@ final class Charge extends \Df\Payment\Charge {
 	 * 2016-05-06
 	 * 2016-04-23 http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 	 * @used-by \Dfe\CheckoutCom\Charge::_build()
-	 * @return CAddress
 	 */
-	private function cAddress() {
+	private function cAddress():CAddress {
 		$r = new CAddress; /** @var CAddress $r */
 		/**
 		 * 2017-04-10
