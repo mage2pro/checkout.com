@@ -44,9 +44,8 @@ final class Settings extends \Df\StripeClone\Settings {
 	/**
 	 * 2016-03-14 «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
 	 * @used-by \Dfe\CheckoutCom\Charge::_build()
-	 * @return string[]
 	 */
-	function statement():array {return $this->v();}
+	function statement():string {return $this->v();}
 
 	/**
 	 * 2016-05-15
