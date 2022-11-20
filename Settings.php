@@ -17,10 +17,8 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * 2016-05-15
 	 * @used-by \Dfe\CheckoutCom\Method::isCaptureDesired()
 	 * @used-by \Dfe\CheckoutCom\Response::action()
-	 * @param O $o
-	 * @return string
 	 */
-	function actionDesired(O $o) {return $this->v(
+	function actionDesired(O $o):string {return $this->v(
 		df_customer_is_new($o->getCustomerId()) ? 'actionForNew' : 'actionForReturned'
 	);}
 
