@@ -313,7 +313,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see minimumAmount()
 	 * @return array(int => string)
 	 */
-	protected function amountFactorTable() {return [
+	protected function amountFactorTable():array {return [
 		1000 => 'BHD,KWD,OMR,JOD', 1 => 'BYR,BIF,DJF,GNF,KMF,XAF,CLF,XPF,JPY,PYG,RWF,KRW,VUV,VND,XOF'
 	];}
 
