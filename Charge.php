@@ -223,9 +223,8 @@ final class Charge extends \Df\Payment\Charge {
 
 	/**
 	 * 2016-05-06
-	 * @return CPhone
 	 */
-	private function cPhone() {return dfc($this, function() {
+	private function cPhone():CPhone {return dfc($this, function() {
 		/** @var CPhone $result */
 		$result = new CPhone;
 		/** @var lPhone|bool $lPhone */
