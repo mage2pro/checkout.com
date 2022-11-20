@@ -140,10 +140,9 @@ final class Response {
 	 * 'Y' !== $response->getAutoCapture() || $this->isChargeFlagged()
 	 *
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
-	 * @return string
 	 * @throws \Exception
 	 */
-	function magentoTransactionId() {return dfc($this, function() {return AC::A === $this->action()
+	function magentoTransactionId():string {return dfc($this, function() {return AC::A === $this->action()
 		? $this->_c->getId() : self::getCaptureCharge($this->_c->getId())->getId()
 	;});}
 
