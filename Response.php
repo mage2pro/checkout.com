@@ -175,9 +175,8 @@ final class Response {
 	 *
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @used-by \Dfe\CheckoutCom\Method::charge()
-	 * @return bool
 	 */
-	function valid() {return in_array($this->_c->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);}
+	function valid():bool {return in_array($this->_c->getStatus(), [self::$S__AUTHORISED, self::$S__FLAGGED]);}
 
 	/**
 	 * 2016-05-15
