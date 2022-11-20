@@ -39,7 +39,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @see \Dfe\CheckoutCom\Source\Prefill::map()
 	 * @return array(string => string)|null
 	 */
-	function prefill() {return Prefill::s()->config($this->v());}
+	function prefill():array {return Prefill::s()->config($this->v());}
 
 	/**
 	 * 2016-03-14
