@@ -20,11 +20,7 @@ final class Exception extends \Df\Payment\Exception {
 	 * @see \Df\Core\Exception::__construct()
 	 * @param array(string => mixed) $request [optional]
 	 */
-	function __construct(Response $response, array $request = []) {
-		parent::__construct();
-		$this->_r = $response;
-		$this->_request = $request;
-	}
+	function __construct(Response $res, array $req = []) {parent::__construct(); $this->_r = $res; $this->_request = $req;}
 
 	/**
 	 * 2016-07-17
@@ -48,6 +44,9 @@ final class Exception extends \Df\Payment\Exception {
 
 	/**
 	 * 2016-07-17
+	 * @used-by self::__construct()
+	 * @used-by self::message()
+	 * @used-by self::messageC()
 	 * @var Response
 	 */
 	private $_r;
