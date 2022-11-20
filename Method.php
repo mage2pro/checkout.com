@@ -159,10 +159,8 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::_void()
 	 * @used-by self::capturePreauthorized()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::action()
-	 * @param string $transactionId
-	 * @param string $eventId
 	 */
-	function disableEvent($transactionId, $eventId) {
+	function disableEvent(string $transactionId, string $eventId):void {
 		$charge = $this->api()->getCharge($transactionId); /** @var ChargeResponse $charge */
 		$metadata = df_eta($charge->getMetadata()); /** @var array(string => string) $metadata */
 		$events = df_csv_parse(dfa($metadata, self::DISABLED_EVENTS, '')); /** @var string[] $events */
