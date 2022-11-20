@@ -437,9 +437,8 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-04-21
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
-	 * @return ChargeService
 	 */
-	private function api() {return $this->s()->apiCharge();}
+	private function api():ChargeService {return $this->s()->apiCharge();}
 
 	/**
 	 * 2016-05-11
