@@ -533,9 +533,9 @@ final class Method extends \Df\Payment\Method {
 	 * If Checkout.com marks a payment as «flagged»,
 	 * then the @see \Dfe\CheckoutCom\Method::isCaptureDesired() method's result will be ignored,
 	 * and the «authorize» action will be used instead.
-	 * @return bool
+	 * @used-by self::response()
 	 */
-	private function isCaptureDesired() {return AC::c($this->s()->actionDesired($this->o()));}
+	private function isCaptureDesired():bool {return AC::c($this->s()->actionDesired($this->o()));}
 
 	/**
 	 * 2016-04-23
