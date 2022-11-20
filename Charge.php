@@ -16,10 +16,8 @@ use Magento\Sales\Model\Order\Item as OI;
 final class Charge extends \Df\Payment\Charge {
 	/**
 	 * 2016-05-06
-	 * @used-by self::build()
-	 * @param bool $capture
 	 */
-	private function _build($capture):lCharge {
+	private function _build(bool $capture):lCharge {
 		$r = new lCharge; /** @var lCharge $r */
 		# 2016-05-08
 		# «How To Use Billing Descriptors to Decrease Chargebacks»
