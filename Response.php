@@ -60,7 +60,7 @@ final class Response {
 	 * @param string|string[]|null $k [optional]
 	 * @return array(string => string)
 	 */
-	function a($k = null) {return dfaoc($this, function() {/** @var array(string => string) $r */
+	function a($k = null):array {return dfaoc($this, function() {/** @var array(string => string) $r */
 		dfp_report($this, $r = df_json_decode($this->_c->{'json'}), 'response');
 		return $r;
 	}, $k);}
@@ -74,9 +74,8 @@ final class Response {
 	 * So we can employ the Review mode for such payments.
 	 * @used-by \Dfe\CheckoutCom\Method::getConfigPaymentAction()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
-	 * @return string
 	 */
-	function action() {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
+	function action():string {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
 		? AC::A : $this->_s->actionDesired($this->_o)
 	;});}
 
