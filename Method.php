@@ -200,7 +200,7 @@ final class Method extends \Df\Payment\Method {
 	 * 		'payment_action' => 'getConfigPaymentAction'
 	 * https://github.com/mage2pro/core/blob/3.2.31/Payment/Method.php#L898-L904
 	 */
-	function getConfigPaymentAction():string {return $this->needRedirect() ? '' : $this->r()->action();}
+	function getConfigPaymentAction():string {return $this->need3DS() ? '' : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
@@ -508,7 +508,7 @@ final class Method extends \Df\Payment\Method {
 	 *	}
 	 * @used-by getConfigPaymentAction()
 	 */
-	private function needRedirect():bool {return dfc($this, function() {
+	private function need3DS():bool {return dfc($this, function() {
 		if ($url = $this->r()->a('redirectUrl')) { /** @var string|null $url */
 			# 2016-05-07
 			# If a 3D Secure validation is needed,
@@ -578,7 +578,7 @@ final class Method extends \Df\Payment\Method {
 	 * 2016-05-15
 	 * @used-by self::charge()
 	 * @used-by self::getConfigPaymentAction()
-	 * @used-by self::needRedirect()
+	 * @used-by self::need3DS()
 	 */
 	private function r():Response {return dfc($this, function() {return new Response($this->response(), $this->o());});}
 
