@@ -341,7 +341,7 @@ final class Charge extends \Df\Payment\Charge {
 	 * https://github.com/CKOTech/checkout-magento2-plugin/issues/1
 	 * @return array(string => string)
 	 */
-	private function pMetadata() {return df_map('mb_substr', [
+	private function pMetadata():array {return df_map('mb_substr', [
 		/**
 		 * 2016-08-18
 		 * It was a «server» key before, but it exceeded the maximum length of a key: 100 characters.
