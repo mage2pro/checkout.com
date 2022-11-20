@@ -443,9 +443,8 @@ final class Method extends \Df\Payment\Method {
 	/**
 	 * 2016-05-11
 	 * @used-by self::charge()
-	 * @param T $auth
 	 */
-	private function capturePreauthorized(T $auth) {
+	private function capturePreauthorized(T $auth):void {
 		$this->leh(function() use($auth) {
 			# 2016-05-03
 			# https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
