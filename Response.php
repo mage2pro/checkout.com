@@ -190,11 +190,9 @@ final class Response {
 	 * 2016-05-15
 	 * @used-by self::magentoTransactionId()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
-	 * @param string $authId
-	 * @return CCharge
 	 * @throws \Exception
 	 */
-	static function getCaptureCharge($authId) {
+	static function getCaptureCharge(string $authId):CCharge {
 		/** @bar CCharge $result */
 		$result = null;
 		try {
