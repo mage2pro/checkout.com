@@ -200,7 +200,7 @@ final class Method extends \Df\Payment\Method {
 	 * 		'payment_action' => 'getConfigPaymentAction'
 	 * https://github.com/mage2pro/core/blob/3.2.31/Payment/Method.php#L898-L904
 	 */
-	function getConfigPaymentAction():string {return $this->ckoRedirectUrl() ? '' : $this->r()->action();}
+	function getConfigPaymentAction():string {return $this->needRedirect() ? '' : $this->r()->action();}
 
 	/**
 	 * 2016-03-15
@@ -506,24 +506,24 @@ final class Method extends \Df\Payment\Method {
 	 *		"responseCode": "10000",
 	 *		"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
 	 *	}
-	 * @return string|null
+	 * @used-by getConfigPaymentAction()
 	 */
-	private function ckoRedirectUrl() {return dfc($this, function() {
-		if ($r = $this->r()->a('redirectUrl')) { /** @var string|null $r */
+	private function needRedirect():bool {return dfc($this, function() {
+		if ($url = $this->r()->a('redirectUrl')) { /** @var string|null $url */
 			# 2016-05-07
 			# If a 3D Secure validation is needed,
 			# then $response->getId() returns a token (see a sample response above),
 			# not the transaction's ID.
 			# In this case, we postpone creating a Magento transaction yet,
 			# so we do not call $payment->setTransactionId($response->getId());
-			PO::setRedirectData($this, $r);
+			PO::setRedirectData($this, $url);
 			# 2016-05-06
 			# Postpone sending an order confirmation email to the customer,
 			# because the customer should pass 3D Secure validation first.
 			# «How is a confirmation email sent on an order placement?» https://mage2.pro/t/1542
 			$this->o()->setCanSendNewEmailFlag(false);
 		}
-		return $r;
+		return !!$url;
 	});}
 
 	/**
