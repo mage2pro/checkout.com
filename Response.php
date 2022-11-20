@@ -192,7 +192,8 @@ final class Response {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @throws \Exception
 	 */
-	static function getCaptureCharge(string $authId):CCharge {/** @bar CCharge $r */
+	static function getCaptureCharge(string $authId):CCharge {
+		$r = null; /** @bar CCharge $r */
 		try {
 			/**
 			 * 2016-05-11
@@ -211,16 +212,11 @@ final class Response {
 			 * and if the store's administrator enables the automatic capture feature,
 			 * then we make the «capture» transaction in a webhook, not here.
 			 */
-			/** @var int $numRetries */
-			$numRetries = 60;
-			$r = null;
-			/** @var S $s */
-			$s = dfps(__CLASS__);
-			/** @var API $api */
-			$api = $s->apiCharge();
+			$numRetries = 60; /** @var int $numRetries */
+			$s = dfps(__CLASS__); /** @var S $s */
+			$api = $s->apiCharge(); /** @var API $api */
 			while ($numRetries && !$r) {
-				/** @var ChargeHistory $history */
-				$history = $api->getChargeHistory($authId);
+				$history = $api->getChargeHistory($authId); /** @var ChargeHistory $history */
 				df_log(print_r($history->getCharges(), true));
 				/**
 				 * 2016-05-11
@@ -228,8 +224,7 @@ final class Response {
 				 * An «Authorized» transaction is the second.
 				 * https://mage2.pro/t/1601
 				 */
-				/** @var SCharge $sCharge */
-				$sCharge = df_first($history->getCharges());
+				$sCharge = df_first($history->getCharges()); /** @var SCharge $sCharge */
 				/**
 				 * 2016-05-15
 				 * For the transactions,
