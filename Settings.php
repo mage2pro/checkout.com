@@ -26,15 +26,6 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * 2016-05-05
 	 * https://github.com/CKOTech/checkout-php-library#example
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
-	 */
-	function api():API {return dfc($this, function() {return new API(
-		$this->privateKey(), $this->test() ? 'sandbox' : 'live'
-	);});}
-
-	/**
-	 * 2016-05-05
-	 * https://github.com/CKOTech/checkout-php-library#example
-	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @used-by \Dfe\CheckoutCom\Response::getCaptureCharge()
 	 * @return ChargeService
 	 */
@@ -64,4 +55,14 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * @return bool
 	 */
 	function waitForCapture() {return $this->b();}
+
+	/**
+	 * 2016-05-05
+	 * https://github.com/CKOTech/checkout-php-library#example
+	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
+	 * @used-by self::apiCharge()
+	 */
+	private function api():API {return dfc($this, function() {return new API(
+		$this->privateKey(), $this->test() ? 'sandbox' : 'live'
+	);});}
 }
