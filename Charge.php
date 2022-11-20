@@ -226,16 +226,14 @@ final class Charge extends \Df\Payment\Charge {
 	 * @used-by self::cAddress()
 	 */
 	private function cPhone():CPhone {return dfc($this, function() {
-		/** @var CPhone $result */
-		$result = new CPhone;
-		/** @var lPhone|bool $lPhone */
-		if ($lPhone = df_phone($this->addressSB(), false)) {
+		$r = new CPhone; /** @var CPhone $r */
+		if ($lPhone = df_phone($this->addressSB(), false)) {/** @var lPhone|bool $lPhone */
 			# 2016-04-23
 			# «Contact phone number for the card holder.
 			# Its length should be between 6 and 25 characters.
 			# Allowed characters are: numbers, +, (,) ,/ and ' '.»
 			# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-			$result->setNumber($lPhone->getNationalNumber());
+			$r->setNumber($lPhone->getNationalNumber());
 			# 2016-04-23
 			# «Country code for the phone number of the card holder
 			# e.g. 44 for United Kingdom.
@@ -251,9 +249,9 @@ final class Charge extends \Df\Payment\Charge {
 			//		"number": "9629197300",
 			//		"countryCode": 7
 			//	}
-			$result->setCountryCode(strval($lPhone->getCountryCode()));
+			$r->setCountryCode(strval($lPhone->getCountryCode()));
 		}
-		return $result;
+		return $r;
 	});}
 
 	/**
