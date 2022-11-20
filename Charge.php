@@ -379,7 +379,7 @@ final class Charge extends \Df\Payment\Charge {
 	 * @used-by self::_build()
 	 * @param lCharge $c
 	 */
-	private function setProducts(lCharge $c) {$this->oiLeafs(function(OI $i) use($c) {
+	private function setProducts(lCharge $c):void {$this->oiLeafs(function(OI $i) use($c) {
 		$c->setProducts($this->cProduct($i))
 	;});}
 
