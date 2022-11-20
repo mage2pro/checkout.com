@@ -192,9 +192,7 @@ final class Response {
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @throws \Exception
 	 */
-	static function getCaptureCharge(string $authId):CCharge {
-		/** @bar CCharge $result */
-		$result = null;
+	static function getCaptureCharge(string $authId):CCharge {/** @bar CCharge $r */
 		try {
 			/**
 			 * 2016-05-11
@@ -215,12 +213,12 @@ final class Response {
 			 */
 			/** @var int $numRetries */
 			$numRetries = 60;
-			$result = null;
+			$r = null;
 			/** @var S $s */
 			$s = dfps(__CLASS__);
 			/** @var API $api */
 			$api = $s->apiCharge();
-			while ($numRetries && !$result) {
+			while ($numRetries && !$r) {
 				/** @var ChargeHistory $history */
 				$history = $api->getChargeHistory($authId);
 				df_log(print_r($history->getCharges(), true));
@@ -239,7 +237,7 @@ final class Response {
 				 * the object «status» field's value will be «Captured», not «Captured - 3D».
 				 */
 				if (self::S__CAPTURED === $sCharge->getStatus()) {
-					$result = $api->getCharge($sCharge->getId());
+					$r = $api->getCharge($sCharge->getId());
 				}
 				else {
 					sleep(1);
@@ -251,7 +249,7 @@ final class Response {
 			df_log($e);
 			throw $e;
 		}
-		return df_assert($result);
+		return df_assert($r);
 	}
 
 	/**
