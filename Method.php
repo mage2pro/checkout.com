@@ -561,10 +561,8 @@ final class Method extends \Df\Payment\Method {
 	 * The result should be in the basic monetary unit (like dollars), not in fractions (like cents).
 	 * https://mage2.pro/t/2687/3
 	 * @used-by self::amountLimits()
-	 * @param string $c
-	 * @return float
 	 */
-	private function minimumAmount($c) {return dfa([
+	private function minimumAmount(string $c):float {return dfa([
 		'AED' => 5, 'ARS' => 20, 'AUD' => 1.5, 'BHD' => .5, 'BIF' => 2000, 'BYR' => 20000, 'BZD' => 3
 		,'CAD' => 1.5, 'CHF' => 1, 'CLF' => .05, 'CLP' => 700, 'COP' => 3000, 'DJF' => 200, 'DKK' => 7
 		,'GBP' => 1, 'GNF' => 9300, 'EUR' => 1, 'HKD' => 8, 'IDR' => 13500, 'INR' => 70, 'ISK' => 120
