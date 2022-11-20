@@ -42,11 +42,10 @@ final class Settings extends \Df\StripeClone\Settings {
 	function prefill():array {return Prefill::s()->config($this->v());}
 
 	/**
-	 * 2016-03-14
-	 * «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
+	 * 2016-03-14 «Mage2.PRO» → «Payment» → «Checkout.com» → «Billing Descriptor»
 	 * @return string[]
 	 */
-	function statement() {return $this->v();}
+	function statement():array {return $this->v();}
 
 	/**
 	 * 2016-05-15
