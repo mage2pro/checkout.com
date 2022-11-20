@@ -180,9 +180,8 @@ final class Response {
 
 	/**
 	 * 2016-05-15
-	 * @return bool
 	 */
-	private function waitForCapture() {return dfc($this, function() {return
+	private function waitForCapture():bool {return dfc($this, function() {return
 		df_is_localhost() || $this->_s->waitForCapture()
 	;});}
 
