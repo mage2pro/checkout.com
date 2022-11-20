@@ -583,22 +583,14 @@ final class Method extends \Df\Payment\Method {
 	private function r():Response {return dfc($this, function() {return new Response($this->response(), $this->o());});}
 
 	/**
-	 * 2016-08-21
-	 * @return array(string => mixed)
-	 */
-	private function request() {return dfc($this, function() {return Charge::build(
-		$this, $this->isCaptureDesired()
-	);});}
-
-	/**
 	 * 2016-05-07
 	 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
 	 * @return ChargeResponse
 	 */
-	private function response() {
-		if (!isset($this->_response)) {$this->_response = self::leh(function() {
-			return $this->api()->chargeWithCardTokenDf($this->request());
-		});}
+	private function response():ChargeResponse {
+		if (!isset($this->_response)) {$this->_response = self::leh(function() {return $this->api()->chargeWithCardTokenDf(
+			Charge::build($this, $this->isCaptureDesired())
+		);});}
 		return $this->_response;
 	}
 
