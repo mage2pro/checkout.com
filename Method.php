@@ -539,22 +539,19 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-04-23
-	 * @param callable $function
+	 * @used-by self::_refund()
+	 * @used-by self::_void()
+	 * @used-by self::capturePreauthorized()
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function leh(callable $function) {
-		/** @var mixed $result */
-		try {$result = $function();}
-		catch (\Exception $e) {
-			if ($e instanceof CE) {
-				$e = new LE(__($e->getErrorMessage()), $e);
-			}
-			df_sentry($this, $e);
-			throw df_lx($e);
+	private function leh(\Closure $f) {return df_try($f, function(\Exception $e):void {
+		if ($e instanceof CE) {
+			$e = new LE(__($e->getErrorMessage()), $e);
 		}
-		return $result;
-	}
+		df_sentry($this, $e);
+		throw df_lx($e);
+	});}
 
 	/**
 	 * 2017-02-10
