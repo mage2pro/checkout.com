@@ -18,10 +18,9 @@ final class Exception extends \Df\Payment\Exception {
 	 * 2016-07-17
 	 * @override
 	 * @see \Df\Core\Exception::__construct()
-	 * @param Response $response
 	 * @param array(string => mixed) $request [optional]
 	 */
-	function __construct(Response $response, array $request = []) {
+	function __construct(Response $response, array $request = []):void {
 		parent::__construct();
 		$this->_r = $response;
 		$this->_request = $request;
