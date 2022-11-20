@@ -346,7 +346,7 @@ final class Method extends \Df\Payment\Method {
 		else {
 			# 2016-04-23
 			# http://developers.checkout.com/docs/server/api-reference/charges/charge-with-card-token#response
-		    $response = $this->response(); /** @var ChargeResponse $response */
+		    $response = $this->res(); /** @var ChargeResponse $response */
 			if (!$this->r()->valid()) {
 				throw new Exception($this->r(), $this->request());
 			}
@@ -580,14 +580,15 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::getConfigPaymentAction()
 	 * @used-by self::need3DS()
 	 */
-	private function r():Response {return dfc($this, function() {return new Response($this->response(), $this->o());});}
+	private function r():Response {return dfc($this, function() {return new Response($this->res(), $this->o());});}
 
 	/**
 	 * 2016-05-07
 	 * https://github.com/CKOTech/checkout-php-library/blob/V1.2.3/com/checkout/ApiServices/Charges/ResponseModels/Charge.php#L123
-	 * @return ChargeResponse
+	 * @used-by self::charge()
+	 * @used-by self::r()
 	 */
-	private function response():ChargeResponse {
+	private function res():ChargeResponse {
 		if (!isset($this->_response)) {$this->_response = self::leh(function() {return $this->api()->chargeWithCardTokenDf(
 			Charge::build($this, $this->isCaptureDesired())
 		);});}
