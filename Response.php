@@ -46,8 +46,6 @@ final class Response {
 	 * 2017-03-27
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 * @used-by \Dfe\CheckoutCom\Method::r()
-	 * @param CCharge $c
-	 * @param Order $o
 	 */
 	function __construct(CCharge $c, Order $o) {$this->_c = $c; $this->_o = $o; $this->_s = dfps($this);}
 
