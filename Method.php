@@ -576,9 +576,9 @@ final class Method extends \Df\Payment\Method {
 
 	/**
 	 * 2016-05-15
-	 * @return Response
+	 * @used-by self::needRedirect()
 	 */
-	private function r() {return dfc($this, function() {return new Response($this->response(), $this->o());});}
+	private function r():Response {return dfc($this, function() {return new Response($this->response(), $this->o());});}
 
 	/**
 	 * 2016-08-21
