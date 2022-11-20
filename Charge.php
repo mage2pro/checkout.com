@@ -381,7 +381,7 @@ final class Charge extends \Df\Payment\Charge {
 
 	/**
 	 * 2016-05-06
-	 * @used-by \Dfe\CheckoutCom\Method::request()
+	 * @used-by \Dfe\CheckoutCom\Method::response()
 	 * @return array(string => mixed)
 	 */
 	static function build(Method $m, $capture = true):array {return
