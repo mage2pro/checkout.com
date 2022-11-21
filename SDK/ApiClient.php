@@ -6,9 +6,8 @@ class ApiClient extends \com\checkout\ApiClient {
 	 * 2016-05-08
 	 * @override
 	 * @see \com\checkout\ApiClient::chargeService()
-	 * @return ChargeService
 	 */
-	function chargeService() {return $this->_chargeService;}
+	function chargeService():ChargeService {return $this->_chargeService;}
 
 	/**
 	 * 2016-05-08
