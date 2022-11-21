@@ -8,7 +8,7 @@ final class ChargesMapper extends \com\checkout\ApiServices\Charges\ChargesMappe
 	 * @param CardTokenChargeCreate|object|null $requestModel [optional]
 	 * @return array(string => mixed)
 	 */
-	function requestPayloadConverter($requestModel = null) {
+	function requestPayloadConverter($requestModel = null):array {
 		/** @var array(string => mixed) $result */
 		$result = parent::requestPayloadConverter($requestModel);
 		$requestModel = $requestModel ?: $this->getRequestModel();
