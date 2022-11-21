@@ -13,7 +13,7 @@ final class Voided extends Charge {
 	 * @see \Dfe\CheckoutCom\Handler::process()
 	 * @used-by \Dfe\CheckoutCom\Handler::p()
 	 */
-	protected function process() {
+	protected function process():void {
 		# 2016-05-11 isPaymentReview() means that the transaction is «Flagged». We need to void it.
 		$this->o()->isPaymentReview() ? $this->op()->deny() : $this->op()->void(new _DO);
 		$this->o()->save();
