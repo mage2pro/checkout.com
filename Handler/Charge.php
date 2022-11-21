@@ -24,12 +24,6 @@ abstract class Charge extends Handler {
 	final protected function eligible():bool {return !!$this->op();}
 
 	/**
-	 * 2016-03-27
-	 * @return string
-	 */
-	final protected function id() {return $this->r('id');}
-
-	/**
 	 * 2016-03-26
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::invoice()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge\Captured::process()
@@ -112,7 +106,7 @@ abstract class Charge extends Handler {
 				 * Поэтому никакие обходные манёвры нам не нужны,
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
 				 */
-				$result->setTransactionId($this->id());
+				$result->setTransactionId($this->r('id'));
 				# 2017-01-05
 				# Раньше я этого вообще не делал.
 				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
@@ -145,7 +139,6 @@ abstract class Charge extends Handler {
 	/**
 	 * 2017-03-27
 	 * @used-by self::parentCharge()
-	 * @return S
 	 */
-	private function ss() {return dfps($this->op());}
+	private function ss():S {return dfps($this->op());}
 }
