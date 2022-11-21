@@ -16,5 +16,3 @@ class ApiHttpClient {
 	 */
 	private static function api() {return \CheckoutApi_Api::getApi();}
 }
-
-
