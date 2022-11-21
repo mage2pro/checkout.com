@@ -7,7 +7,7 @@ final class Prefill extends \Df\Config\Source {
 	 * @param string $key
 	 * @return array(string => string)|null
 	 */
-	function config($key) {return dfa($this->_config(), $key);}
+	function config(string $key):array {return dfa($this->_config(), $key);}
 
 	/**
 	 * 2016-04-13 http://docs.checkout.com/getting-started/testing-and-simulating-charges#test-cards
