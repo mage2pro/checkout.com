@@ -19,5 +19,3 @@ final class DefaultT extends Handler {
 	 */
 	protected function process() {return "«{$this->type()}» event handling is not implemented.";}
 }
-
-
