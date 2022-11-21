@@ -6,9 +6,8 @@ final class ChargeService extends \com\checkout\ApiServices\Charges\ChargeServic
 	 * 2016-05-08
 	 * @see \com\checkout\ApiServices\Charges\ChargeService::chargeWithCardToken()
 	 * @param array(string => mixed) $params
-	 * @return Response
 	 */
-	function chargeWithCardTokenDf(array $params) {
+	function chargeWithCardTokenDf(array $params):Response {
 		return new Response(ApiHttpClient::postRequest($this->_apiUrl->getCardTokensApiUri(), [
 			'authorization' => $this->_apiSetting->getSecretKey(),
 			'mode' => $this->_apiSetting->getMode(),
