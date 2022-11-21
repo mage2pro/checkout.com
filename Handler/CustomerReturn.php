@@ -155,12 +155,9 @@ final class CustomerReturn {
 	/**
 	 * 2016-05-16
 	 * @used-by self::p()
-	 * @param O $o
-	 * @param Payment $p
-	 * @param CCharge $c
 	 * @param string $action
 	 */
-	private static function action(O $o, Payment $p, CCharge $c, $action) {
+	private static function action(O $o, Payment $p, CCharge $c, string $action):void {
 		$m = dfpm($p); /** @var Method $m */
 		if (AC::A === $action) {
 			# 2016-05-15 Disable this event because we will trigger Capture manually.
