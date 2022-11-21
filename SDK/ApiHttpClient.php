@@ -4,11 +4,9 @@ namespace Dfe\CheckoutCom\SDK;
 class ApiHttpClient {
 	/**
 	 * 2016-08-05
-	 * @param string $uri
 	 * @param array(string => string) $payload [optional]
-	 * @return \CheckoutApi_Lib_RespondObj
 	 */
-	static function postRequest($uri, array $payload = []) {
+	static function postRequest(string $uri, array $payload = []):\CheckoutApi_Lib_RespondObj {
 		return self::api()->request($uri, ['method' => 'POST'] + $payload, true);
 	}
 
