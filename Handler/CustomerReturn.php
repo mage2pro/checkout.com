@@ -25,10 +25,8 @@ final class CustomerReturn {
 	/**
 	 * 2016-05-05 Handles the customer's return to the store after a 3D Secure verification.
 	 * @used-by \Dfe\CheckoutCom\Controller\Index\Index::execute()
-	 * @param string $token
-	 * @return bool
 	 */
-	static function p($token) {
+	static function p(string $token):bool {
 		/**
 		 * 2016-05-08 (addition)
 		 * The order placement and the 3D Secure verification
