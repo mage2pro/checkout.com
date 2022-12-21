@@ -251,7 +251,7 @@ final class Charge extends \Df\Payment\Charge {
 	 * 2016-05-06
 	 * @used-by self::setProducts()
 	 */
-	private function cProduct(OI $i) {
+	private function cProduct(OI $i):CProduct {
 		$r = new CProduct; /** @var CProduct $r */
 		/**
 		 * 2016-04-23
