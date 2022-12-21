@@ -181,9 +181,7 @@ final class Response {
 	 * 2016-05-15
 	 * @used-by self::action()
 	 */
-	private function waitForCapture():bool {return dfc($this, function() {return
-		df_is_localhost() || $this->_s->waitForCapture()
-	;});}
+	private function waitForCapture():bool {return df_is_localhost() || $this->_s->waitForCapture();}
 
 	/**
 	 * 2016-05-15
