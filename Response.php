@@ -59,7 +59,7 @@ final class Response {
 	 * @used-by \Dfe\CheckoutCom\Method::need3DS()
 	 * @return array(string => string)
 	 */
-	function a(string ...$k):array {return dfaoc($this, function() {/** @var array(string => string) $r */
+	function a(string ...$k):array {return dfaoc($this, function():array {/** @var array(string => string) $r */
 		dfp_report($this, $r = df_json_decode($this->_c->{'json'}), 'response');
 		return $r;
 	}, df_arg($k));}
