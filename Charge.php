@@ -218,7 +218,7 @@ final class Charge extends \Df\Payment\Charge {
 	 * 2016-05-06
 	 * @used-by self::cAddress()
 	 */
-	private function cPhone():CPhone {return dfc($this, function() {
+	private function cPhone():CPhone {
 		$r = new CPhone; /** @var CPhone $r */
 		if ($lPhone = df_phone($this->addressSB(), false)) {/** @var lPhone|bool $lPhone */
 			# 2016-04-23
@@ -245,7 +245,7 @@ final class Charge extends \Df\Payment\Charge {
 			$r->setCountryCode(strval($lPhone->getCountryCode()));
 		}
 		return $r;
-	});}
+	}
 
 	/**
 	 * 2016-05-06
