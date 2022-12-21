@@ -5,7 +5,6 @@ final class Prefill extends \Df\Config\Source {
 	/**
 	 * 2016-05-10
 	 * @used-by \Dfe\CheckoutCom\Settings::prefill()
-	 * @param string $k
 	 * @return array(string => string)|null
 	 */
 	function config(string $k):array {return dfa(df_module_json($this, 'test-card-data'), $k);}
