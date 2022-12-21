@@ -74,7 +74,7 @@ final class Response {
 	 * @used-by \Dfe\CheckoutCom\Method::getConfigPaymentAction()
 	 * @used-by \Dfe\CheckoutCom\Handler\CustomerReturn::p()
 	 */
-	function action():string {return dfc($this, function() {return $this->flagged() || !$this->waitForCapture()
+	function action():string {return dfc($this, function():string {return $this->flagged() || !$this->waitForCapture()
 		? AC::A : $this->_s->actionDesired($this->_o)
 	;});}
 
