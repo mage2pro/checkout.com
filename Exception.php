@@ -27,7 +27,7 @@ final class Exception extends \Df\Payment\Exception {
 	 * @override
 	 * @see \Df\Payment\Exception::message()
 	 */
-	function message():string {return dfc($this, function() {return df_api_rr_failed('Checkout.com',
+	function message():string {return dfc($this, function():string {return df_api_rr_failed('Checkout.com',
 		$this->_r->a(...(!$this->_r->hasId() ? [] :
 			['status', 'responseMessage', 'id', 'responseCode', 'authCode', 'responseAdvancedInfo']
 		))
