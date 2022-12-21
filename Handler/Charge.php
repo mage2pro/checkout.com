@@ -47,11 +47,31 @@ abstract class Charge extends Handler {
 	final protected function op() {return dfc($this, function() {return $this->paymentByTxnId($this->parentId());});}
 
 	/**
+	 * 2016-05-10
+	 * Parent Transaction ID
+	 * In the charge.refunded event Checkout.com sends back 2 IDs:
+ 	 * id: refund transaction ID
+ 	 * originalId: capture transaction ID
+	 * originalId is absent only for the primary transaction (charge.succeeded)
+	 * @return string|null
+	 */
+	final protected function parentId() {return $this->r('originalId');}
+
+	/**
+	 * 2016-05-10
+	 * @return ChargeResponse|null
+	 */
+	final protected function parentCharge() {return dfc($this, function() {return
+		!$this->parentId() ? null : $this->ss()->apiCharge()->getCharge($this->parentId())
+	;});}
+
+	/**
 	 * 2016-03-26
+	 * @used-by self::op()
 	 * @param string|null $id
 	 * @return Payment|DfPayment|null
 	 */
-	final protected function paymentByTxnId($id) {return dfc($this, function($id) {
+	private function paymentByTxnId($id) {return dfc($this, function($id) {
 		$result = null; /** @var Payment|null $result */
 		if ($id) {
 			/** @var int|null $paymentId */
@@ -116,25 +136,6 @@ abstract class Charge extends Handler {
 		}
 		return $result;
 	}, func_get_args());}
-
-	/**
-	 * 2016-05-10
-	 * Parent Transaction ID
-	 * In the charge.refunded event Checkout.com sends back 2 IDs:
- 	 * id: refund transaction ID
- 	 * originalId: capture transaction ID
-	 * originalId is absent only for the primary transaction (charge.succeeded)
-	 * @return string|null
-	 */
-	final protected function parentId() {return $this->r('originalId');}
-
-	/**
-	 * 2016-05-10
-	 * @return ChargeResponse|null
-	 */
-	final protected function parentCharge() {return dfc($this, function() {return
-		!$this->parentId() ? null : $this->ss()->apiCharge()->getCharge($this->parentId())
-	;});}
 
 	/**
 	 * 2017-03-27
