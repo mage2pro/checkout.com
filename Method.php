@@ -506,7 +506,7 @@ final class Method extends \Df\Payment\Method {
 	 *	}
 	 * @used-by self::getConfigPaymentAction()
 	 */
-	private function need3DS():bool {return dfc($this, function() {
+	private function need3DS():bool {return dfc($this, function():bool {
 		if ($url = $this->r()->a('redirectUrl')) { /** @var string|null $url */
 			# 2016-05-07
 			# If a 3D Secure validation is needed,
