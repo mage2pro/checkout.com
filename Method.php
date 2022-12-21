@@ -239,14 +239,12 @@ final class Method extends \Df\Payment\Method {
 		$refund = new ChargeRefund; /** @var ChargeRefund $refund */
 		/**
 		 * 2016-05-09
-		 * The «capture» transaction's ID differs from the previous transaction's ID.
+		 * 1) The «capture» transaction's ID differs from the previous transaction's ID.
 		 * We should use the «capture» transaction's ID
 		 * as a parameter of the Checkout.com «refund» transaction.
-		 *
-		 * $payment->getRefundTransactionId() and $payment->getParentTransactionId()
+		 * 2) $payment->getRefundTransactionId() and $payment->getParentTransactionId()
 		 * return the same value.
-		 *
-		 * «refund_transaction_id» is set here:
+		 * 3) «refund_transaction_id» is set here:
 		 * https://github.com/magento/magento2/blob/ffea3cd/app/code/Magento/Sales/Model/Order/Payment.php#L652
 		 */
 		$refund->setChargeId($this->ii()->getRefundTransactionId());
@@ -276,7 +274,7 @@ final class Method extends \Df\Payment\Method {
 	 * @override
 	 * @see \Df\Payment\Method::_void()
 	 */
-	protected function _void():void {$this->leh(function() {
+	protected function _void():void {$this->leh(function():void {
 		if ($auth = $this->ii()->getAuthorizationTransaction()) {
 			/** @var T|false|null $auth */
 			$void = new ChargeVoid; /** @var ChargeVoid $void */
