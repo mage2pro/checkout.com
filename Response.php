@@ -56,14 +56,13 @@ final class Response {
 	 * @used-by self::hasId()
 	 * @used-by self::messageC()
 	 * @used-by \Dfe\CheckoutCom\Exception::message()
-	 * @used-by \Dfe\CheckoutCom\Method::needRedirect()
-	 * @param string|string[]|null $k [optional]
+	 * @used-by \Dfe\CheckoutCom\Method::need3DS()
 	 * @return array(string => string)
 	 */
-	function a($k = null):array {return dfaoc($this, function() {/** @var array(string => string) $r */
+	function a(string ...$k):array {return dfaoc($this, function() {/** @var array(string => string) $r */
 		dfp_report($this, $r = df_json_decode($this->_c->{'json'}), 'response');
 		return $r;
-	}, $k);}
+	}, df_arg($k));}
 
 	/**
 	 * 2016-05-08
@@ -153,7 +152,7 @@ final class Response {
 	 */
 	function messageC():string {return dfc($this, function() {return !$this->hasId()
 		? __('Sorry, this payment method is not working now.<br/>Please use another payment method.')
-		: $this->_s->messageFailure(df_desc(...$this->a(['responseMessage', 'responseAdvancedInfo'])))
+		: $this->_s->messageFailure(df_desc(...$this->a('responseMessage', 'responseAdvancedInfo')))
 	;});}
 
 	/**

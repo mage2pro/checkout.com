@@ -128,19 +128,13 @@ final class Charge extends \Df\Payment\Charge {
 		# 2017-09-04 «Description of the charge», optional, string, the length is not limited.
 		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$r->setDescription($this->description());
-		/**
-		 * 2016-04-21
-		 * «Expressed as a non-zero positive integer
-		 * (i.e. decimal figures not allowed).
-		 * Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
-		 * Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units
-		 * (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
-		 * Divide all other currencies into 100 units
-		 * (e.g. "value = 100" is equivalent to 1 US Dollar).
-		 * Checkout.com will perform the proper conversions for currencies
-		 * that do not support fractional values.»
-		 * http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
-		 */
+		# 2016-04-21
+		# «Expressed as a non-zero positive integer m(i.e. decimal figures not allowed).
+		# Divide Bahraini Dinars (BHD), Kuwaiti Dinars (KWD),
+		# Omani Rials (OMR) and Jordanian Dinars (JOD) into 1000 units (e.g. "value = 1000" is equivalent to 1 Bahraini Dinar).
+		# Divide all other currencies into 100 units (e.g. "value = 100" is equivalent to 1 US Dollar).
+		# Checkout.com will perform the proper conversions for currencies that do not support fractional values.»
+		# http://docs.checkout.com/reference/merchant-api-reference/charges/charge-with-card-token#request-payload-fields
 		$r->setValue($this->amountF());
 		# 2016-04-21
 		# «Three-letter ISO currency code representing the currency in which the charge was made.

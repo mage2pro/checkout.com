@@ -506,7 +506,7 @@ final class Method extends \Df\Payment\Method {
 	 *		"responseCode": "10000",
 	 *		"redirectUrl": "https://sandbox.checkout.com/api2/v2/3ds/acs/55367"
 	 *	}
-	 * @used-by getConfigPaymentAction()
+	 * @used-by self::getConfigPaymentAction()
 	 */
 	private function need3DS():bool {return dfc($this, function() {
 		if ($url = $this->r()->a('redirectUrl')) { /** @var string|null $url */

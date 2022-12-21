@@ -30,13 +30,9 @@ abstract class Handler extends \Df\Core\O {
 	 * @used-by self::isInitiatedByMyself()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::id()
 	 * @used-by \Dfe\CheckoutCom\Handler\Charge::parentId()
-	 * @param string|null $path [optional]
 	 * @return string|array(string => mixed)|null
 	 */
-	final protected function r($path = null) {
-		$o = $this['message']; /** @var array(string => mixed) $o */
-		return !$path ? $o : dfc($this, function($path) use($o) {return dfa_deep($o, $path);}, [$path]);
-	}
+	final protected function r(string $p = '') {return dfa_deep($this['message'], $p);}
 
 	/**
 	 * 2016-05-11

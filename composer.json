@@ -6,9 +6,9 @@
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"
 	,"license": "MIT"
 	,"authors": [{
-		"name": "Dmitry Fedyuk",
+		"name": "Dmitrii Fediuk",
 		"email": "admin@mage2.pro",
-		"homepage": "https://mage2.pro/users/dmitry_fedyuk",
+		"homepage": "https://www.upwork.com/fl/mage2pro",
 		"role": "Developer"
 	}]
 	,"require": {"mage2pro/core": ">=8.1.1", "mage2pro/phone": ">=1.0.0", "checkout/checkout-php-api": "^1.2.3"}
