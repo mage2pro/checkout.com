@@ -235,7 +235,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::_refund()
 	 * @used-by \Df\Payment\Method::refund()
 	 */
-	protected function _refund(float $a):void {$this->leh(function() use($a) {
+	protected function _refund(float $a):void {$this->leh(function() use($a):void {
 		$refund = new ChargeRefund; /** @var ChargeRefund $refund */
 		/**
 		 * 2016-05-09
