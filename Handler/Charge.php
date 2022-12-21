@@ -71,7 +71,7 @@ abstract class Charge extends Handler {
 	 * @param string|null $id
 	 * @return Payment|DfPayment|null
 	 */
-	private function paymentByTxnId($id) {return dfc($this, function($id) {
+	private function paymentByTxnId($id) {
 		$r = null; /** @var Payment|null $r */
 		if ($id) {
 			/** @var int|null $paymentId */
@@ -135,7 +135,7 @@ abstract class Charge extends Handler {
 			}
 		}
 		return $r;
-	}, func_get_args());}
+	}
 
 	/**
 	 * 2017-03-27
