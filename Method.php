@@ -443,7 +443,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::charge()
 	 */
 	private function capturePreauthorized(T $auth):void {
-		$this->leh(function() use($auth) {
+		$this->leh(function() use($auth):void {
 			# 2016-05-03 https://github.com/CKOTech/checkout-php-library/wiki/Charges#capture-a-charge
 			$capture = new ChargeCapture; /** @var ChargeCapture $capture */
 			$this->disableEvent($auth->getTxnId(), 'charge.captured');
