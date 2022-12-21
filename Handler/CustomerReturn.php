@@ -155,7 +155,6 @@ final class CustomerReturn {
 	/**
 	 * 2016-05-16
 	 * @used-by self::p()
-	 * @param string $action
 	 */
 	private static function action(O $o, Payment $p, CCharge $c, string $action):void {
 		$m = dfpm($p); /** @var Method $m */
