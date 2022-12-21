@@ -326,7 +326,7 @@ final class Method extends \Df\Payment\Method {
 	 * @see \Df\Payment\Method::amountLimits()
 	 * @used-by \Df\Payment\Method::isAvailable()
 	 */
-	protected function amountLimits():\Closure {return function($c) {return [$this->minimumAmount($c), null];};}
+	protected function amountLimits():\Closure {return function(string $c):array {return [$this->minimumAmount($c), null];};}
 
 	/**
 	 * 2016-03-07
