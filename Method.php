@@ -573,7 +573,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::getConfigPaymentAction()
 	 * @used-by self::need3DS()
 	 */
-	private function r():Response {return dfc($this, function() {return new Response($this->res(), $this->o());});}
+	private function r():Response {return dfc($this, function():Response {return new Response($this->res(), $this->o());});}
 
 	/**
 	 * 2016-05-07
