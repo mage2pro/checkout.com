@@ -62,7 +62,7 @@ final class Settings extends \Df\StripeClone\Settings {
 	 * https://github.com/CKOTech/checkout-php-library/wiki/Charges#creates-a-charge-with-cardtoken
 	 * @used-by self::apiCharge()
 	 */
-	private function api():API {return dfc($this, function() {return new API(
+	private function api():API {return dfc($this, function():API {return new API(
 		$this->privateKey(), $this->test() ? 'sandbox' : 'live'
 	);});}
 }
