@@ -582,9 +582,11 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::r()
 	 */
 	private function res():ChargeResponse {
-		if (!isset($this->_response)) {$this->_response = self::leh(function() {return $this->api()->chargeWithCardTokenDf(
-			Charge::build($this, $this->isCaptureDesired())
-		);});}
+		if (!isset($this->_response)) {
+			$this->_response = self::leh(function():array {return $this->api()->chargeWithCardTokenDf(
+				Charge::build($this, $this->isCaptureDesired())
+			);});
+		}
 		return $this->_response;
 	}
 
