@@ -16,6 +16,7 @@ use Magento\Sales\Model\Order\Item as OI;
 final class Charge extends \Df\Payment\Charge {
 	/**
 	 * 2016-05-06
+	 * @used-by self::build()
 	 */
 	private function _build(bool $capture):lCharge {
 		$r = new lCharge; /** @var lCharge $r */
