@@ -72,12 +72,12 @@ abstract class Charge extends Handler {
 	 * @return Payment|DfPayment|null
 	 */
 	private function paymentByTxnId($id) {return dfc($this, function($id) {
-		$result = null; /** @var Payment|null $result */
+		$r = null; /** @var Payment|null $r */
 		if ($id) {
 			/** @var int|null $paymentId */
 			$paymentId = df_fetch_one('sales_payment_transaction', 'payment_id', ['txn_id' => $id]);
 			if ($paymentId) {
-				$result = dfp_webhook_case(df_load(Payment::class, $paymentId));
+				$r = dfp_webhook_case(df_load(Payment::class, $paymentId));
 				/**
 				 * 2016-05-11
 				 * This ID will have to be used in scenarios involving webhook.
@@ -126,15 +126,15 @@ abstract class Charge extends Handler {
 				 * Поэтому никакие обходные манёвры нам не нужны,
 				 * и смело устанвливаем транзакции наш нестандартный идентификатор прямо здесь.
 				 */
-				$result->setTransactionId($this->r('id'));
+				$r->setTransactionId($this->r('id'));
 				# 2017-01-05
 				# Раньше я этого вообще не делал.
 				# Видимо, потому что Checkout.com был моим всего лишь вторым платёжным модулем
 				# для Magento 2, и я был ещё недостаточно опытен.
-				$result->setParentTransactionId($id);
+				$r->setParentTransactionId($id);
 			}
 		}
-		return $result;
+		return $r;
 	}, func_get_args());}
 
 	/**
