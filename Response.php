@@ -214,7 +214,7 @@ final class Response {
 			$api = $s->apiCharge(); /** @var API $api */
 			while ($numRetries && !$r) {
 				$history = $api->getChargeHistory($authId); /** @var ChargeHistory $history */
-				df_log(print_r($history->getCharges(), true));
+				df_log($history->getCharges());
 				/**
 				 * 2016-05-11
 				 * A «Сaptured» transaction is always first in the response array.
