@@ -77,7 +77,9 @@ abstract class Handler extends \Df\Core\O {
 		}
 		catch (E $e) {
 			df_500();
-			df_sentry(__CLASS__, $e, ['extra' => ['request' => $req]]);
+			# 2023-07-25
+			# "Change the 3rd argument of `df_sentry` from `$context` to `$extra`": https://github.com/mage2pro/core/issues/249
+			df_sentry(__CLASS__, $e, ['request' => $req]);
 			if (df_my_local()) {
 				throw $e; # 2016-03-27 Show the stack trace on the screen
 			}
