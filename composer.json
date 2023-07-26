@@ -1,6 +1,6 @@
 {
 	"name": "mage2pro/checkout.com"
-	,"version": "1.7.2"
+	,"version": "1.7.3"
 	,"description": "Checkout.com integration with Magento 2"
 	,"type": "magento2-module"
 	,"homepage": "https://mage2.pro/c/extensions/checkout-com"
@@ -11,7 +11,7 @@
 		"homepage": "https://upwork.com/fl/mage2pro",
 		"role": "Developer"
 	}]
-	,"require": {"mage2pro/core": ">=9.7.8", "mage2pro/phone": ">=1.0.0", "checkout/checkout-php-api": "^1.2.3"}
+	,"require": {"mage2pro/core": ">=9.9.8", "mage2pro/phone": ">=1.0.0", "checkout/checkout-php-api": "^1.2.3"}
 	,"autoload": {"files": ["registration.php"], "psr-4": {"Dfe\\CheckoutCom\\": ""}}
 	,"keywords": [
 		"3D Secure"

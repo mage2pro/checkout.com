@@ -44,7 +44,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 	private function webhook():Json {
 		# 2016-12-30 Checkout.com does not pass the «User-Agent» HTTP Header.
 		df_sentry_m($this)->user(['id' => df_is_localhost() ? 'Checkout.com webhook on localhost' : 'Checkout.com']);
-		return Json::i(Handler::p(df_json_decode(df_file_read(
+		return Json::i(Handler::p(df_json_decode(df_contents(
 			df_my_local() ? BP . '/_my/test/checkout.com/charge.voided.json' : 'php://input'
 		))));
 	}
