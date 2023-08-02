@@ -1,8 +1,8 @@
 <?php
 namespace Dfe\CheckoutCom;
 use Dfe\CheckoutCom\Handler\DefaultT;
-use Exception as E;
 use Magento\Framework\Phrase;
+use \Throwable as Th; # 2023-08-02 "Treat `\Throwable` similar to `\Exception`": https://github.com/mage2pro/core/issues/311
 /**
  * @see \Dfe\CheckoutCom\Handler\Charge
  * @see \Dfe\CheckoutCom\Handler\CustomerReturn
@@ -56,7 +56,6 @@ abstract class Handler extends \Df\Core\O {
 	 * 2016-03-25
 	 * @param array(string => mixed) $req
 	 * @return Phrase|string
-	 * @throws E
 	 */
 	static function p(array $req) {/** @var Phrase|string $r */
 		try {
@@ -75,15 +74,15 @@ abstract class Handler extends \Df\Core\O {
 				)
 			; 
 		}
-		catch (E $e) {
+		catch (Th $t) {
 			df_500();
 			# 2023-07-25
 			# "Change the 3rd argument of `df_sentry` from `$context` to `$extra`": https://github.com/mage2pro/core/issues/249
-			df_sentry(__CLASS__, $e, ['request' => $req]);
+			df_sentry(__CLASS__, $t, ['request' => $req]);
 			if (df_my_local()) {
-				throw $e; # 2016-03-27 Show the stack trace on the screen
+				throw $t; # 2016-03-27 Show the stack trace on the screen
 			}
-			$r = __($e->getMessage());
+			$r = __($t->getMessage());
 		}
 		return $r;
 	}

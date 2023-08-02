@@ -1,5 +1,14 @@
 <?php
 namespace Dfe\CheckoutCom;
+use Df\Payment\PlaceOrderInternal as PO;
+use Df\Payment\Source\AC;
+use Df\Payment\Token;
+use Dfe\CheckoutCom\SDK\ChargeService;
+use Magento\Framework\DataObject as _DO;
+use Magento\Framework\Exception\LocalizedException as LE;
+use Magento\Payment\Model\InfoInterface as II;
+use Magento\Sales\Model\Order\Payment\Transaction as T;
+use \Throwable as Th; # 2023-08-02 "Treat `\Throwable` similar to `\Exception`": https://github.com/mage2pro/core/issues/311
 use com\checkout\ApiServices\Cards\ResponseModels\Card;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeCapture;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeRefund;
@@ -7,16 +16,6 @@ use com\checkout\ApiServices\Charges\RequestModels\ChargeUpdate;
 use com\checkout\ApiServices\Charges\RequestModels\ChargeVoid;
 use com\checkout\ApiServices\Charges\ResponseModels\Charge as ChargeResponse;
 use com\checkout\helpers\ApiHttpClientCustomException as CE;
-use Df\Payment\PlaceOrderInternal as PO;
-use Df\Payment\Source\AC;
-use Df\Payment\Token;
-use Dfe\CheckoutCom\SDK\ChargeService;
-use Magento\Framework\DataObject as _DO;
-use Magento\Framework\Exception\LocalizedException as LE;
-use Magento\Payment\Model\Info as I;
-use Magento\Payment\Model\InfoInterface as II;
-use Magento\Sales\Model\Order\Payment as OP;
-use Magento\Sales\Model\Order\Payment\Transaction as T;
 /** @method Settings s() */
 final class Method extends \Df\Payment\Method {
 	/**
@@ -543,12 +542,12 @@ final class Method extends \Df\Payment\Method {
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function leh(\Closure $f) {return df_try($f, function(\Exception $e):void {
-		if ($e instanceof CE) {
-			$e = new LE(__($e->getErrorMessage()), $e);
+	private function leh(\Closure $f) {return df_try($f, function(Th $th):void {
+		if ($th instanceof CE) {
+			$th = new LE(__($th->getErrorMessage()), $th);
 		}
-		df_sentry($this, $e);
-		throw df_lx($e);
+		df_sentry($this, $th);
+		throw df_lx($th);
 	});}
 
 	/**
