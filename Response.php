@@ -237,9 +237,10 @@ final class Response {
 				}
 			}
 		}
-		catch (\Exception $e) {
-			df_log($e);
-			throw $e;
+		# 2023-08-03 "Treat `\Throwable` similar to `\Exception`": https://github.com/mage2pro/core/issues/311
+		catch (\Throwable $t) {
+			df_log($t);
+			throw $t;
 		}
 		return df_assert($r);
 	}

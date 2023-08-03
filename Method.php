@@ -540,7 +540,7 @@ final class Method extends \Df\Payment\Method {
 	 * @used-by self::_void()
 	 * @used-by self::capturePreauthorized()
 	 * @return mixed
-	 * @throws \Exception
+	 * @throws LE
 	 */
 	private function leh(\Closure $f) {return df_try($f, function(Th $th):void {
 		if ($th instanceof CE) {

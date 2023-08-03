@@ -82,7 +82,7 @@ abstract class Handler extends \Df\Core\O {
 			if (df_my_local()) {
 				throw $t; # 2016-03-27 Show the stack trace on the screen
 			}
-			$r = __($t->getMessage());
+			$r = __(df_xts($t));
 		}
 		return $r;
 	}
